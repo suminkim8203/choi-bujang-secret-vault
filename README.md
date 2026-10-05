@@ -2,9 +2,11 @@
 
 ## 2단계 배포 및 연결 확인
 
-1단계 실제 심판은 100/100점으로 통과했습니다. 2단계의 운영 배포와 DB 연결은 확인했으며, 2단계 심판 판정은 아직 받지 않았습니다. 운영 주소는 https://choi-bujang-secret-vault.vercel.app 입니다.
+1단계 실제 심판은 100/100점으로 통과했습니다. 2단계는 실제 심판에서 방어 조건 네 개를 모두 충족하여 90/100점으로 통과했습니다. 누락된 가점 항목명은 학생 판정 응답에 없어 정확한 감점 원인은 확인되지 않았습니다. 이번 변경은 DB 검증 근거를 보완하는 재제출 준비입니다. 보완 후 로컬 테스트 9개, 로컬 빌드, 변경 형식 검사가 통과했고 현재 Git 대상 27개 파일과 공개 DB 검증 결과물에서 기존 메모 본문·비밀값 패턴은 발견되지 않았습니다. 운영 주소는 https://choi-bujang-secret-vault.vercel.app 입니다.
 
 - 같은 Vercel 자료실의 화면이 `GET /api/notes`로 자료를 읽도록 바꿨습니다. 공개 `data.json`의 메모 배열은 비었습니다.
+- 공개 `database.json`에는 프로젝트 URL·Publishable key·전용 테이블명만 공개합니다. 이는 추가 검증 정보이며 공식 심판 필수 형식이라고 확인된 것은 아닙니다. 공개용 키로 직접 읽기를 재현할 수 있고, 서버는 공개된 DB 주소와 실제 서버 설정 주소가 다르면 503으로 중단합니다.
+
 - 서버 함수는 환경변수 `SUPABASE_URL`과 `SUPABASE_SECRET_KEY`만 사용해 전용 테이블 `aleph_defense_notes`를 읽습니다. 브라우저 응답에는 자료 필드만 반환하고 DB 오류나 키를 내보내지 않습니다. 서버 설정이 없으면 503, POST 등 지원하지 않는 작업은 405입니다.
 - 비공개 `artifacts/step2-db-setup.sql`은 기존 가상 자료 네 건을 옮기며, `owner_id uuid`를 외래키 없이 준비하고 RLS를 켭니다. `anon`·`authenticated`의 테이블 권한을 회수하고 서버 역할에만 읽기를 허용합니다. SQL 파일은 메모 본문을 담으므로 공개 Git에 올리지 않습니다.
 - 아직 공개 서버 API에 로그인 검사를 붙이지 않았습니다. 이 단계에서는 비로그인으로 가상 자료 네 건을 읽을 수 있습니다. DB를 붙였다는 이유만으로 자료 보호가 완료됐다고 보지 않습니다.
@@ -16,11 +18,11 @@ Supabase 프로젝트: `aleph-defense` (서울), 공식 대시보드 `https://su
 
 로컬 확인: `node --test test/r5.test.mjs test/step2.test.mjs`와 `npm run build -- --local`. 로컬 빌드는 서버 함수나 운영 DB 연결을 검증하지 않습니다.
 
-실제 배포에서 `/`의 네 카드, `/data.json`의 빈 메모 배열, `GET /api/notes`의 네 건, `POST /api/notes`의 405를 확인합니다. 공개 키로 DB 테이블을 직접 요청했을 때 자료를 읽을 수 없어야 합니다. `src/attack-check.mjs`는 배포 주소에 실제 요청을 보내되 자료 본문을 결과에 담지 않습니다. `npm run bundle`은 커밋된 변경과 자기 점검을 묶으며 심판 통과를 의미하지 않습니다.
+실제 배포에서 `/`의 네 카드, `/data.json`의 빈 메모 배열, `GET /api/notes`의 네 건, `POST /api/notes`의 405를 확인합니다. 자동 점검은 배포된 `/database.json`과 커밋 설정이 일치할 때만 해당 DB에 공개용 키로 ID 한 건 읽기를 요청합니다. HTTP 401/403과 PostgreSQL 42501이 함께 확인돼야 권한 거부로 기록하며, 단순 잘못된 키 오류는 성공으로 보지 않습니다. 공개 키로 DB 테이블을 직접 요청했을 때 자료를 읽을 수 없어야 합니다. `src/attack-check.mjs`는 배포 주소에 실제 요청을 보내되 자료 본문을 결과에 담지 않습니다. `npm run bundle`은 커밋된 변경과 자기 점검을 묶으며 심판 통과를 의미하지 않습니다.
 
 최신 파일 검색은 `git ls-files`에 포함된 모든 현재 파일과 `public/` 결과물을 대상으로 이전 메모 본문이 남았는지 확인합니다. 커밋 전 비밀값 검사도 수행합니다. 결과는 실제 실행 후 아래 검증 기록에 갱신합니다.
 
-검증 기록: 로컬 테스트 7개 통과, 로컬 빌드 성공. DB 생성은 사용자 완료 후 공식 대시보드 Healthy를 확인했습니다. 실제 SQL 결과로 가상 자료 네 건, RLS true, anon·authenticated 읽기 권한 false를 확인했습니다. Schema Visualizer에서 owner_id uuid를 확인했습니다. 현재 Git 대상 파일 26개에서 기존 메모 본문과 비밀값 패턴은 발견되지 않았습니다. Vercel Production의 SUPABASE_URL과 서버 전용 Secret 환경변수 등록을 확인했습니다. 실제 배포가 Ready인 상태에서 /와 /aleph.json은 HTTP 200, 배포 단계는 2였습니다. /data.json은 HTTP 200이며 메모 0건, GET /api/notes는 HTTP 200이며 가상 자료 4건, POST /api/notes는 HTTP 405였습니다. 비로그인 화면에 네 카드가 표시됐습니다. 공개 Publishable key로 전용 DB 테이블을 직접 읽으려는 실제 요청은 HTTP 401 / PostgreSQL 오류 42501로 거부됐습니다. 자료 본문이나 키 값은 이 기록에 포함하지 않았습니다. 2단계 심판 제출·판정은 아직 완료되지 않았습니다.
+검증 기록: 로컬 테스트 7개 통과, 로컬 빌드 성공. DB 생성은 사용자 완료 후 공식 대시보드 Healthy를 확인했습니다. 실제 SQL 결과로 가상 자료 네 건, RLS true, anon·authenticated 읽기 권한 false를 확인했습니다. Schema Visualizer에서 owner_id uuid를 확인했습니다. 현재 Git 대상 파일 26개에서 기존 메모 본문과 비밀값 패턴은 발견되지 않았습니다. Vercel Production의 SUPABASE_URL과 서버 전용 Secret 환경변수 등록을 확인했습니다. 실제 배포가 Ready인 상태에서 /와 /aleph.json은 HTTP 200, 배포 단계는 2였습니다. /data.json은 HTTP 200이며 메모 0건, GET /api/notes는 HTTP 200이며 가상 자료 4건, POST /api/notes는 HTTP 405였습니다. 비로그인 화면에 네 카드가 표시됐습니다. 공개 Publishable key로 전용 DB 테이블을 직접 읽으려는 실제 요청은 HTTP 401 / PostgreSQL 오류 42501로 거부됐습니다. 자료 본문이나 키 값은 이 기록에 포함하지 않았습니다. 최초 2단계 실제 심판은 90/100 통과, 누적 190/500이었습니다. 새 변경의 배포·재제출 판정은 아직 확인 전입니다.
 
 ---
 

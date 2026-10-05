@@ -1,6 +1,7 @@
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { deploymentIdentity } from './deployment-identity.mjs';
+import { publicDatabase } from '../src/public-db-config.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const source = resolve(root, 'data.json');
@@ -16,11 +17,14 @@ if (!Array.isArray(data.notes)) {
 if (config.step >= 2 && data.notes.length !== 0) {
   throw new Error('2단계부터 공개 data.json에 메모를 넣을 수 없습니다.');
 }
+const database = config.step === 2 ? publicDatabase(config.database) : null;
 await mkdir(resolve(root, 'public'), { recursive: true });
+if (database) await writeFile(resolve(root, 'public', 'database.json'), `${JSON.stringify(database, null, 2)}\n`, 'utf8');
 await copyFile(source, output);
 console.log(config.step === 1 ? '실습용 공개 자료를 public/data.json에 복사했습니다.' : '공개 data.json에 메모가 없는지 확인했습니다.');
 if (!process.argv.includes('--local')) {
   const identity = deploymentIdentity(process.env, config);
+  if (database) identity.database = database;
   await writeFile(resolve(root, 'public', 'aleph.json'),
     `${JSON.stringify(identity, null, 2)}\n`, 'utf8');
   console.log('배포 저장소·커밋·주소를 public/aleph.json에 기록했습니다.');

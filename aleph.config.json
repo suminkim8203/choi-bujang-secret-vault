@@ -5,7 +5,14 @@
   "sampleMarker": "SAMPLE_NOTE_1",
   "judgeIssuer": "https://aleph-judge-production.up.railway.app/defense/judge",
   "identityProvider": null,
-  "allowedRoutes": ["/api/notes"],
+  "allowedRoutes": [
+    "/api/notes"
+  ],
   "originalApiUrl": null,
-  "restoreRoute": null
+  "restoreRoute": null,
+  "database": {
+    "url": "https://vpicvdydirvwjaeuemzb.supabase.co",
+    "publishableKey": "sb_publishable_hcw36cegJAjJ1tzw8WDfpA_HIqwNY_B",
+    "table": "aleph_defense_notes"
+  }
 }

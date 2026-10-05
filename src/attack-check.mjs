@@ -1,3 +1,5 @@
+import { publicDatabase } from './public-db-config.mjs';
+
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
@@ -48,6 +50,25 @@ export async function runAttackChecks(config) {
     });
     results.push({ attackId: 'unsupported_write', expected: '현재 읽기 전용 API에 POST 요청은 거부됨',
       observed: `POST 응답 HTTP ${write.status}${write.status === 405 ? '; 쓰기 요청 거부됨' : '; 예상과 다름'}` });
+    const database = publicDatabase(config.database);
+    const descriptorResponse = await fetch(new URL('/database.json', app), {
+      redirect: 'error', signal: AbortSignal.timeout(10000),
+    });
+    let deployed;
+    try { deployed = publicDatabase(await descriptorResponse.json()); } catch { /* Fail closed below. */ }
+    if (!descriptorResponse.ok || JSON.stringify(deployed) !== JSON.stringify(database)) {
+      throw new Error('공개 DB 검증 정보가 현재 설정과 일치하지 않습니다.');
+    }
+    const target = new URL(`/rest/v1/${database.table}`, database.url);
+    target.searchParams.set('select', 'id');
+    target.searchParams.set('limit', '1');
+    const direct = await fetch(target, { headers: { apikey: database.publishableKey },
+      redirect: 'error', signal: AbortSignal.timeout(10000) });
+    let code = null;
+    try { const body = await direct.json(); if (body?.code === '42501') code = body.code; } catch { /* No bodies in evidence. */ }
+    const denied = [401, 403].includes(direct.status) && code === '42501';
+    results.push({ attackId: 'direct_database_read', expected: '공개용 키로 전용 DB 테이블을 직접 읽으면 권한 오류로 거부됨',
+      observed: `DB 직접 읽기 HTTP ${direct.status}; ${denied ? 'PostgreSQL 42501 권한 거부 확인' : '권한 거부 확인 실패'}` });
     return results;
   }
   return [{ attackId: 'anonymous_note_read', expected: '비로그인 화면에서 가상 메모를 확인',
