@@ -8,10 +8,14 @@ export function deploymentIdentity(env, config) {
   const repo = env.VERCEL_GIT_REPO_SLUG;
   const commit = env.VERCEL_GIT_COMMIT_SHA;
   const host = env.VERCEL_URL;
+  // 2단계의 공개 주소는 보호된 개별 배포 주소와 다를 수 있습니다.
+  const publicAppUrl = config?.step === 2 ? config.publicAppUrl : `https://${host}`;
+  const publicHost = typeof publicAppUrl === 'string'
+    && /^https:\/\/([^/]+)\/?$/u.exec(publicAppUrl)?.[1];
   if (env.VERCEL_GIT_PROVIDER !== 'github' || !OWNER.test(owner || '')
       || !REPO.test(repo || '') || repo === '.' || repo === '..'
       || repo.toLowerCase().endsWith('.git') || !SHA.test(commit || '')
-      || !HOST.test(host || '') || ![1, 2].includes(config?.step)
+      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2].includes(config?.step)
       || typeof config.judgeIssuer !== 'string'
       || !/^https:\/\/[a-z0-9-]+\.up\.railway\.app\/defense\/judge$/iu.test(config.judgeIssuer)
       || typeof config.sampleMarker !== 'string'
@@ -23,7 +27,7 @@ export function deploymentIdentity(env, config) {
     step: config.step,
     repoUrl: `https://github.com/${owner.toLowerCase()}/${repo.toLowerCase()}`,
     commit: commit.toLowerCase(),
-    publicAppUrl: `https://${host.toLowerCase()}`,
+    publicAppUrl: `https://${publicHost.toLowerCase()}`,
     judgeIssuer: config.judgeIssuer,
     sampleMarker: config.sampleMarker,
   };

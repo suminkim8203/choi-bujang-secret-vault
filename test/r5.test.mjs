@@ -31,6 +31,19 @@ test('build identity uses Vercel Git and deployment metadata', () => {
   assert.throws(() => deploymentIdentity({ ...env, VERCEL_GIT_COMMIT_SHA: 'short' }, config));
 });
 
+test('step 2 identity advertises the public production URL instead of the protected deployment URL', () => {
+  const identity = deploymentIdentity(env, { ...config, step: 2 });
+  assert.equal(identity.publicAppUrl, config.publicAppUrl);
+  assert.equal(identity.commit, env.VERCEL_GIT_COMMIT_SHA);
+  assert.equal(identity.repoUrl, 'https://github.com/student-a/aleph-defense');
+  for (const publicAppUrl of [undefined, 'http://student-defense.vercel.app',
+    'https://student-defense.vercel.app/api/notes', 'https://other.example',
+    'https://user:password@student-defense.vercel.app',
+    'https://student-defense.vercel.app?query=1']) {
+    assert.throws(() => deploymentIdentity(env, { ...config, step: 2, publicAppUrl }));
+  }
+});
+
 test('first attack check reads public data.json without credentials', async () => {
   const originalFetch = globalThis.fetch;
   let requestUrl;
