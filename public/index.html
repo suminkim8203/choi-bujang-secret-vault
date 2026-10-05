@@ -6,49 +6,49 @@
   <title>BYTE BACK | 자료실</title>
   <style>
     :root { color-scheme: dark; font-family: system-ui, sans-serif; }
-    body { margin: 0; min-height: 100vh; background: #101a28; color: #ecf4ff; }
-    main { max-width: 760px; margin: 0 auto; padding: 44px 22px 64px; }
-    .eyebrow { color: #8ad8df; font-size: 14px; font-weight: 700; letter-spacing: .08em; }
-    h1 { margin: 16px 0; font-size: clamp(30px, 7vw, 48px); line-height: 1.2; }
-    p { font-size: 17px; line-height: 1.7; color: #bfd0e5; }
-    .notice { margin: 26px 0; padding: 18px; border: 1px solid #d07384; border-radius: 14px; color: #ffe3e8; background: #612a3544; }
-    ul { list-style: none; display: grid; gap: 12px; padding: 0; }
-    li { border: 1px solid #51667c; border-radius: 14px; padding: 17px 19px; background: #1a2a3d; }
-    strong { display: block; font-size: 18px; margin-bottom: 5px; }
-    li span { color: #bfd0e5; }
-    a { color: #8ad8df; }
-    .verification { font-size: 14px; }
+    body { margin: 0; background: #101827; color: #eff6ff; }
+    main { max-width: 900px; margin: auto; padding: 40px 24px; }
+    p { line-height: 1.7; }
+    .notice { padding: 18px; border: 1px solid #8396ac; border-radius: 12px; }
+    a { color: #93c5fd; }
+    ul { list-style: none; padding: 0; display: grid; gap: 16px; }
+    li { padding: 20px; border: 1px solid #506079; border-radius: 12px; }
+    h2 { font-size: 20px; margin-top: 0; }
+    li p { margin-bottom: 0; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <main>
-    <div class="eyebrow">BYTE BACK · 2단계 자료 분리</div>
+    <p>BYTE BACK · 2단계 자료 분리</p>
     <h1>가상 자료실</h1>
-    <p>아래 기록은 모두 실습용 가상 자료입니다. 현재 자료는 데이터베이스에서 불러옵니다.</p>
-    <div class="notice">아직 로그인하지 않은 방문자도 자료를 읽을 수 있습니다. 다음 단계에서 로그인과 자료별 접근 권한을 붙입니다. 이전 공개 저장소와 배포 이력에 남은 자료는 이 변경으로 지워지지 않습니다.</div>
-    <p class="verification"><a href="/database.json">DB 직접 접근 검증 정보</a> · <a href="https://github.com/suminkim8203/choi-bujang-secret-vault#readme">구현·검증 기록</a></p>
-    <ul id="notes" aria-live="polite"><li>가상 자료를 불러오는 중입니다.</li></ul>
+    <p class="notice">모두 실습용 가상 자료입니다. 화면은 서버 API를 통해 데이터베이스의 자료를 읽습니다. 아직 로그인하지 않은 방문자도 공개 API에서 자료를 읽을 수 있습니다. 로그인 보호는 다음 단계에서 붙입니다. 최신 정적 파일에서 자료를 제거했어도 옛 공개 커밋과 옛 배포 이력에 남은 자료는 지워지지 않았습니다. 과거 노출은 해소되지 않았습니다.</p>
+    <p><a href="/database.json">DB 직접 접근 검증 정보</a> · <a href="https://github.com/suminkim8203/choi-bujang-secret-vault#readme">구현·검증 기록</a></p>
+    <p id="status" role="status">가상 자료를 불러오는 중입니다.</p>
+    <ul id="notes" aria-label="가상 자료 목록"></ul>
   </main>
   <script type="module">
     const list = document.querySelector('#notes');
+    const status = document.querySelector('#status');
     try {
-      const response = await fetch('/api/notes', { cache: 'no-store' });
-      if (!response.ok) throw new Error('자료를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      const response = await fetch('/api/notes', { method: 'GET', cache: 'no-store' });
+      if (!response.ok) throw new Error('READ_FAILED');
       const data = await response.json();
-      if (!Array.isArray(data.notes)) throw new Error('자료 형식이 맞지 않습니다.');
-      list.replaceChildren(...data.notes.map(note => {
-        const item = document.createElement('li');
-        const title = document.createElement('strong');
-        const content = document.createElement('span');
+      if (!Array.isArray(data.notes) || data.notes.some(note => !note
+          || typeof note.title !== 'string' || typeof note.content !== 'string')) {
+        throw new Error('FORMAT_INVALID');
+      }
+      for (const note of data.notes) {
+        const card = document.createElement('li');
+        const title = document.createElement('h2');
+        const body = document.createElement('p');
         title.textContent = note.title;
-        content.textContent = note.content;
-        item.append(title, content);
-        return item;
-      }));
-    } catch (error) {
-      const item = document.createElement('li');
-      item.textContent = error.message;
-      list.replaceChildren(item);
+        body.textContent = note.content;
+        card.append(title, body);
+        list.append(card);
+      }
+      status.textContent = `데이터베이스에서 가상 자료 ${data.notes.length}건을 불러왔습니다.`;
+    } catch {
+      status.textContent = '자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.';
     }
   </script>
 </body>

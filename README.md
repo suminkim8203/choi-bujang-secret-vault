@@ -1,50 +1,40 @@
-# BYTE BACK 방어전 시작 틀 R5
+# BYTE BACK 방어전 · 2단계 비교본
 
-## 2단계 배포 및 연결 확인
+현재 단계는 2단계이며 운영 주소는 https://choi-bujang-secret-vault.vercel.app 입니다. 기존 통과 버전은 Git 브랜치 `step2-score-baseline-a0a895c`에 보존했습니다. 기존 90점을 받던 구현과 비교하려고 API와 화면을 단순한 구성으로 다시 작성했습니다. DB 자료·권한·환경변수·로그인 없는 읽기 범위는 변경하지 않습니다. 이 비교본의 새 심판 판정은 아직 대기입니다.
 
-1단계는 100/100점으로 통과했습니다. 2단계는 최초 제출, DB 정보 보완, 구조 SQL 공개 실험, 검색 재현성 보완에서 모두 90/100점(조건 4개 충족·완결성 가점 2개)이었습니다. 누락 항목명은 확인되지 않았습니다. 현재 비교 실험은 서버 환경변수 두 개를 읽는 위치만 API 파일로 옮깁니다. 이를 심판이 다르게 확인할지는 아직 알 수 없습니다. 운영 주소는 https://choi-bujang-secret-vault.vercel.app 입니다.
+## 공식 지시와 현재 구현
 
-- 같은 Vercel 자료실의 화면이 `GET /api/notes`로 자료를 읽도록 바꿨습니다. 공개 `data.json`의 메모 배열은 비었습니다.
-- 공개 `database.json`에는 프로젝트 URL·Publishable key·전용 테이블명만 공개합니다. 이는 추가 검증 정보이며 공식 심판 필수 형식이라고 확인된 것은 아닙니다. 공개용 키로 직접 읽기를 재현할 수 있고, 서버는 공개된 DB 주소와 실제 서버 설정 주소가 다르면 503으로 중단합니다.
+| 확인 항목 | 구현 및 확인 방법 |
+|---|---|
+| 학습용 Supabase에 가상 자료 이동 | 전용 테이블 public.aleph_defense_notes에 가상 자료4건. 실제 자료를 사용하지 않습니다. |
+| owner_id uuid, auth.users 외래키 없음 | 공개 구조 SQL [db/step2-schema.sql](db/step2-schema.sql). 자료 행이 포함된 원본 생성 SQL은 Git 제외 artifacts/step2-db-setup.sql에 있습니다. |
+| RLS 활성화, anon/authenticated 직접 읽기 거부 | 원래 운영 SQL에서 활성화와 두 역할 SELECT 권한 없음 확인. 공개용 키로 직접 DB 읽기는 권한 오류여야 합니다. |
+| Vercel api 서버 함수에서 DB 읽기 | api/notes.js가 SUPABASE_URL과 SUPABASE_SECRET_KEY를 환경변수에서 직접 읽습니다. 키 값은 사용자만 Vercel Production Secret 입력란에 넣습니다. |
+| 키를 화면·응답·로그에 넣지 않음 | 서버는 id/title/content만 반환하고 DB 오류는 일반 오류로 바꿉니다. 키 값이나 DB 오류를 로그로 출력하지 않습니다. |
+| 화면에 가상 카드4개 표시 | public/index.html에서 GET /api/notes를 요청해 DOM textContent로 표시합니다. 정적 파일에는 메모 행이 없습니다. |
+| 공개 data.json 비우기 | data.json과 public/data.json 모두 notes 빈 배열입니다. 빌드는 메모가 있으면 실패합니다. |
+| 남은 공개 API 약점 기록 | 아직 로그인 없이 GET /api/notes에서 가상 메모4건을 읽을 수 있습니다. DB 이전만으로 자료 보호 완료라고 하지 않습니다. |
+| 옛 공개 이력의 한계 설명 | 아래 문단과 실제 화면에 명시했습니다. |
 
-- 서버 함수는 환경변수 `SUPABASE_URL`과 `SUPABASE_SECRET_KEY`만 사용해 전용 테이블 `aleph_defense_notes`를 읽습니다. 브라우저 응답에는 자료 필드만 반환하고 DB 오류나 키를 내보내지 않습니다. 서버 설정이 없으면 503, POST 등 지원하지 않는 작업은 405입니다.
-- 비공개 `artifacts/step2-db-setup.sql`은 기존 가상 자료 네 건을 옮기며, `owner_id uuid`를 외래키 없이 준비하고 RLS를 켭니다. `anon`·`authenticated`의 테이블 권한을 회수하고 서버 역할에만 읽기를 허용합니다. SQL 파일은 메모 본문을 담으므로 공개 Git에 올리지 않습니다.
-- 아직 공개 서버 API에 로그인 검사를 붙이지 않았습니다. 이 단계에서는 비로그인으로 가상 자료 네 건을 읽을 수 있습니다. DB를 붙였다는 이유만으로 자료 보호가 완료됐다고 보지 않습니다.
-- 이전 공개 Git 커밋과 이전 Vercel 배포에는 가상 자료가 남아 있습니다. 최신 버전에서 제거해도 과거 공개 이력의 노출은 해소되지 않습니다. 실제 자료를 사용했다면 별도의 삭제·비밀 회전·대응이 필요합니다.
+## 옛 공개 이력과 남은 약점
 
-DB 구조 검증용 SQL: [db/step2-schema.sql](db/step2-schema.sql). 원래 실행한 생성 SQL에서 자료 행을 제외한 구조·권한 부분만 공개했습니다. `owner_id uuid`에 인증 사용자 외래키가 없고, RLS 활성화와 `anon`·`authenticated` 권한 회수를 확인할 수 있습니다. 이미 있는 운영 DB에 다시 실행하지 않습니다. 2026-10-06 첫 보완 재제출도 90/100점이었으며, 이번에는 SQL 증빙 공개만 추가해 재판정으로 비교합니다.
+이전 공개 Git 커밋과 옛 Vercel 배포에는 가상 자료가 남아 있습니다. 최신 파일에서 제거해도 이 변경으로 과거 공개 이력이 삭제되지는 않습니다. 과거 노출은 해소되지 않았습니다. 현재 서버 API도 누구나 가상 자료를 읽을 수 있습니다. 이 두 한계를 화면에서도 설명하며, 3단계 로그인이나 다른 단계 기능을 미리 구현하지 않습니다.
 
-Supabase 프로젝트: `aleph-defense` (서울), 공식 대시보드 `https://supabase.com/dashboard/project/vpicvdydirvwjaeuemzb`.
+## 다시 확인하는 순서
 
-연결 순서: 위 SQL을 해당 프로젝트 SQL Editor에서 실행하고 테이블·건수·RLS·권한을 확인합니다. Vercel 공식 프로젝트 설정에 URL과 서버 전용 키를 환경변수로 등록합니다. 키 값은 사용자가 공식 비밀 입력란에 직접 넣으며 채팅·Git·제출 묶음에 복사하지 않습니다. DB 연결이 준비된 뒤 커밋·배포합니다.
+1. `node --test test/r5.test.mjs test/step2.test.mjs`로 DB 요청 제한, 추가 필드 제외, 잘못된 DB 설정 거부와 일반 오류 처리를 확인합니다.
+2. `npm run build -- --local`은 정적 파일만 확인합니다. 운영 DB나 Vercel 배포를 증명하지 않습니다.
+3. `node scripts/check-public-notes.mjs`로 최신 Git 파일 전체, 로컬 public 파일, 운영 정적 경로 /·/data.json·/aleph.json·/database.json에 원본 메모 본문과 비밀값 패턴이 없는지 검색합니다. 값이나 본문을 출력하지 않습니다. 정상 결과는 passed:true, sourceFindings:[], 각 응답 noteBody:false/secretPattern:false입니다. 발견하거나 확인하지 못하면 종료 코드1로 중단합니다.
+4. 운영 화면은 카드4개가 보여야 하고 /data.json에는 메모가 없어야 합니다. 공개 API에서 자료4건 읽기는 2단계의 의도된 남은 약점입니다. POST /api/notes는 HTTP405여야 합니다.
+5. 공개 database.json에는 URL·Publishable key·테이블명만 있습니다. 공개용 키로 전용 DB 테이블을 직접 읽으면 HTTP401/403과 PostgreSQL42501 권한 거부가 함께 확인돼야 합니다. 잘못된 키 오류를 권한 거부 성공으로 세지 않습니다.
+6. 「2단계 저장점」 커밋을 만든 뒤 `npm run bundle`을 실행합니다. Git 제외 artifacts/submission.json에는 실제 요청 점검 결과가 담깁니다. bundle-notes.json도 Git에 올리지 않습니다. 자기 점검은 심판 판정이 아닙니다.
+7. 포털 https://aleph-omega.vercel.app/defense 의 2단계 「단계 창 열기」에서 실제 배포 주소를 제출합니다.
 
-로컬 확인: `node --test test/r5.test.mjs test/step2.test.mjs`와 `npm run build -- --local`. 로컬 빌드는 서버 함수나 운영 DB 연결을 검증하지 않습니다.
+## 확인 기록
 
-실제 배포에서 `/`의 네 카드, `/data.json`의 빈 메모 배열, `GET /api/notes`의 네 건, `POST /api/notes`의 405를 확인합니다. 자동 점검은 배포된 `/database.json`과 커밋 설정이 일치할 때만 해당 DB에 공개용 키로 ID 한 건 읽기를 요청합니다. HTTP 401/403과 PostgreSQL 42501이 함께 확인돼야 권한 거부로 기록하며, 단순 잘못된 키 오류는 성공으로 보지 않습니다. 공개 키로 DB 테이블을 직접 요청했을 때 자료를 읽을 수 없어야 합니다. `src/attack-check.mjs`는 배포 주소에 실제 요청을 보내되 자료 본문을 결과에 담지 않습니다. `npm run bundle`은 커밋된 변경과 자기 점검을 묶으며 심판 통과를 의미하지 않습니다.
-
-최신 파일·배포 검색은 저장소 루트에서 다음 한 줄로 다시 실행합니다.
-
-```sh
-node scripts/check-public-notes.mjs
-```
-
-이 검사는 현재 Git 파일 전체와 로컬 `public/` 결과물, 운영 정적 경로 `/`, `/data.json`, `/aleph.json`, `/database.json`을 검색합니다. 원본 R5 커밋의 가상 메모 본문 네 개를 메모리에서 비교하고, 서버 키·개인키·JWT 패턴도 검사합니다. 본문이나 키 값은 출력하지 않고 검사 건수·경로·일치 여부만 출력합니다. 과거 공개 이력은 원본 비교 자료이며 삭제되지 않았습니다. `--local`을 붙이면 운영 요청 없이 현재 로컬 파일만 검사합니다.
-
-정상 결과는 `passed: true`, `sourceFindings: []`, 각 정적 응답의 `noteBody: false`·`secretPattern: false`입니다. 메모 본문이나 비밀값 패턴이 발견되거나 파일·응답을 확인하지 못하면 종료 코드 1로 중단합니다. 아직 비로그인으로 열려 있는 `/api/notes`는 2단계 DB 자료를 반환하므로 정적 노출 검사에서 제외하고 `npm run bundle`로 따로 확인합니다. API 자료 네 건이 읽힌다는 사실은 자료 보호 완료를 뜻하지 않습니다.
-
-검증 기록은 다음과 같이 구분합니다.
-
-| 시점 | 수행한 검사 | 결과 |
-|---|---|---|
-| 2026-10-05 최초 2단계 | 로컬 테스트 7개·빌드, 당시 Git 파일 26개 검색 | 통과·본문/비밀 패턴 미검출 |
-| 2026-10-05 운영 연결 | SQL에서 자료 4건·RLS true·두 클라이언트 역할 SELECT false·owner_id uuid 확인 | 확인. 인증 사용자 외래키 없음 |
-| 2026-10-06 첫 보완 | 테스트 9개·빌드, 당시 Git 파일 27개 검색, 운영 요청 4개 | 통과. 정적 자료0·API자료4·POST405·DB직접읽기401/42501 |
-| 2026-10-06 SQL 공개 실험 | 구조·권한 SQL과 README 링크만 추가, 운영 요청 4개 | 같은 결과. 실제 심판90점·가점2개 |
-| 2026-10-06 검색 재현성 실험 | 배포 뒤 현재 Git 29개·로컬 공개 파일3개·운영 정적 응답4개 검색, 운영 요청4개 | 본문/비밀 패턴 미검출. 실제 심판90점·가점2개 |
-| 2026-10-06 환경변수 읽기 위치 실험 | API 파일에서 SUPABASE_URL·SUPABASE_SECRET_KEY를 직접 읽어 기존 DB 모듈에 전달 | 동작 유지 비교. 배포와 새 심판 판정은 대기 |
-
-공식 방어전 화면에서는 2단계의 「단계 창 열기」에서 판정을 확인합니다. 로컬 검사와 제출 묶음 생성은 실제 심판 통과를 의미하지 않습니다.
-
+- 기존 버전: 최초 제출, 공개 DB 정보 보완, 구조 SQL 공개, 검색 재현성 보완에서 실제 심판90점·조건4개 충족·가점2개였습니다.
+- 2026-10-06 API 환경변수 읽기 위치 비교 ebee766: 운영에서 해당 SHA와 점검4개를 확인해 새 접수 e4976301-4ea1-4d95-b5e3-4270e411f7f1을 만들었습니다. 대기 상태를 거친 뒤 실제 화면도90점·가점2개였습니다.
+- 비교본: API와 화면을 새로 작성했습니다. 로컬 검사·운영 검사·새 심판 결과는 각각 확인 후 기록합니다. 정확한 누락10점 항목과 심판이 읽는 코드 경로는 공개된 정보로 확인되지 않았습니다.
 
 ---
 
