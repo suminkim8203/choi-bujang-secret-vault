@@ -44,6 +44,13 @@ test('step 2 identity advertises the public production URL instead of the protec
   }
 });
 
+test('step 2 static identity omits the first-stage sample marker', () => {
+  const identity = deploymentIdentity(env, { ...config, step: 2 });
+  assert.equal(Object.hasOwn(identity, 'sampleMarker'), false);
+  assert.equal(JSON.stringify(identity).includes(config.sampleMarker), false);
+  assert.equal(deploymentIdentity(env, config).sampleMarker, config.sampleMarker);
+});
+
 test('first attack check reads public data.json without credentials', async () => {
   const originalFetch = globalThis.fetch;
   let requestUrl;
