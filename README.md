@@ -1,8 +1,8 @@
 # BYTE BACK 방어전 시작 틀 R5
 
-## 2단계 연결 준비
+## 2단계 배포 및 연결 확인
 
-1단계 실제 심판은 100/100점으로 통과했습니다. 현재 변경은 2단계 연결 준비이며, 새 배포·DB 연결·2단계 판정까지 완료됐다는 뜻은 아닙니다.
+1단계 실제 심판은 100/100점으로 통과했습니다. 2단계의 운영 배포와 DB 연결은 확인했으며, 2단계 심판 판정은 아직 받지 않았습니다. 운영 주소는 https://choi-bujang-secret-vault.vercel.app 입니다.
 
 - 같은 Vercel 자료실의 화면이 `GET /api/notes`로 자료를 읽도록 바꿨습니다. 공개 `data.json`의 메모 배열은 비었습니다.
 - 서버 함수는 환경변수 `SUPABASE_URL`과 `SUPABASE_SECRET_KEY`만 사용해 전용 테이블 `aleph_defense_notes`를 읽습니다. 브라우저 응답에는 자료 필드만 반환하고 DB 오류나 키를 내보내지 않습니다. 서버 설정이 없으면 503, POST 등 지원하지 않는 작업은 405입니다.
@@ -20,7 +20,7 @@ Supabase 프로젝트: `aleph-defense` (서울), 공식 대시보드 `https://su
 
 최신 파일 검색은 `git ls-files`에 포함된 모든 현재 파일과 `public/` 결과물을 대상으로 이전 메모 본문이 남았는지 확인합니다. 커밋 전 비밀값 검사도 수행합니다. 결과는 실제 실행 후 아래 검증 기록에 갱신합니다.
 
-검증 기록: 로컬 테스트 7개 통과, 로컬 빌드 성공. DB 생성은 사용자 완료 후 공식 대시보드 Healthy를 확인했습니다. 실제 SQL 결과로 가상 자료 네 건, RLS true, anon·authenticated 읽기 권한 false를 확인했습니다. Schema Visualizer에서 owner_id uuid를 확인했습니다. 현재 Git 대상 파일 26개에서 기존 메모 본문과 비밀값 패턴은 발견되지 않았습니다. Vercel Production의 SUPABASE_URL은 등록 완료이며 서버 전용 키 등록·실제 연결·배포·제출은 진행 중입니다.
+검증 기록: 로컬 테스트 7개 통과, 로컬 빌드 성공. DB 생성은 사용자 완료 후 공식 대시보드 Healthy를 확인했습니다. 실제 SQL 결과로 가상 자료 네 건, RLS true, anon·authenticated 읽기 권한 false를 확인했습니다. Schema Visualizer에서 owner_id uuid를 확인했습니다. 현재 Git 대상 파일 26개에서 기존 메모 본문과 비밀값 패턴은 발견되지 않았습니다. Vercel Production의 SUPABASE_URL과 서버 전용 Secret 환경변수 등록을 확인했습니다. 실제 배포가 Ready인 상태에서 /와 /aleph.json은 HTTP 200, 배포 단계는 2였습니다. /data.json은 HTTP 200이며 메모 0건, GET /api/notes는 HTTP 200이며 가상 자료 4건, POST /api/notes는 HTTP 405였습니다. 비로그인 화면에 네 카드가 표시됐습니다. 공개 Publishable key로 전용 DB 테이블을 직접 읽으려는 실제 요청은 HTTP 401 / PostgreSQL 오류 42501로 거부됐습니다. 자료 본문이나 키 값은 이 기록에 포함하지 않았습니다. 2단계 심판 제출·판정은 아직 완료되지 않았습니다.
 
 ---
 
