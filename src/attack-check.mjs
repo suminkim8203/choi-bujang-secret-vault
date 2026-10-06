@@ -3,7 +3,7 @@ import { publicDatabase } from './public-db-config.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -54,13 +54,29 @@ export async function runAttackChecks(config) {
         observed: `실제 ${method} 요청 HTTP401; 자료 없는 거부 응답 확인` });
     }
     const database = publicDatabase(config.database);
-    const direct = await fetch(new URL(`/rest/v1/${database.table}?select=id&limit=1`, database.url), {
+    const original = new URL(`/rest/v1/${database.table}`, database.url);
+    if (config.step >= 5 && config.originalApiUrl !== original.href) throw new Error('원본 API 경로 불일치');
+    const readTarget = new URL(original); readTarget.search = '?select=id&limit=1';
+    const direct = await fetch(readTarget, {
       headers: { apikey: database.publishableKey }, redirect: 'error', signal: AbortSignal.timeout(10000) });
     let code;
     try { code = (await direct.json())?.code; } catch { /* No upstream bodies in evidence. */ }
     if (![401, 403].includes(direct.status) || code !== '42501') throw new Error('공개 DB 권한 거부 확인 실패');
     checks.push({ attackId: 'direct_database_read', expected: '공개용 키로 DB 직접 읽기 거부',
       observed: `실제 DB 직접 요청 HTTP${direct.status}; PostgreSQL42501 권한 거부` });
+    if (config.step >= 5) {
+      const writeTarget = new URL(config.originalApiUrl);
+      writeTarget.searchParams.set('id', `eq.${id}`);
+      const write = await fetch(writeTarget, { method: 'PATCH',
+        headers: { apikey: database.publishableKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'disposable verification' }),
+        redirect: 'error', signal: AbortSignal.timeout(10000) });
+      let writeCode;
+      try { writeCode = (await write.json())?.code; } catch { /* No upstream bodies. */ }
+      if (![401, 403].includes(write.status) || writeCode !== '42501') throw new Error('원본 DB 직접 수정 권한 거부 확인 실패');
+      checks.push({ attackId: 'direct_database_update', expected: '공개용 키의 원본 DB 직접 수정은 권한 오류로 거부',
+        observed: `실제 PATCH 요청 HTTP${write.status}; PostgreSQL42501 권한 거부` });
+    }
     return checks;
   }
   if (config.step === 2) {

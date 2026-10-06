@@ -14,10 +14,11 @@ export function deploymentIdentity(env, config) {
     && /^https:\/\/([^/]+)\/?$/u.exec(publicAppUrl)?.[1];
   const allowedRoutes = config?.step >= 2 ? config.allowedRoutes : null;
   const identityProvider = config?.identityProvider;
+  const expectedOriginalApi = `${config?.database?.url}/rest/v1/${config?.database?.table}`;
   if (env.VERCEL_GIT_PROVIDER !== 'github' || !OWNER.test(owner || '')
       || !REPO.test(repo || '') || repo === '.' || repo === '..'
       || repo.toLowerCase().endsWith('.git') || !SHA.test(commit || '')
-      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4].includes(config?.step)
+      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5].includes(config?.step)
       || (config.step === 2 && (!Array.isArray(allowedRoutes)
         || allowedRoutes.length !== 1 || allowedRoutes[0] !== '/api/notes'))
       || (config.step >= 3 && (!Array.isArray(allowedRoutes)
@@ -25,6 +26,7 @@ export function deploymentIdentity(env, config) {
         || !identityProvider || identityProvider.issuer !== `${config.database?.url}/auth/v1`
         || identityProvider.audience !== 'authenticated'
         || identityProvider.jwksUrl !== `${identityProvider.issuer}/.well-known/jwks.json`))
+      || (config.step >= 5 && config.originalApiUrl !== expectedOriginalApi)
       || typeof config.judgeIssuer !== 'string'
       || !/^https:\/\/[a-z0-9-]+\.up\.railway\.app\/defense\/judge$/iu.test(config.judgeIssuer)
       || typeof config.sampleMarker !== 'string'
@@ -39,6 +41,7 @@ export function deploymentIdentity(env, config) {
     publicAppUrl: `https://${publicHost.toLowerCase()}`,
     judgeIssuer: config.judgeIssuer,
     ...(config.step === 1 ? { sampleMarker: config.sampleMarker } : {}),
+    ...(config.step >= 5 ? { originalApiUrl: config.originalApiUrl } : {}),
     ...(config.step >= 2 ? { allowedRoutes: [...allowedRoutes] } : {}),
     ...(config.step >= 3 ? { identityProvider: {
       issuer: identityProvider.issuer, audience: identityProvider.audience, jwksUrl: identityProvider.jwksUrl,

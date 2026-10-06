@@ -57,7 +57,7 @@ export async function checkPublicNotes({ localOnly = false } = {}) {
     // In stage 3 the browser also loads these deployed assets. Checking their
     // local copies alone does not establish what the production browser gets.
     if (config.step >= 3) paths.push('/app.js', '/vendor/supabase.js');
-    if (config.step === 4) paths.push('/verify-access.html', '/verify-access.js');
+    if (config.step >= 4) paths.push('/verify-access.html', '/verify-access.js');
     for (const path of paths) {
       const response = await fetch(new URL(path, app), {
         redirect: 'error', signal: AbortSignal.timeout(10000), cache: 'no-store',
@@ -65,12 +65,13 @@ export async function checkPublicNotes({ localOnly = false } = {}) {
       if (!response.ok) throw new Error('STATIC_RESPONSE_UNAVAILABLE');
       const text = await response.text();
       if (text.length > 1024 * 1024) throw new Error('STATIC_RESPONSE_TOO_LARGE');
-      staticResponses.push({ path, status: response.status, ...findingsFor(text, bodies) });
+      staticResponses.push({ path, status: response.status, ...findingsFor(text, bodies),
+        ...(config.step >= 5 ? { seedMarker: text.includes(config.sampleMarker) } : {}) });
     }
   }
   return { currentGitFiles: tracked.length, localPublicFiles: publicFiles.length,
     sourceFindings, staticResponses,
-    passed: sourceFindings.length === 0 && staticResponses.every(row => !row.noteBody && !row.secretPattern) };
+    passed: sourceFindings.length === 0 && staticResponses.every(row => !row.noteBody && !row.secretPattern && !row.seedMarker) };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

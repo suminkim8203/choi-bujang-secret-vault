@@ -1,5 +1,5 @@
 {
-  "step": 4,
+  "step": 5,
   "repoUrl": "https://github.com/suminkim8203/choi-bujang-secret-vault",
   "publicAppUrl": "https://choi-bujang-secret-vault.vercel.app",
   "sampleMarker": "SAMPLE_NOTE_1",
@@ -13,7 +13,7 @@
     "/api/notes",
     "/api/notes/:id"
   ],
-  "originalApiUrl": null,
+  "originalApiUrl": "https://vpicvdydirvwjaeuemzb.supabase.co/rest/v1/aleph_defense_notes",
   "restoreRoute": null,
   "database": {
     "url": "https://vpicvdydirvwjaeuemzb.supabase.co",

@@ -49,28 +49,6 @@ $('prepare').addEventListener('click', () => run(async () => {
   report('API 소유자 변경 시도', `HTTP${transfer.status}`); assert(transfer.status === 400);
   const foreignInsert = await request('/api/notes', 'POST', { title: text.title, body: text.body, owner_id: fakeOwner });
   report('API 타인 소유 추가 시도', `HTTP${foreignInsert.status}`); assert(foreignInsert.status === 400);
-  const rlsOwn = await client.from(database.table).select('id').eq('id', id);
-  report('DB 본인 행 SELECT', `HTTP${rlsOwn.status}; ${rlsOwn.data?.length ?? 0}건`);
-  assert(!rlsOwn.error && rlsOwn.data.length === 1);
-  const rlsTransfer = await client.from(database.table).update({ owner_id: fakeOwner }).eq('id', id).select('id');
-  report('DB 새 소유자 변경 거부', `HTTP${rlsTransfer.status}; ${rlsTransfer.error?.code === '42501' ? '권한 거부' : '예상 확인 필요'}`);
-  assert(rlsTransfer.error?.code === '42501');
-  const foreignId = crypto.randomUUID();
-  const rlsInsertDenied = await client.from(database.table).insert({ id: foreignId,
-    title: text.title, content: text.body, owner_id: fakeOwner }).select('id');
-  report('DB 타인 소유 INSERT 거부', `HTTP${rlsInsertDenied.status}; ${rlsInsertDenied.error?.code === '42501' ? '권한 거부' : '예상 확인 필요'}`);
-  assert(rlsInsertDenied.error?.code === '42501');
-  const dbId = crypto.randomUUID();
-  const dbInserted = await client.from(database.table).insert({ id: dbId,
-    title: text.title, content: text.body, owner_id: session.user.id }).select('id');
-  report('DB 본인 INSERT', `HTTP${dbInserted.status}; ${dbInserted.data?.length ?? 0}건`);
-  assert(!dbInserted.error && dbInserted.data.length === 1);
-  const dbChanged = await client.from(database.table).update({ title: text.updatedTitle }).eq('id', dbId).select('id');
-  report('DB 본인 UPDATE', `HTTP${dbChanged.status}; ${dbChanged.data?.length ?? 0}건`);
-  assert(!dbChanged.error && dbChanged.data.length === 1);
-  const dbRemoved = await client.from(database.table).delete().eq('id', dbId).select('id');
-  report('DB 본인 DELETE', `HTTP${dbRemoved.status}; ${dbRemoved.data?.length ?? 0}건`);
-  assert(!dbRemoved.error && dbRemoved.data.length === 1);
 }));
 $('cross').addEventListener('click', () => run(async () => {
   const id = $('other-id').value.trim();
@@ -84,15 +62,6 @@ $('cross').addEventListener('click', () => run(async () => {
     report(`상대 ${method}`, `HTTP${denied.status}`);
     assert(denied.status === 404 && denied.body && Object.keys(denied.body).join(',') === 'error');
   }
-  const hidden = await client.from(database.table).select('id').eq('id', id);
-  report('DB 상대 SELECT', `HTTP${hidden.status}; ${hidden.data?.length ?? 0}건`);
-  assert(!hidden.error && hidden.data.length === 0);
-  const blocked = await client.from(database.table).update({ title: text.updatedTitle }).eq('id', id).select('id');
-  report('DB 상대 UPDATE', `HTTP${blocked.status}; ${blocked.data?.length ?? 0}건`);
-  assert(!blocked.error && blocked.data.length === 0);
-  const removed = await client.from(database.table).delete().eq('id', id).select('id');
-  report('DB 상대 DELETE', `HTTP${removed.status}; ${removed.data?.length ?? 0}건`);
-  assert(!removed.error && removed.data.length === 0);
 }));
 $('finish').addEventListener('click', () => run(async () => {
   const id = $('own-id').value.trim(); assert(UUID.test(id) && !seeded.test(id));
@@ -111,9 +80,9 @@ $('finish').addEventListener('click', () => run(async () => {
 try {
   const [metadata, descriptor] = await Promise.all([fetch('/aleph.json', { cache: 'no-store' }), fetch('/database.json', { cache: 'no-store' })]);
   assert(metadata.ok && descriptor.ok);
-  const deployed = await metadata.json(); database = await descriptor.json(); assert(deployed.step === 4);
-  $('identity').textContent = `4단계 운영 저장점 ${deployed.commit}`;
+  const deployed = await metadata.json(); database = await descriptor.json(); assert(deployed.step === 5);
+  $('identity').textContent = `5단계 운영 저장점 ${deployed.commit}`;
   client = window.supabase.createClient(database.url, database.publishableKey);
   client.auth.onAuthStateChange((_event, next) => { session = next; controls(); });
   const { data, error } = await client.auth.getSession(); assert(!error); session = data.session; controls();
-} catch { $('state').textContent = '로그인 설정 또는 4단계 운영 배포를 확인할 수 없습니다.'; }
+} catch { $('state').textContent = '로그인 설정 또는 5단계 운영 배포를 확인할 수 없습니다.'; }

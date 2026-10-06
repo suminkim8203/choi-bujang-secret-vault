@@ -1,6 +1,17 @@
-# BYTE BACK 방어전 · 4단계 저장점
+# BYTE BACK 방어전 · 5단계 저장점
 
-4단계는 기존 실제 로그인과 메모 CRUD를 유지하며 개별 읽기·수정·삭제에도 검증된 사용자 ID와 DB 소유자 ID를 함께 조건으로 적용합니다. 공개 운영 주소: https://choi-bujang-secret-vault.vercel.app
+5단계는 메모 요청을 Vercel 서버 API로 모으고 전용 테이블의 PUBLIC·anon·authenticated 직접 권한을 회수합니다. 로그인과 서버 소유자 조건은 유지합니다. SQL 적용과 운영 검증 여부는 아래 기록에서 구분합니다. 공개 운영 주소: https://choi-bujang-secret-vault.vercel.app
+
+## 5단계 변경과 검증 상태
+
+- 일반 자료실은 이미 `/api/notes`와 `/api/notes/:id`만 사용했습니다. 검증 페이지에 남아 있던 Supabase 테이블 직접 호출을 제거했습니다. 공식 SDK Auth 호출은 유지합니다.
+- `db/step5-permissions.sql`은 전용 메모 테이블의 PUBLIC·anon·authenticated 권한만 회수합니다. service_role의 기존 CRUD 권한이 없으면 트랜잭션을 중단하며 서버 권한을 늘리지 않습니다. 기존 자료·소유자·RLS 정책·다른 테이블은 유지합니다.
+- SQL 실행 전후 role_table_grants와 has_table_privilege를 확인합니다. 정상 결과는 anon/authenticated의 7개 권한 false, service_role CRUD true, RLS true, 기존 정책4개입니다. SQL Editor 실행은 아직 확인되지 않았습니다.
+- `aleph.config.json.originalApiUrl`은 `https://vpicvdydirvwjaeuemzb.supabase.co/rest/v1/aleph_defense_notes`이며 쿼리 없는 원본 경로입니다. 운영 `/aleph.json`에도 기록하도록 빌드 계약을 추가했습니다.
+- 권한 변경 전 실제 A 계정의 서버 API 정상 CRUD를 확인했습니다. 임시 메모 추가·개별 읽기·수정·삭제 후 기존3건으로 복귀했습니다. 변경 후 A/B 정상 CRUD·양방향 타인 거부·익명 거부 및 원본 API 거부는 아직 미실행입니다.
+- 자기 점검은 공개용 키의 원본 DB 읽기·수정 거부를 실제 요청으로 기록합니다. 수정 시험은 기존 메모가 아닌 시험 ID에 제한합니다. 운영 정적8응답의 가상 메모 본문·비밀 패턴·seed 표시도 검색합니다.
+- 재현: SQL 검토·실행 후 자료실에서 A/B 실습 로그인 → `/verify-access.html`에서 각자 임시 메모 준비 → 서로의 임시 ID 거부 확인 → 각자 보존·정리 확인. 비밀번호·토큰·실제 계정 정보는 기록하지 않습니다.
+- 아직 5단계 배포·제출·판정을 완료했다고 하지 않습니다. 아래 4단계 기록은 이전 단계 결과입니다. 6단계는 별도 지시 전 진행하지 않습니다.
 
 공식 제작 지시와 직접 확인 항목을 다시 대조한 근거는 [3단계 검증 기록](docs/STEP3_VERIFICATION.md)에 있습니다. 해당 기록은 기능 누락, 검증 범위, 사용자 직접 확인과 실제 심판 판정을 구분합니다.
 
@@ -28,7 +39,7 @@
 
 ## 단계 경계와 공개 이력
 
-개별 ID 소유자 검사는 이번4단계에 추가했습니다. 운영 반영과 A/B 교차 접근 결과는 아래 확인 기록에서 구분합니다. DB의 server role은 RLS를 우회하므로 서버 API 자체의 원자적 소유자 조건을 유지합니다. 5단계는 별도 지시 전 진행하지 않습니다. 실제 개인정보를 쓰지 않습니다.
+개별 ID 소유자 검사는4단계에 추가했고5단계에서도 유지합니다. DB의 server role은 RLS를 우회하므로 서버 API 자체의 원자적 소유자 조건을 유지합니다. 실제 개인정보를 쓰지 않습니다.
 
 최신 정적 파일에서 메모를 제거해도 이전 공개 Git 커밋과 옛 배포의 가상 자료는 지워지지 않습니다. 과거 노출이 해소됐다고 하지 않습니다. 로그인 보호는 현재 운영 API에 적용되며 과거 공개 배포를 소급 변경하지 않습니다.
 
@@ -42,10 +53,10 @@
 
 ## 다시 실행
 
-1. `node --test test/r5.test.mjs test/step2.test.mjs test/step3.test.mjs test/step4.test.mjs`로 현재 계약 및 토큰 검증·양방향 소유자 거부 조건을 확인합니다. 로컬 시험의 임시 서명 키·토큰은 메모리에서만 쓰고 실제 계정·심판 토큰은 사용하지 않습니다.
+1. `node --test test/r5.test.mjs test/step2.test.mjs test/step3.test.mjs test/step4.test.mjs test/step5.test.mjs`로 현재 계약 및 토큰 검증·양방향 소유자 거부 조건을 확인합니다. 로컬 시험의 임시 서명 키·토큰은 메모리에서만 쓰고 실제 계정·심판 토큰은 사용하지 않습니다.
 2. `npm run build -- --local`로 정적 출력과 공식 SDK 복사를 확인합니다. 로컬 빌드가 실제 로그인·DB 연결을 증명하지 않습니다.
 3. `node scripts/check-public-notes.mjs`로 최신 Git 파일, 로컬 public 파일 및 운영 정적 응답에서 원본 메모 본문·비밀 패턴을 검사합니다. 본문과 비밀값은 출력하지 않습니다.
-4. 실제 A/B 로그인을 자료실에서 바꿔 가며 `/verify-access.html` 시험 화면을 사용합니다. 각자 임시 메모 준비와 본인 GET·PUT·소유자 변경 거부 확인 → 서로의 임시 ID를 입력해 목록 제외·개별 GET/PUT/DELETE404 → 원래 계정에서 내용 보존 확인 및 임시 메모 정리 → 삭제 후 GET404·A3건/B1건 복귀를 확인합니다. 시험 화면은 SDK가 토큰을 직접 전달하며 에이전트는 토큰·계정 식별자를 읽지 않습니다. 별도 로그인한 DB 직접 요청도 RLS 검증으로 구분하며 심판이 authenticated 직접 접근을 채점한다고 주장하지 않습니다.
+4. 실제 A/B 로그인을 자료실에서 바꿔 가며 `/verify-access.html` 시험 화면을 사용합니다. 각자 임시 메모 준비와 본인 GET·PUT·소유자 변경 거부 확인 → 서로의 임시 ID를 입력해 목록 제외·개별 GET/PUT/DELETE404 → 원래 계정에서 내용 보존 확인 및 임시 메모 정리 → 삭제 후 GET404·A3건/B1건 복귀를 확인합니다. 시험 화면은 SDK가 토큰을 직접 전달하며 에이전트는 토큰·계정 식별자를 읽지 않습니다. 5단계 시험 화면은 메모 요청을 모두 서버 API로 보냅니다.
 5. 「4단계 저장점」 커밋을 만들고 `npm run bundle`을 실행합니다. 실제 운영에 보낸 익명 GET/POST/PUT/DELETE·잘못된 토큰·공개 DB 접근 요청 결과만 자동 자기 점검에 기록합니다. 브라우저의 A/B 검증 및 실제 심판 판정은 별도로 기록합니다.
 6. 포털4단계에서 운영 주소를 제출하고 새 접수 판정을 확인합니다. artifacts/submission.json과 bundle-notes.json은 Git 제외입니다. 자기 점검과 실제 심판 판정은 동일하지 않습니다.
 

@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>4단계 · 계정별 접근 확인</title>
+<title>5단계 · 계정별 접근 확인</title>
 <style>body{max-width:860px;margin:40px auto;padding:0 24px;font:16px/1.65 system-ui;color:#172334}input{display:block;width:100%;box-sizing:border-box;padding:12px;font:inherit;margin:8px 0 20px}button{padding:12px 18px;margin:8px 8px 8px 0;font:inherit}pre{white-space:pre-wrap;background:#eef2f7;padding:20px}label{display:block;font-weight:600}p{overflow-wrap:anywhere}button:disabled{opacity:.5}</style>
 <script src="/vendor/supabase.js" defer></script><script src="/verify-access.js" type="module"></script></head>
-<body><h1>4단계 계정별 접근 확인</h1><p><a href="/">자료실 로그인 화면</a>에서 로그인한 실습 계정으로 확인합니다. 실제 개인정보는 입력하지 않습니다. 검증 버튼은 삭제 예정 가상 메모를 만들고, 정리 버튼은 그 임시 메모만 삭제합니다.</p>
+<body><h1>5단계 계정별 접근 확인</h1><p><a href="/">자료실 로그인 화면</a>에서 로그인한 실습 계정으로 확인합니다. 실제 개인정보는 입력하지 않습니다. 검증 버튼은 삭제 예정 가상 메모를 만들고, 정리 버튼은 그 임시 메모만 삭제합니다.</p>
 <p id="state">로그인 상태 확인 중</p><p id="identity">운영 저장점 확인 중</p>
 <button id="prepare" disabled>내 임시 메모 준비와 정상 작업 확인</button>
 <label for="own-id">내 검증용 임시 메모 ID</label><input id="own-id" readonly>
@@ -11,4 +11,4 @@
 <button id="cross" disabled>상대 메모 조회·수정·삭제 거부 확인</button>
 <button id="finish" disabled>내 메모 보존 확인과 임시 메모 정리</button>
 <p id="message" role="status" aria-live="polite"></p><pre id="results" aria-live="polite"></pre>
-<p>결과에는 HTTP 상태·건수·공개 저장점만 표시합니다. 브라우저의 로그인 토큰, 사용자 ID, 이메일, 메모 본문은 표시하거나 내보내지 않습니다. 로그인한 사용자의 DB 직접 요청 시험은 RLS 검증이며, 심판 점수와 구분합니다.</p></body></html>
+<p>결과에는 HTTP 상태·건수·공개 저장점만 표시합니다. 브라우저의 로그인 토큰, 사용자 ID, 이메일, 메모 본문은 표시하거나 내보내지 않습니다. 메모 검증도 서버 API만 사용합니다. 로그인(Auth) 호출은 유지하며, 이 확인 결과는 심판 점수와 구분합니다.</p></body></html>
