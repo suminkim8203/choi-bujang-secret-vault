@@ -12,10 +12,13 @@ export function deploymentIdentity(env, config) {
   const publicAppUrl = config?.step === 2 ? config.publicAppUrl : `https://${host}`;
   const publicHost = typeof publicAppUrl === 'string'
     && /^https:\/\/([^/]+)\/?$/u.exec(publicAppUrl)?.[1];
+  const allowedRoutes = config?.step === 2 ? config.allowedRoutes : null;
   if (env.VERCEL_GIT_PROVIDER !== 'github' || !OWNER.test(owner || '')
       || !REPO.test(repo || '') || repo === '.' || repo === '..'
       || repo.toLowerCase().endsWith('.git') || !SHA.test(commit || '')
       || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2].includes(config?.step)
+      || (config.step === 2 && (!Array.isArray(allowedRoutes)
+        || allowedRoutes.length !== 1 || allowedRoutes[0] !== '/api/notes'))
       || typeof config.judgeIssuer !== 'string'
       || !/^https:\/\/[a-z0-9-]+\.up\.railway\.app\/defense\/judge$/iu.test(config.judgeIssuer)
       || typeof config.sampleMarker !== 'string'
@@ -30,5 +33,6 @@ export function deploymentIdentity(env, config) {
     publicAppUrl: `https://${publicHost.toLowerCase()}`,
     judgeIssuer: config.judgeIssuer,
     ...(config.step === 1 ? { sampleMarker: config.sampleMarker } : {}),
+    ...(config.step === 2 ? { allowedRoutes: [...allowedRoutes] } : {}),
   };
 }

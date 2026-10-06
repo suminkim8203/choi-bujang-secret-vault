@@ -8,6 +8,7 @@ const config = {
   judgeIssuer: 'https://aleph-judge-production.up.railway.app/defense/judge',
   sampleMarker: 'SAMPLE_NOTE_1',
   publicAppUrl: 'https://student-defense.vercel.app',
+  allowedRoutes: ['/api/notes'],
 };
 const env = {
   VERCEL_GIT_PROVIDER: 'github',
@@ -49,6 +50,17 @@ test('step 2 static identity omits the first-stage sample marker', () => {
   assert.equal(Object.hasOwn(identity, 'sampleMarker'), false);
   assert.equal(JSON.stringify(identity).includes(config.sampleMarker), false);
   assert.equal(deploymentIdentity(env, config).sampleMarker, config.sampleMarker);
+});
+
+test('step 2 identity advertises only the implemented notes route', () => {
+  const identity = deploymentIdentity(env, { ...config, step: 2 });
+  assert.deepEqual(identity.allowedRoutes, ['/api/notes']);
+  assert.notEqual(identity.allowedRoutes, config.allowedRoutes);
+  assert.equal(Object.hasOwn(deploymentIdentity(env, config), 'allowedRoutes'), false);
+  for (const allowedRoutes of [undefined, [], '/api/notes', ['/api/other'],
+    ['https://other.example/api/notes'], ['/api/notes?query=1'], ['/api/notes', '/api/notes']]) {
+    assert.throws(() => deploymentIdentity(env, { ...config, step: 2, allowedRoutes }));
+  }
 });
 
 test('first attack check reads public data.json without credentials', async () => {
