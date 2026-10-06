@@ -19,11 +19,13 @@ function databaseConfig(env, config) {
   return { base, key };
 }
 
-function noteInput(value, create) {
+function noteInput(value, create, ownerProtected) {
   if (!value || typeof value !== 'object' || Array.isArray(value)
       || typeof value.title !== 'string' || !value.title.trim() || value.title.length > 120
       || typeof value.body !== 'string' || !value.body.trim() || value.body.length > 10000
       || (create && value.id !== undefined && !UUID.test(value.id))) return null;
+  if (ownerProtected && Object.keys(value).some(key =>
+      !(create ? ['id', 'title', 'body'] : ['title', 'body']).includes(key))) return null;
   // owner_id, userId and role from the browser are deliberately not used.
   return { title: value.title.trim(), content: value.body.trim(),
     ...(create ? { id: value.id ?? randomUUID() } : {}) };
@@ -50,6 +52,8 @@ export function createNotesHandler({ config, item = false, env = () => process.e
       verifier ??= verify ?? createLoginVerifier({ config, supabaseSecretKey: currentEnv.SUPABASE_SECRET_KEY });
       const identity = await verifier(authorization);
       if (!identity || !UUID.test(identity.userId ?? '')) return fail(401);
+      const ownerProtected = config.step >= 4;
+      const owner = identity.userId.toLowerCase();
       const method = request.method;
       const methods = item ? ['GET', 'PUT', 'DELETE'] : ['GET', 'POST'];
       if (!methods.includes(method)) {
@@ -59,8 +63,11 @@ export function createNotesHandler({ config, item = false, env = () => process.e
       const id = item ? request.query?.id : null;
       if (item && (typeof id !== 'string' || !UUID.test(id))) return fail(400);
       const target = new URL('/rest/v1/aleph_defense_notes', db.base);
-      target.searchParams.set('select', 'id,title,content');
+      target.searchParams.set('select', ownerProtected ? 'id,title,content,owner_id' : 'id,title,content');
       if (item) target.searchParams.set('id', `eq.${id}`);
+      // Apply ownership atomically to GET, PATCH and DELETE, using the
+      // server-verified identity rather than any client-supplied owner.
+      if (ownerProtected && method !== 'POST') target.searchParams.set('owner_id', `eq.${owner}`);
       if (!item && method === 'GET') {
         target.searchParams.set('owner_id', `eq.${identity.userId}`);
         target.searchParams.set('order', 'created_at.asc,id.asc');
@@ -69,10 +76,11 @@ export function createNotesHandler({ config, item = false, env = () => process.e
       const headers = { apikey: db.key, Accept: 'application/json' };
       const options = { headers, redirect: 'error', signal: AbortSignal.timeout(10000) };
       if (method === 'POST' || method === 'PUT') {
-        const input = noteInput(request.body, method === 'POST');
+        const input = noteInput(request.body, method === 'POST', ownerProtected);
         if (!input) return fail(400);
-        // Stage 3 verifies login; item ownership checks are the Stage 4 task.
-        const row = method === 'POST' ? { ...input, owner_id: identity.userId } : input;
+        // PUT accepts no owner field, so the existing owner cannot change.
+        // POST always records the server-verified identity.
+        const row = method === 'POST' ? { ...input, owner_id: owner } : input;
         headers['Content-Type'] = 'application/json';
         headers.Prefer = 'return=representation';
         options.method = method === 'PUT' ? 'PATCH' : 'POST';
@@ -88,6 +96,8 @@ export function createNotesHandler({ config, item = false, env = () => process.e
       }
       const rows = await result.json();
       if (!Array.isArray(rows) || rows.length > 100) return fail(503);
+      if (ownerProtected && rows.some(row => typeof row?.owner_id !== 'string'
+          || row.owner_id.toLowerCase() !== owner)) return fail(503);
       if ((item || method === 'POST') && rows.length === 0) return fail(404);
       if ((item || method === 'POST') && rows.length !== 1) return fail(503);
       if (method === 'DELETE') return response.status(200).json({ id });

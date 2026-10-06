@@ -1,6 +1,6 @@
-# BYTE BACK 방어전 · 3단계 저장점
+# BYTE BACK 방어전 · 4단계 저장점
 
-3단계는 Supabase Auth의 이메일·비밀번호 로그인과 로그아웃을 연결하고, 메모 API에서 서버가 토큰을 검증합니다. 공개 운영 주소: https://choi-bujang-secret-vault.vercel.app
+4단계는 기존 실제 로그인과 메모 CRUD를 유지하며 개별 읽기·수정·삭제에도 검증된 사용자 ID와 DB 소유자 ID를 함께 조건으로 적용합니다. 공개 운영 주소: https://choi-bujang-secret-vault.vercel.app
 
 공식 제작 지시와 직접 확인 항목을 다시 대조한 근거는 [3단계 검증 기록](docs/STEP3_VERIFICATION.md)에 있습니다. 해당 기록은 기능 누락, 검증 범위, 사용자 직접 확인과 실제 심판 판정을 구분합니다.
 
@@ -11,6 +11,7 @@
 - `aleph.config.json`과 운영 `/aleph.json`에 실제 Supabase issuer·audience·공개 JWKS 주소와 허용 경로를 기록합니다. 기존 judgeIssuer는 보존합니다.
 - 서버는 SUPABASE_URL과 SUPABASE_SECRET_KEY를 환경변수에서 읽습니다. 브라우저·응답·로그에 서버 키, 토큰, DB 오류 원문을 넣지 않습니다. 브라우저에 공개되는 database.json은 URL·Publishable key·테이블명만 포함합니다.
 - 목록은 검증된 사용자 ID의 owner_id로 필터링합니다. 추가할 때도 owner_id는 검증된 사용자 ID로 서버가 기록합니다. 기존 가상 자료4건과 owner_id uuid, auth.users 외래키 없음은 유지합니다.
+- 개별 GET·PUT·DELETE에서도 ID와 owner_id를 동시에 필터링합니다. 타인 메모와 없는 메모는 자료 없는 HTTP404로 구분하지 않습니다. PUT은 title·body만 받아 기존 소유자를 변경할 수 없고, POST·PUT의 임의 소유자·역할 필드는 HTTP400으로 거부합니다. DB 반환 행의 소유자도 검사하며 owner_id는 브라우저 응답에서 제외합니다.
 - 정적 data.json은 빈 notes 배열입니다. 로그아웃 상태에는 메모 목록과 작성 화면이 보이지 않습니다. 로그인 뒤 본인 실습 메모를 추가·읽기·수정·삭제할 수 있습니다.
 
 ## 실제 API 계약
@@ -27,25 +28,30 @@
 
 ## 단계 경계와 공개 이력
 
-공식 3단계 안내에 따라 개별 ID 요청의 소유자 검사는 아직 추가하지 않습니다. 따라서 로그인한 B가 A 메모 ID를 알면 개별 읽기·수정·삭제가 가능합니다. 이 남은 약점은 4단계 대상입니다. 실제 개인정보를 쓰지 않습니다.
+개별 ID 소유자 검사는 이번4단계에 추가했습니다. 운영 반영과 A/B 교차 접근 결과는 아래 확인 기록에서 구분합니다. DB의 server role은 RLS를 우회하므로 서버 API 자체의 원자적 소유자 조건을 유지합니다. 5단계는 별도 지시 전 진행하지 않습니다. 실제 개인정보를 쓰지 않습니다.
 
 최신 정적 파일에서 메모를 제거해도 이전 공개 Git 커밋과 옛 배포의 가상 자료는 지워지지 않습니다. 과거 노출이 해소됐다고 하지 않습니다. 로그인 보호는 현재 운영 API에 적용되며 과거 공개 배포를 소급 변경하지 않습니다.
 
 ## DB 준비와 직접 확인
 
-`db/step3-permissions.sql`은 기존 자료와 구조를 보존하고 server role에만 CRUD 권한을 줍니다. anon·authenticated 직접 테이블 접근은 계속 거부하고 RLS를 유지합니다. Supabase 공식 SQL Editor에서 실행해야 합니다. 실제 서버 키와 계정 비밀번호는 사용자만 공식 비밀 입력란에 입력합니다.
+기존3단계 SQL은 server role에만 CRUD 권한을 주었습니다. 이번 `db/step4-owners.sql`은 공식 SQL Editor에서 사용자가 두 이메일 자리표시자만 바꾸고 실행합니다. 기존 네 가상 메모의 본문·제목·ID는 보존하고 A에3건/B에1건을 연결합니다. 실제 이메일·비밀번호·사용자 ID를 Git이나 제출 기록에 넣지 않습니다.
+
+`db/step4-rls.sql`은 해당 전용 메모 테이블만 대상으로 PUBLIC·anon·authenticated의 기존 권한을 회수하고 authenticated에 SELECT·INSERT·UPDATE·DELETE만 부여합니다. 기존 정책을 이 테이블에서만 정리한 뒤 SELECT·DELETE에는 USING, INSERT에는 WITH CHECK, UPDATE에는 양쪽 조건으로 auth.uid()=owner_id를 적용합니다. 실행 전후 role_table_grants·has_table_privilege 및 RLS·정책을 확인합니다. 사용자 검토·실행과 실제 운영 확인 전까지 적용됐다고 주장하지 않습니다.
 
 운영 배포 후 실습 계정A로 로그인 → 가상 메모 추가 → 수정 → 삭제를 확인합니다. 삭제 뒤 개별 GET404는 화면 삭제 처리에서 함께 확인합니다. 로그아웃하면 화면에서 메모가 사라지고 API 비로그인 접근은 HTTP401이어야 합니다. 비밀번호·토큰·계정 주소는 검증 기록에 저장하지 않습니다.
 
 ## 다시 실행
 
-1. `node --test test/r5.test.mjs test/step2.test.mjs test/step3.test.mjs`로 현재 계약 및 토큰 검증 거부 조건을 확인합니다. 로컬 시험의 임시 서명 키·토큰은 메모리에서만 쓰고 실제 계정·심판 토큰은 사용하지 않습니다.
+1. `node --test test/r5.test.mjs test/step2.test.mjs test/step3.test.mjs test/step4.test.mjs`로 현재 계약 및 토큰 검증·양방향 소유자 거부 조건을 확인합니다. 로컬 시험의 임시 서명 키·토큰은 메모리에서만 쓰고 실제 계정·심판 토큰은 사용하지 않습니다.
 2. `npm run build -- --local`로 정적 출력과 공식 SDK 복사를 확인합니다. 로컬 빌드가 실제 로그인·DB 연결을 증명하지 않습니다.
 3. `node scripts/check-public-notes.mjs`로 최신 Git 파일, 로컬 public 파일 및 운영 정적 응답에서 원본 메모 본문·비밀 패턴을 검사합니다. 본문과 비밀값은 출력하지 않습니다.
-4. 「3단계 저장점」 커밋을 만들고 `npm run bundle`을 실행합니다. 실제 운영에 보낸 익명 GET/POST/PUT/DELETE·잘못된 토큰·공개 DB 접근 요청 결과만 자기 점검에 기록합니다. 위조·만료·다른 서비스용 토큰의 운영 심판 검사는 별도로 구분합니다.
-5. 포털 3단계에서 운영 주소를 제출하고 새 접수 판정을 확인합니다. artifacts/submission.json과 bundle-notes.json은 Git 제외입니다. 자기 점검과 실제 심판 판정은 동일하지 않습니다.
+4. 실제 A/B 로그인을 자료실에서 바꿔 가며 `/verify-access.html` 시험 화면을 사용합니다. 각자 임시 메모 준비와 본인 GET·PUT·소유자 변경 거부 확인 → 서로의 임시 ID를 입력해 목록 제외·개별 GET/PUT/DELETE404 → 원래 계정에서 내용 보존 확인 및 임시 메모 정리 → 삭제 후 GET404·A3건/B1건 복귀를 확인합니다. 시험 화면은 SDK가 토큰을 직접 전달하며 에이전트는 토큰·계정 식별자를 읽지 않습니다. 별도 로그인한 DB 직접 요청도 RLS 검증으로 구분하며 심판이 authenticated 직접 접근을 채점한다고 주장하지 않습니다.
+5. 「4단계 저장점」 커밋을 만들고 `npm run bundle`을 실행합니다. 실제 운영에 보낸 익명 GET/POST/PUT/DELETE·잘못된 토큰·공개 DB 접근 요청 결과만 자동 자기 점검에 기록합니다. 브라우저의 A/B 검증 및 실제 심판 판정은 별도로 기록합니다.
+6. 포털4단계에서 운영 주소를 제출하고 새 접수 판정을 확인합니다. artifacts/submission.json과 bundle-notes.json은 Git 제외입니다. 자기 점검과 실제 심판 판정은 동일하지 않습니다.
 
 ## 확인 기록
+
+- 4단계 구현 중: 실제 공식 제작1·2·3을 읽고 위 소유자 검사·SQL·시험 화면을 준비했습니다. 로컬 검사22개 통과. SQL 실행·운영 A/B 검증·실제 심판 판정은 아직 미실행입니다. 과거 단계의 기록은 아래 보존합니다.
 
 - 1단계 실제 심판100/100. 2단계 최초·여러 보완 제출은 모두90/100·필수조건4개·완결성 가점2개였습니다. 마지막 a4bdbf3의 경로 공개 보완도90점이었습니다. 누락10점의 개별 근거는 제공되지 않아 원인 미확인입니다.
 - 3단계 구현8882724: 로컬 검사18개, 빌드, 최신 Git34파일·로컬 공개5파일 및 운영 정적응답4개의 비밀·원본 본문 검색이 통과했습니다. 운영 /aleph.json에서 해당 SHA와 step3·발급자·허용 경로를 확인했습니다.

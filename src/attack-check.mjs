@@ -3,7 +3,7 @@ import { publicDatabase } from './public-db-config.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -30,7 +30,7 @@ export async function runAttackChecks(config) {
       // A non-JSON response is a failed check, not a successful deployment.
     }
   }
-  if (config.step === 3) {
+  if (config.step >= 3) {
     if (!response.ok || !emptyStatic) throw new Error('공개 정적 메모 제거를 확인하지 못했습니다.');
     const checks = [{ attackId: 'static_note_read', expected: '공개 data.json에 메모가 없어야 함',
       observed: '실제 공개 응답 HTTP200; 메모 배열 비어 있음' }];

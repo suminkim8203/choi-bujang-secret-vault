@@ -7,7 +7,7 @@ const root = resolve(import.meta.dirname, '..');
 const source = resolve(root, 'data.json');
 const output = resolve(root, 'public', 'data.json');
 const config = JSON.parse(await readFile(resolve(root, 'aleph.config.json'), 'utf8'));
-if (![1, 2, 3].includes(config.step)) {
+if (![1, 2, 3, 4].includes(config.step)) {
   throw new Error('현재 단계에 맞게 빌드 흐름을 확인하세요.');
 }
 const data = JSON.parse(await readFile(source, 'utf8'));
@@ -20,7 +20,7 @@ if (config.step >= 2 && data.notes.length !== 0) {
 const database = config.step >= 2 ? publicDatabase(config.database) : null;
 await mkdir(resolve(root, 'public'), { recursive: true });
 if (database) await writeFile(resolve(root, 'public', 'database.json'), `${JSON.stringify(database, null, 2)}\n`, 'utf8');
-if (config.step === 3) {
+if (config.step >= 3) {
   await mkdir(resolve(root, 'public', 'vendor'), { recursive: true });
   await copyFile(resolve(root, 'node_modules', '@supabase', 'supabase-js', 'dist', 'umd', 'supabase.js'),
     resolve(root, 'public', 'vendor', 'supabase.js'));
