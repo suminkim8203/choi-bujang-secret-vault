@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-06",
+  "scope": "completed stages1-5; not final package",
+  "gradedCommit": "062b39c47c37e9e793db329321789532f7d139ea",
+  "resultRecordCommit": "8be7248f27d7433df9e695bd8734b9dcda443e3c",
+  "stage6Authorized": false,
+  "scores": {
+    "1": 100,
+    "2": 100,
+    "3": 100,
+    "4": 100,
+    "5": 100
+  },
+  "scoreboard": {
+    "total": 500,
+    "max": 500,
+    "recoveredSlots": 4,
+    "maxSlots": 4,
+    "monsters": 16,
+    "maxMonsters": 41
+  },
+  "criteria": {
+    "2": {
+      "required": 4,
+      "bonuses": 3,
+      "newPendingObserved": true,
+      "intakeIdRecorded": false
+    },
+    "3": {
+      "required": 7,
+      "bonuses": 3,
+      "newPendingObserved": true,
+      "intakeIdRecorded": false
+    },
+    "4": {
+      "required": 7,
+      "bonuses": 3,
+      "newPendingObserved": true,
+      "intakeIdRecorded": false
+    },
+    "5": {
+      "required": 7,
+      "bonuses": 3,
+      "newPendingObserved": true,
+      "intakeIdRecorded": false
+    }
+  },
+  "localTests": 25,
+  "staticScan": {
+    "trackedFilesAtRetry": 42,
+    "publicFiles": 7,
+    "productionStaticResponses": 8,
+    "secretAndOriginalBodyFindings": 0
+  },
+  "actualAutomaticRequests": 9,
+  "header": "X-Content-Type-Options: nosniff",
+  "normalLoggedInCRUD": {
+    "listBefore": 3,
+    "create": 201,
+    "read": 200,
+    "update": 200,
+    "ownerInjection": 400,
+    "delete": 200,
+    "deletedRead": 404,
+    "listAfter": 3,
+    "temporaryNoteRemoved": true,
+    "crossAccountRecheck": "not repeated; previous stage5 evidence retained"
+  },
+  "sourceLimits": [
+    "SQL execution and B verification include user reports",
+    "cross-account test not repeated after header-only change",
+    "no individual internal judge flags",
+    "old public commits and deployments remain"
+  ],
+  "automation": "deleted at user request on 2026-10-06"
+}
