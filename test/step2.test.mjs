@@ -37,10 +37,10 @@ test('DB errors and absent configuration produce generic responses without key c
     delete process.env.SUPABASE_SECRET_KEY;
     const response = { setHeader() {}, status(code) { this.code = code; return this; }, json(body) { this.body = body; } };
     await handler({ method: 'GET' }, response);
-    assert.equal(response.code, 503);
-    assert.deepEqual(response.body, { error: '자료를 불러오지 못했습니다.' });
+    assert.equal(response.code, 401);
+    assert.deepEqual(response.body, { error: '로그인이 필요합니다.' });
     await handler({ method: 'POST' }, response);
-    assert.equal(response.code, 405);
+    assert.equal(response.code, 401);
   } finally {
     if (saved.url === undefined) delete process.env.SUPABASE_URL; else process.env.SUPABASE_URL = saved.url;
     if (saved.key === undefined) delete process.env.SUPABASE_SECRET_KEY; else process.env.SUPABASE_SECRET_KEY = saved.key;
@@ -52,7 +52,9 @@ test('public files contain no note rows and the page reads the server route', as
     assert.deepEqual(JSON.parse(await readFile(new URL('../' + path, import.meta.url), 'utf8')), { notes: [] });
   }
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
-  assert.match(html, /fetch\('\/api\/notes'/u);
+  const app = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.match(app, /api\('\/api\/notes'/u);
+  assert.doesNotMatch(app, /SUPABASE_SECRET_KEY|sb_secret_/u);
   assert.doesNotMatch(html, /SUPABASE_SECRET_KEY|sb_secret_/u);
 });
 

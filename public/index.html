@@ -1,55 +1,20 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BYTE BACK | 자료실</title>
-  <style>
-    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
-    body { margin: 0; background: #101827; color: #eff6ff; }
-    main { max-width: 900px; margin: auto; padding: 40px 24px; }
-    p { line-height: 1.7; }
-    .notice { padding: 18px; border: 1px solid #8396ac; border-radius: 12px; }
-    a { color: #93c5fd; }
-    ul { list-style: none; padding: 0; display: grid; gap: 16px; }
-    li { padding: 20px; border: 1px solid #506079; border-radius: 12px; }
-    h2 { font-size: 20px; margin-top: 0; }
-    li p { margin-bottom: 0; white-space: pre-wrap; }
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>가상 자료실 · 로그인</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:#f5f6f8;color:#172334;font:16px/1.65 system-ui,sans-serif}main{max-width:880px;margin:48px auto;padding:0 24px}h1{margin:4px 0 12px}h2{font-size:22px}h3{margin:0}header{display:flex;gap:16px;align-items:center;justify-content:space-between}form,article{background:white;border:1px solid #d9e0e8;border-radius:14px;padding:24px;margin:16px 0}label{display:block;font-weight:600;margin:14px 0 6px}input,textarea{width:100%;border:1px solid #acb7c6;border-radius:7px;padding:12px;font:inherit}textarea{resize:vertical;min-height:110px}button{border:0;border-radius:7px;background:#214ecc;color:white;padding:10px 18px;font:inherit;cursor:pointer;margin:12px 8px 0 0}button:disabled{opacity:.5;cursor:wait}article p{white-space:pre-wrap;overflow-wrap:anywhere}small,.subtle{color:#526276}#message{min-height:28px}footer{border-top:1px solid #d9e0e8;padding-top:16px;margin-top:32px;font-size:14px}.eyebrow{color:#214ecc;font-weight:700;letter-spacing:2px;font-size:12px}
+</style>
+<script src="/vendor/supabase.js" defer></script>
+<script src="/app.js" type="module"></script>
 </head>
-<body>
-  <main>
-    <p>BYTE BACK · 2단계 자료 분리</p>
-    <h1>가상 자료실</h1>
-    <p class="notice">모두 실습용 가상 자료입니다. 화면은 서버 API를 통해 데이터베이스의 자료를 읽습니다. 아직 로그인하지 않은 방문자도 공개 API에서 자료를 읽을 수 있습니다. 로그인 보호는 다음 단계에서 붙입니다. 최신 정적 파일에서 자료를 제거했어도 옛 공개 커밋과 옛 배포 이력에 남은 자료는 지워지지 않았습니다. 과거 노출은 해소되지 않았습니다.</p>
-    <p><a href="/database.json">DB 직접 접근 검증 정보</a> · <a href="https://github.com/suminkim8203/choi-bujang-secret-vault#readme">구현·검증 기록</a></p>
-    <p id="status" role="status">가상 자료를 불러오는 중입니다.</p>
-    <ul id="notes" aria-label="가상 자료 목록"></ul>
-  </main>
-  <script type="module">
-    const list = document.querySelector('#notes');
-    const status = document.querySelector('#status');
-    try {
-      const response = await fetch('/api/notes', { method: 'GET', cache: 'no-store' });
-      if (!response.ok) throw new Error('READ_FAILED');
-      const data = await response.json();
-      if (!Array.isArray(data.notes) || data.notes.some(note => !note
-          || typeof note.title !== 'string' || typeof note.content !== 'string')) {
-        throw new Error('FORMAT_INVALID');
-      }
-      for (const note of data.notes) {
-        const card = document.createElement('li');
-        const title = document.createElement('h2');
-        const body = document.createElement('p');
-        title.textContent = note.title;
-        body.textContent = note.content;
-        card.append(title, body);
-        list.append(card);
-      }
-      status.textContent = `데이터베이스에서 가상 자료 ${data.notes.length}건을 불러왔습니다.`;
-    } catch {
-      status.textContent = '자료를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.';
-    }
-  </script>
-</body>
-</html>
+<body><main>
+<header><div><div class="eyebrow">BYTE BACK · 3단계</div><h1>가상 자료실</h1></div><button id="logout" hidden>로그아웃</button></header>
+<p class="subtle">실습용 로그인 계정으로 내 가상 메모를 작성하고 관리합니다. 실제 개인정보는 적지 마세요.</p>
+<p id="login-state">로그인하지 않음</p><p id="message" role="status" aria-live="polite">로그인 설정을 확인하고 있습니다.</p>
+<form id="login-form"><h2>로그인</h2><label for="email">이메일</label><input id="email" name="email" type="email" autocomplete="username" required><label for="password">비밀번호</label><input id="password" name="password" type="password" autocomplete="current-password" required><button id="login" type="submit" disabled>로그인</button></form>
+<section id="workspace" hidden><h2>내 메모</h2><p id="empty" hidden>아직 내 메모가 없습니다. 아래에서 가상 메모를 추가하세요.</p><div id="notes"></div>
+<form id="note-form"><h2>메모 작성</h2><label for="title">제목</label><input id="title" name="title" maxlength="120" required><label for="body">내용</label><textarea id="body" name="body" maxlength="10000" required></textarea><button id="save-note" type="submit">메모 추가</button><button id="cancel-edit" type="button" hidden>수정 취소</button></form></section>
+<footer>최신 정적 파일에는 메모가 없습니다. 이전 공개 Git 커밋·옛 배포의 가상 자료는 삭제되지 않았습니다. 현재 단계는 로그인을 검사하며, 다른 로그인 사용자의 메모에 대한 접근 제한은 다음 단계에서 다룹니다.</footer>
+</main></body></html>
