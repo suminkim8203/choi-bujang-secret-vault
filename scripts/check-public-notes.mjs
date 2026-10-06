@@ -53,7 +53,11 @@ export async function checkPublicNotes({ localOnly = false } = {}) {
     }
     // These are the current static outputs. /api/notes deliberately contains
     // fictional DB rows in step 2 and is checked separately by npm run bundle.
-    for (const path of ['/', '/data.json', '/aleph.json', '/database.json']) {
+    const paths = ['/', '/data.json', '/aleph.json', '/database.json'];
+    // In stage 3 the browser also loads these deployed assets. Checking their
+    // local copies alone does not establish what the production browser gets.
+    if (config.step === 3) paths.push('/app.js', '/vendor/supabase.js');
+    for (const path of paths) {
       const response = await fetch(new URL(path, app), {
         redirect: 'error', signal: AbortSignal.timeout(10000), cache: 'no-store',
       });
