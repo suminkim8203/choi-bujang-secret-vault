@@ -1,0 +1,32 @@
+{
+  "schema": "aleph.student.xdr.patterns.v1",
+  "moduleKey": "web-injection",
+  "thresholdOrigin": "project_policy",
+  "thresholdNote": "반복5회는 이 실습의 정책 값이며 공식 채점표나 MITRE 표준 수치가 아닙니다.",
+  "patterns": [
+    { "id": "web-injection.repeated-sql", "name": "반복 SQL 주입", "signal": "sqlEvidence", "minCount": 5,
+      "conditionText": "같은 주소의 집계 경보에서 SQL 구문·표식 또는 데이터베이스 조회 이어 붙이기 증거가5회 이상 확인됨",
+      "evidence": "T1190은 공개 앱 악용을 설명하며 SQL 주입은 입력으로 질의 실행을 바꾸는 형태이다.",
+      "sourceUrl": "https://community.owasp.org/attacks/SQL_Injection" },
+    { "id": "web-injection.repeated-script", "name": "반복 스크립트 삽입", "signal": "scriptEvidence", "minCount": 5,
+      "conditionText": "같은 주소의 집계 경보에서 스크립트 삽입 표기 또는 표식이5회 이상 확인됨",
+      "evidence": "XSS는 웹 입력에 악성 스크립트를 넣는 형태이며 단순 수업 단어와 삽입 증거를 구분한다.",
+      "sourceUrl": "https://community.owasp.org/attacks/xss/" },
+    { "id": "web-injection.repeated-traversal", "name": "반복 경로 이탈", "signal": "traversalEvidence", "minCount": 5,
+      "conditionText": "같은 주소의 집계 경보에서 여러 단계 상위 경로 이동 또는 경로 이탈 표기가5회 이상 확인됨",
+      "evidence": "경로 조작은 허용된 디렉터리 밖의 파일에 접근하려는 형태이며 up이라는 단어만으로 입증되지 않는다.",
+      "sourceUrl": "https://community.owasp.org/attacks/Path_Traversal" },
+    { "id": "web-injection.repeated-command", "name": "반복 명령 구분자 삽입", "signal": "commandEvidence", "minCount": 5,
+      "conditionText": "같은 주소의 집계 경보에서 명령 구분자 표기가5회 이상 확인됨",
+      "evidence": "명령 주입은 취약 앱에 전달한 입력이 운영체제 명령 실행에 영향을 주는 형태이다. 구분 문자 한 건만으로 입증되지 않는다.",
+      "sourceUrl": "https://community.owasp.org/attacks/Command_Injection" }
+  ],
+  "technique": "T1190",
+  "techniqueSource": "https://attack.mitre.org/techniques/T1190/",
+  "limitations": [
+    "공식 자료는 실제 실행 문자열 대신 문서용 표기와 한국어 집계 설명을 사용한다.",
+    "현재 관찰기는 이 설명에서 증거를 추출하며 실제 원시 URL·본문의 SQL/XSS 파서가 아니다.",
+    "시각 하나로 집계 시간 범위를 만들지 않으며, 원천 경보의 동일 출발 주소 집계는 실운영에서 별도 검증해야 한다.",
+    "명확한 반복 증거가 없으면 단어·규칙 수준·기술 번호만으로 차단하지 않는다."
+  ]
+}

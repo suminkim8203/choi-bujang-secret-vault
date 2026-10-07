@@ -1,0 +1,15 @@
+{
+  "moduleKey": "web-injection",
+  "mode": "fixture-only",
+  "counts": {
+    "block": 8,
+    "alert": 9,
+    "record": 9
+  },
+  "fixtureCount": 26,
+  "denyRulesExported": 8,
+  "jevLiveVerified": false,
+  "liveEngineConnected": false,
+  "judgeStatus": "check-portal-for-current-verdict",
+  "integrationNotes": "xdr/web-injection/README.md in the public repository"
+}
