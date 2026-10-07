@@ -10,6 +10,10 @@
   "denyRulesExported": 8,
   "jevLiveVerified": false,
   "liveEngineConnected": false,
-  "judgeStatus": "check-portal-for-current-verdict",
-  "integrationNotes": "xdr/web-injection/README.md in the public repository"
+  "judgeStatus": "passed",
+  "integrationNotes": "xdr/web-injection/README.md in the public repository",
+  "judgeScore": 100,
+  "gradedCommit": "ce8fa5e71bdf705697e1b03d8368eb7d38436eee",
+  "bonusPointsEarned": 100,
+  "bonusTotalAfterVerdict": 180
 }
