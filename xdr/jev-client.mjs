@@ -1,9 +1,10 @@
 const ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 
-export function createJevAssessor({ env = process.env, send = fetch } = {}) {
+export function createJevAssessor({ env = typeof process === 'object' ? process.env : {},
+  send = typeof fetch === 'function' ? fetch : null } = {}) {
   return async function assess(facts) {
     // Explicit opt-in; never spend credits merely because a key is present.
-    if (env.XDR_JEV_ENABLED !== 'true' || typeof env.TYPESAFE_API_KEY !== 'string'
+    if (typeof send !== 'function' || env.XDR_JEV_ENABLED !== 'true' || typeof env.TYPESAFE_API_KEY !== 'string'
         || env.TYPESAFE_API_KEY.length === 0) return null;
     try {
       const response = await send(ENDPOINT, {
