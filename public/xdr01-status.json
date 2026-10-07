@@ -10,6 +10,9 @@
   "denyRulesExported": 10,
   "jevLiveVerified": false,
   "liveEngineConnected": false,
-  "judgeStatus": "check-portal-for-current-verdict",
-  "integrationNotes": "xdr/INTEGRATION.md in the public repository"
+  "judgeStatus": "passed",
+  "integrationNotes": "xdr/INTEGRATION.md in the public repository",
+  "judgeScore": 100,
+  "gradedCommit": "dc2ec5ed4ba82da04b738812b937e37a61bd5bc4",
+  "bonusPointsEarned": 80
 }
