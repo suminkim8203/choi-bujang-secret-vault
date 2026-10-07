@@ -59,3 +59,14 @@ test('invalid numbers and addresses fail closed without coercing strings', () =>
   assert.deepEqual(matchPatterns({ ...burst, windowSeconds: -1 }), []);
   assert.deepEqual(matchPatterns({ ...spray, distinctAccounts: '8' }), []);
 });
+
+test('high-volume and multi-account failures need independent repetition evidence', () => {
+  const high = { ...burst, failureCount: 70, windowSeconds: null };
+  assert.deepEqual(matchPatterns(high), []);
+  assert.deepEqual(matchPatterns({ ...high, continuedFailureEvidence: true }), ['brute-force.sustained-account-failures']);
+  const many = { eventType:'login_failure',sourceAddress:'192.0.2.1',sameSourceConfirmed:true,
+    distinctAccounts:20,failureCount:20 };
+  assert.deepEqual(matchPatterns(many), []);
+  assert.deepEqual(matchPatterns({ ...many, uniformIntervalEvidence:true }), ['brute-force.uniform-account-rotation']);
+  assert.deepEqual(matchPatterns({ ...many, uniformIntervalEvidence:true,eventType:'login_success' }), []);
+});

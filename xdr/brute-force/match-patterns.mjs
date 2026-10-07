@@ -36,6 +36,15 @@ export function matchPatterns(observation) {
       if (observation.eventType === 'login_failure' && observation.passwordVariationEvidence === true
           && Number.isSafeInteger(observation.failureCount)
           && observation.failureCount >= conditions.minFailureCount) matches.push(pattern.id);
+    } else if (pattern.id === 'brute-force.sustained-account-failures') {
+      if (observation.eventType === 'login_failure' && observation.sameAccountConfirmed === true
+          && observation.continuedFailureEvidence === true && Number.isSafeInteger(observation.failureCount)
+          && observation.failureCount >= conditions.minFailureCount) matches.push(pattern.id);
+    } else if (pattern.id === 'brute-force.uniform-account-rotation') {
+      if (observation.eventType === 'login_failure' && observation.uniformIntervalEvidence === true
+          && Number.isSafeInteger(observation.failureCount) && observation.failureCount >= conditions.minFailureCount
+          && Number.isSafeInteger(observation.distinctAccounts)
+          && observation.distinctAccounts >= conditions.minDistinctAccounts) matches.push(pattern.id);
     }
   }
   // Return pattern identifiers only; no source, account, or credential values.

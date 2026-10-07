@@ -40,12 +40,15 @@ test('attack probability thresholds are inclusive at 0.85 and 0.5', async () => 
   }
 });
 
-test('missing windows and password equality stay unknown; high count or rule level alone does not block', async () => {
+test('missing windows and password equality stay unknown even when another supported pattern matches', async () => {
   const facts = observe(get('bf-08'));
   assert.equal(facts.windowSeconds, null);
   assert.equal(observe(get('bf-05')).samePasswordEvidence, false);
-  assert.equal((await offline(get('bf-08'))).action, 'alert');
-  assert.equal((await offline(get('bf-10'))).action, 'alert');
+  assert.equal((await offline(get('bf-08'))).action, 'block');
+  assert.match((await offline(get('bf-08'))).reason, /sustained-account-failures/u);
+  assert.equal((await offline(get('bf-10'))).action, 'block');
+  assert.equal((await offline(get('bf-05'))).action, 'block');
+  assert.match((await offline(get('bf-05'))).reason, /uniform-account-rotation/u);
   assert.equal((await offline({ ...get('bf-13'), rule: { level: 15, description: '확인 정보 없음' } })).action, 'alert');
 });
 

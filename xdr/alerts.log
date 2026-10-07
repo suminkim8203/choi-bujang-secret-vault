@@ -17,3 +17,6 @@
 {"moduleKey":"brute-force","alertId":"bf-17","action":"alert","confidence":0.5}
 {"moduleKey":"brute-force","alertId":"bf-18","action":"alert","confidence":0.5}
 {"moduleKey":"brute-force","alertId":"bf-19","action":"alert","confidence":0.5}
+{"moduleKey":"brute-force","alertId":"bf-05","action":"block","confidence":0.95}
+{"moduleKey":"brute-force","alertId":"bf-08","action":"block","confidence":0.95}
+{"moduleKey":"brute-force","alertId":"bf-10","action":"block","confidence":0.95}

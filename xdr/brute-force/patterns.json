@@ -63,6 +63,26 @@
       "evidence": "MITRE T1110.001은 비밀번호 후보를 반복적·체계적으로 추측하는 방식을 설명합니다.",
       "sourceUrl": "https://attack.mitre.org/techniques/T1110/001/",
       "limitations": ["단순 비밀번호 변경 화면의 실패는 후보 대입 증거가 아닙니다."]
+    },
+    {
+      "id": "brute-force.sustained-account-failures",
+      "name": "같은 계정의 고빈도 연속 실패",
+      "technique": "T1110.001",
+      "conditions": { "minFailureCount": 50 },
+      "conditionText": "한 주소·한 계정의 집계 실패가50회 이상이고, 계속 이어지는 실패 또는 성공 없이 실패만 발생했다는 추가 증거가 명시된 경우입니다. 시간 범위가 없으면 짧은 시간 공격으로 표현하지 않습니다.",
+      "evidence": "MITRE T1110.001 탐지 전략은 한 계정 또는 유사 계정에 대한 반복 인증 실패의 연속과 원격 주소 상관관계를 다룹니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1110/001/",
+      "limitations": ["실패 횟수만 큰 경보에는 적용하지 않습니다. 수치50은 실습 정책이며 실서비스 오탐 검증은 별도로 필요합니다."]
+    },
+    {
+      "id": "brute-force.uniform-account-rotation",
+      "name": "일정 간격으로 여러 계정에 반복 실패",
+      "technique": "T1110",
+      "conditions": { "minFailureCount": 20, "minDistinctAccounts": 10 },
+      "conditionText": "한 출발 주소에서10계정 이상을 대상으로20회 이상 인증 실패가 발생했고, 일정 간격의 반복 시도라는 행동 증거가 명시된 경우입니다. 비밀번호 동일 여부나 정확한 시간 범위를 추정하지 않습니다.",
+      "evidence": "MITRE T1110은 비밀번호를 반복적·체계적으로 대입하는 무차별 공격을 설명합니다. 일정 간격의 다계정 실패는 이 실습에서 체계적 반복을 나타내는 추가 신호로 사용합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1110/",
+      "limitations": ["공유 주소·여러 계정만으로 적용하지 않습니다. 관리용 자동화의 오탐 가능성이 있어 실서비스에서는 추가 확인이 필요합니다."]
     }
   ],
   "handling": {

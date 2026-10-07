@@ -2,14 +2,14 @@
   "moduleKey": "brute-force",
   "mode": "fixture-only",
   "counts": {
-    "block": 7,
-    "alert": 12,
+    "block": 10,
+    "alert": 9,
     "record": 9
   },
   "fixtureCount": 28,
-  "denyRulesExported": 7,
+  "denyRulesExported": 10,
   "jevLiveVerified": false,
   "liveEngineConnected": false,
-  "judgeStatus": "not_submitted",
+  "judgeStatus": "check-portal-for-current-verdict",
   "integrationNotes": "xdr/INTEGRATION.md in the public repository"
 }

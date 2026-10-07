@@ -37,6 +37,14 @@
       "expiresAt": "2026-09-27T00:35:11.000Z"
     },
     {
+      "id": "xdr.brute-force.bf-05",
+      "moduleKey": "brute-force",
+      "sourceAddress": "203.0.113.21",
+      "alertId": "bf-05",
+      "observedAt": "2026-09-27T00:21:00.000Z",
+      "expiresAt": "2026-09-27T00:36:00.000Z"
+    },
+    {
       "id": "xdr.brute-force.bf-06",
       "moduleKey": "brute-force",
       "sourceAddress": "198.51.100.44",
@@ -53,12 +61,28 @@
       "expiresAt": "2026-09-27T02:20:40.000Z"
     },
     {
+      "id": "xdr.brute-force.bf-08",
+      "moduleKey": "brute-force",
+      "sourceAddress": "192.0.2.18",
+      "alertId": "bf-08",
+      "observedAt": "2026-09-27T04:10:02.000Z",
+      "expiresAt": "2026-09-27T04:25:02.000Z"
+    },
+    {
       "id": "xdr.brute-force.bf-09",
       "moduleKey": "brute-force",
       "sourceAddress": "198.51.100.8",
       "alertId": "bf-09",
       "observedAt": "2026-09-27T05:22:18.000Z",
       "expiresAt": "2026-09-27T05:37:18.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-10",
+      "moduleKey": "brute-force",
+      "sourceAddress": "203.0.113.40",
+      "alertId": "bf-10",
+      "observedAt": "2026-09-27T06:40:01.000Z",
+      "expiresAt": "2026-09-27T06:55:01.000Z"
     }
   ]
 }

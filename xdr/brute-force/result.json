@@ -24,13 +24,13 @@
       "alertId": "bf-04",
       "action": "block",
       "confidence": 0.95,
-      "reason": "brute-force.same-source-burst | 명시된 패턴 증거"
+      "reason": "brute-force.same-source-burst,brute-force.sustained-account-failures | 명시된 패턴 증거"
     },
     {
       "alertId": "bf-05",
-      "action": "alert",
-      "confidence": 0.5,
-      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.uniform-account-rotation | 명시된 패턴 증거"
     },
     {
       "alertId": "bf-06",
@@ -46,9 +46,9 @@
     },
     {
       "alertId": "bf-08",
-      "action": "alert",
-      "confidence": 0.5,
-      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.sustained-account-failures | 명시된 패턴 증거"
     },
     {
       "alertId": "bf-09",
@@ -58,9 +58,9 @@
     },
     {
       "alertId": "bf-10",
-      "action": "alert",
-      "confidence": 0.5,
-      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.sustained-account-failures | 명시된 패턴 증거"
     },
     {
       "alertId": "bf-11",
@@ -172,8 +172,8 @@
     }
   ],
   "counts": {
-    "block": 7,
-    "alert": 12,
+    "block": 10,
+    "alert": 9,
     "record": 9
   }
 }

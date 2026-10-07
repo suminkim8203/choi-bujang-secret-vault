@@ -25,9 +25,10 @@ try {
   catch (error) { if (error.code !== 'ENOENT') throw error; }
   const prior = new Set(oldLog.split('\n').filter(Boolean).map(line => {
     const entry = JSON.parse(line);
-    return `${entry.moduleKey}:${entry.alertId}`;
+    return `${entry.moduleKey}:${entry.alertId}:${entry.action}:${entry.confidence}`;
   }));
-  const additions = result.decisions.filter(row => row.action !== 'record' && !prior.has(`brute-force:${row.alertId}`))
+  const additions = result.decisions.filter(row => row.action !== 'record'
+    && !prior.has(`brute-force:${row.alertId}:${row.action}:${row.confidence}`))
     .map(row => JSON.stringify({ moduleKey: 'brute-force', alertId: row.alertId,
       action: row.action, confidence: row.confidence }));
   await writeFile(new URL('xdr/brute-force/deny-rules.json', root), `${JSON.stringify(overlay, null, 2)}\n`);
@@ -35,7 +36,7 @@ try {
   await writeFile(new URL('public/xdr01-status.json', root), `${JSON.stringify({
     moduleKey: 'brute-force', mode: 'fixture-only', counts: result.counts,
     fixtureCount: fixture.alerts.length, denyRulesExported: rules.length,
-    jevLiveVerified: false, liveEngineConnected: false, judgeStatus: 'not_submitted',
+    jevLiveVerified: false, liveEngineConnected: false, judgeStatus: 'check-portal-for-current-verdict',
     integrationNotes: 'xdr/INTEGRATION.md in the public repository',
   }, null, 2)}\n`);
   console.log(JSON.stringify({ ...result.counts, denyRulesExported: rules.length,

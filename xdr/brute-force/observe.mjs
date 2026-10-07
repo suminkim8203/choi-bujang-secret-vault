@@ -43,6 +43,8 @@ export function observe(alert) {
     samePasswordEvidence: samePassword,
     accountRotationEvidence: accountRotation,
     passwordVariationEvidence: /비밀번호를 한 글자씩 바꿔/u.test(description),
+    continuedFailureEvidence: /이어졌|성공은 없습니다/u.test(description),
+    uniformIntervalEvidence: /같은 간격/u.test(description),
     hadSuccess,
     normal,
     readable,
