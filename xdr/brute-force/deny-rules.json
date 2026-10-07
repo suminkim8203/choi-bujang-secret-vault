@@ -1,0 +1,64 @@
+{
+  "schema": "aleph.student.xdr.deny-overlay.v1",
+  "moduleKey": "brute-force",
+  "mode": "fixture-export-only",
+  "ttlSeconds": 900,
+  "rules": [
+    {
+      "id": "xdr.brute-force.bf-01",
+      "moduleKey": "brute-force",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "bf-01",
+      "observedAt": "2026-09-27T00:12:01.000Z",
+      "expiresAt": "2026-09-27T00:27:01.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-02",
+      "moduleKey": "brute-force",
+      "sourceAddress": "203.0.113.10",
+      "alertId": "bf-02",
+      "observedAt": "2026-09-27T00:12:40.000Z",
+      "expiresAt": "2026-09-27T00:27:40.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-03",
+      "moduleKey": "brute-force",
+      "sourceAddress": "198.51.100.20",
+      "alertId": "bf-03",
+      "observedAt": "2026-09-27T00:14:02.000Z",
+      "expiresAt": "2026-09-27T00:29:02.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-04",
+      "moduleKey": "brute-force",
+      "sourceAddress": "192.0.2.30",
+      "alertId": "bf-04",
+      "observedAt": "2026-09-27T00:20:11.000Z",
+      "expiresAt": "2026-09-27T00:35:11.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-06",
+      "moduleKey": "brute-force",
+      "sourceAddress": "198.51.100.44",
+      "alertId": "bf-06",
+      "observedAt": "2026-09-27T02:02:15.000Z",
+      "expiresAt": "2026-09-27T02:17:15.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-07",
+      "moduleKey": "brute-force",
+      "sourceAddress": "203.0.113.15",
+      "alertId": "bf-07",
+      "observedAt": "2026-09-27T02:05:40.000Z",
+      "expiresAt": "2026-09-27T02:20:40.000Z"
+    },
+    {
+      "id": "xdr.brute-force.bf-09",
+      "moduleKey": "brute-force",
+      "sourceAddress": "198.51.100.8",
+      "alertId": "bf-09",
+      "observedAt": "2026-09-27T05:22:18.000Z",
+      "expiresAt": "2026-09-27T05:37:18.000Z"
+    }
+  ]
+}

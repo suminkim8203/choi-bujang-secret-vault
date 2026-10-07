@@ -1,0 +1,179 @@
+{
+  "schema": "aleph.xdr.result.v1",
+  "moduleKey": "brute-force",
+  "decisions": [
+    {
+      "alertId": "bf-01",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.same-source-burst | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-02",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.password-spray | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-03",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.account-rotation-burst | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-04",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.same-source-burst | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-05",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-06",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.same-source-burst | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-07",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.password-variation | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-08",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-09",
+      "action": "block",
+      "confidence": 0.95,
+      "reason": "brute-force.password-spray | 명시된 패턴 증거"
+    },
+    {
+      "alertId": "bf-10",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-11",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-12",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-13",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-14",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-15",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | 누락·가림·충돌 증거"
+    },
+    {
+      "alertId": "bf-16",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-17",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-18",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-19",
+      "action": "alert",
+      "confidence": 0.5,
+      "reason": "brute-force.evidence-review | Jev 미연결·실패 시 알림"
+    },
+    {
+      "alertId": "bf-20",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-21",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-22",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-23",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-24",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-25",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-26",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-27",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    },
+    {
+      "alertId": "bf-28",
+      "action": "record",
+      "confidence": 0.05,
+      "reason": "brute-force.normal-authentication | 정상 동작"
+    }
+  ],
+  "counts": {
+    "block": 7,
+    "alert": 12,
+    "record": 9
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "aleph.student.xdr.patterns.v1",
+  "moduleKey": "brute-force",
+  "reviewedAt": "2026-10-07",
+  "thresholdOrigin": "project_policy",
+  "thresholdNote": "아래 수치는 이 프로젝트의 실습용 기준이며 MITRE나 ALEPH가 지정한 수치가 아닙니다. 실제 환경에는 별도 보정이 필요합니다.",
+  "patterns": [
+    {
+      "id": "brute-force.same-source-burst",
+      "name": "같은 주소·계정의 짧은 시간 반복 실패",
+      "technique": "T1110",
+      "conditions": {
+        "eventType": "login_failure",
+        "requireSameSource": true,
+        "requireSameAccount": true,
+        "minFailureCount": 20,
+        "maxWindowSeconds": 180
+      },
+      "conditionText": "같은 출발 주소와 같은 계정으로 확인된 로그인 실패가 3분 이내에 20회 이상 발생한 경우입니다. 시간 범위·실패 횟수·묶음의 동일 주소/계정 증거가 모두 필요합니다.",
+      "evidence": "MITRE ATT&CK T1110은 반복적인 비밀번호 추측을 설명하고, 탐지 전략은 짧은 시간의 다수 인증 실패 및 동일 IP/사용자 상관관계를 다룹니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1110/",
+      "limitations": [
+        "경보 시각 하나만으로 반복 실패의 시간 범위를 알 수 없습니다.",
+        "규칙 수준이나 T1110 표기만으로는 이 패턴이 충족되지 않습니다.",
+        "실패가 조금 발생한 뒤 성공하거나, 묶음의 시간·주소·계정 증거가 없으면 이 패턴에 자동으로 맞추지 않습니다."
+      ]
+    },
+    {
+      "id": "brute-force.password-spray",
+      "name": "여러 계정에 같은 비밀번호 대입",
+      "technique": "T1110.003",
+      "conditions": {
+        "eventTypes": ["login_failure", "login_attempt"],
+        "requireSameSource": true,
+        "requireSamePasswordEvidence": true,
+        "minDistinctAccounts": 5
+      },
+      "conditionText": "같은 출발 주소에서 서로 다른 계정 5개 이상에 같은 비밀번호를 반복 대입했다는 증거가 있는 경우입니다. 비밀번호 값은 읽거나 저장하지 않고, 경보 또는 집계기가 확인한 동일 비밀번호 여부만 사용합니다.",
+      "evidence": "MITRE ATT&CK T1110.003은 하나 또는 소수의 비밀번호를 여러 계정에 대입하는 Password Spraying을 설명합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1110/003/",
+      "limitations": [
+        "공유 주소나 여러 계정이라는 사실만으로 같은 비밀번호 대입이 입증되지는 않습니다.",
+        "계정 수·동일 비밀번호 증거가 없으면 이 패턴에 자동으로 맞추지 않습니다.",
+        "느린 시도와 여러 주소에 분산된 공격은 이 두 실습용 패턴만으로 모두 탐지할 수 없습니다."
+      ]
+    },
+    {
+      "id": "brute-force.account-rotation-burst",
+      "name": "짧은 시간 계정을 바꿔 가며 반복 실패",
+      "technique": "T1110",
+      "conditions": { "minFailureCount": 20, "maxWindowSeconds": 180 },
+      "conditionText": "출발 주소가 확인된 경보에서 계정 이름을 바꿔 가며 3분 이내에20회 이상 실패했다는 집계가 확인된 경우입니다. 같은 비밀번호라는 증거가 없으면 Password Spraying이라고 이름 붙이지 않습니다.",
+      "evidence": "MITRE T1110 탐지 전략은 짧은 시간 사용자 집합에 걸친 반복 인증 실패를 다룹니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1110/",
+      "limitations": ["시간 범위와 계정 변경 증거가 모두 필요합니다."]
+    },
+    {
+      "id": "brute-force.password-variation",
+      "name": "비밀번호 후보를 바꾸는 반복 추측",
+      "technique": "T1110.001",
+      "conditions": { "minFailureCount": 20 },
+      "conditionText": "출발 주소가 확인된 경보에 비밀번호 후보를 한 글자씩 바꾸는 반복 시도와 실패20회 이상이 명시된 경우입니다. 비밀번호 원문은 사용하지 않습니다.",
+      "evidence": "MITRE T1110.001은 비밀번호 후보를 반복적·체계적으로 추측하는 방식을 설명합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1110/001/",
+      "limitations": ["단순 비밀번호 변경 화면의 실패는 후보 대입 증거가 아닙니다."]
+    }
+  ],
+  "handling": {
+    "matchesAreCandidatesOnly": true,
+    "missingEvidence": "not_matched_requires_review",
+    "normalEvents": "login_success, logout, session_check 자체는 공격 패턴 대상이 아닙니다.",
+    "automaticBlocking": false,
+    "note": "패턴 일치는 최종 block/alert/record 판정이 아닙니다. 판단 모듈·Jev 및 ZTNA 연결은 별도 작업입니다."
+  }
+}

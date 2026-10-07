@@ -8,7 +8,13 @@
     "bundle": "node scripts/bundle.mjs",
     "decider:test": "node scripts/decider-test.mjs",
     "detect:test": "node scripts/detect-test.mjs",
-    "fixture:7": "node scripts/fixture-7.mjs"
+    "fixture:7": "node scripts/fixture-7.mjs",
+    "xdr:read": "node xdr/brute-force/read-alerts.mjs",
+    "xdr:run": "node scripts/xdr-run.mjs",
+    "test:xdr-reader": "node --test test/xdr-reader.test.mjs",
+    "test:xdr-patterns": "node --test test/xdr-patterns.test.mjs",
+    "xdr:connect": "node scripts/xdr-connect.mjs",
+    "test:xdr": "node --test test/xdr-*.test.mjs"
   },
   "engines": {
     "node": ">=22"
