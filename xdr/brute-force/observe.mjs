@@ -1,4 +1,4 @@
-import { isIP } from 'node:net';
+import { isIP } from './address.mjs';
 import { extractAlerts } from './read-alerts.mjs';
 
 function positiveInteger(value) {

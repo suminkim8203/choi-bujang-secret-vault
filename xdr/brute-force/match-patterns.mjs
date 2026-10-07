@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { isIP } from 'node:net';
+import { isIP } from './address.mjs';
 
 export const patternCatalog = JSON.parse(await readFile(new URL('./patterns.json', import.meta.url), 'utf8'));
 

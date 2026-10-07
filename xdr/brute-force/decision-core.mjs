@@ -38,4 +38,7 @@ export function createDecider({ assess = createJevAssessor(), timeoutMs = 1600 }
   };
 }
 
-export const decide = createDecider();
+const defaultDecider = createDecider();
+export async function decide(alert) {
+  return defaultDecider(alert);
+}
