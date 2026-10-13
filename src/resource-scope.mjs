@@ -3,4 +3,3 @@ export const RESOURCES = Object.freeze({
   notes: Object.freeze({ id: 'personal_notes', service: 'notes', collection: '/api/notes', item: '/api/notes/:id' }),
   announcements: Object.freeze({ id: 'teacher_announcements', service: 'announcements', item: '/api/announcements/:id' }),
 });
-
