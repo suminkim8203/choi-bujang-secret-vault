@@ -1,11 +1,12 @@
 const $=id=>document.getElementById(id);
-function empty(){for(const id of['ops-record-total','ops-total','ops-blocked','ops-failed','ops-not-run'])$(id).textContent='—';$('ops-rows').replaceChildren();}
+function empty(){for(const id of['ops-record-total','ops-matched','ops-total','ops-blocked','ops-failed','ops-not-run'])$(id).textContent='—';$('ops-rows').replaceChildren();}
 async function refresh(){const button=$('ops-refresh');button.disabled=true;empty();$('ops-meta').textContent='서버 점검 결과를 확인하고 있습니다.';
   try{const response=await fetch('/api/checks',{cache:'no-store',credentials:'omit'});const report=await response.json();
     if(!response.ok||report.schema!=='aleph.operations.report.v1'||!Array.isArray(report.rows)
       ||Object.values(report.counts).some(v=>!Number.isInteger(v)||v<0))throw Error('invalid_report');
-    $('ops-record-total').textContent=String(report.counts.total);$('ops-total').textContent=String(report.counts.executed);$('ops-blocked').textContent=String(report.counts.blocked);
-    $('ops-failed').textContent=String(report.counts.failed);$('ops-not-run').textContent=String(report.counts.notRun);
+    if(report.total!==report.counts.total||report.blocked!==report.counts.matched||report.failed!==report.counts.failed||report.notRun!==report.counts.notRun)throw Error('summary_mismatch');
+    $('ops-record-total').textContent=String(report.total);$('ops-matched').textContent=String(report.blocked);$('ops-total').textContent=String(report.counts.executed);$('ops-blocked').textContent=String(report.counts.blocked);
+    $('ops-failed').textContent=String(report.failed);$('ops-not-run').textContent=String(report.notRun);
     $('ops-meta').textContent=`확인 시각 ${report.checkedAt} · 검사한 커밋 ${report.commit} · ${report.complete?'대표 점검 완료':'점검 중단, 미실행 항목 확인'}`;
     $('ops-rules').textContent=report.rules.join(', ');
     $('ops-detect').textContent=`고정 가상 사건 API ${report.detection.cases}건 · 실제 사용자의 사건 전달은 미연결`;

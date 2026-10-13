@@ -84,7 +84,7 @@ test('server-rendered root displays the same real report without script executio
  const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
  const template=await readFile(new URL('../views/index.html',import.meta.url),'utf8');
  const html=renderOperations(template,report);assert.ok(html.includes('<dd id="ops-total">14</dd>'));
- assert.ok(html.includes('<dd id="ops-not-run">6</dd>'));assert.ok(html.includes('fixture_request_2'));
+ assert.ok(html.includes('<dd id="ops-not-run" data-k="notRun">6</dd>'));assert.ok(html.includes('fixture_request_2'));
  assert.equal((html.match(/<tbody id="ops-rows">[\s\S]*?<\/tbody>/u)[0].match(/<tr>/gu)||[]).length,20);
  const bad=structuredClone(report);bad.counts.executed=41;assert.throws(()=>renderOperations(template,bad));
  const payload=structuredClone(report);payload.rows[0].path='</script><img src=x>';
@@ -100,3 +100,14 @@ test('receipt-array API matches the full table, preserves unrun rows and rejects
  const bad=createChecksHandler({config,collect:async()=>({...report,ready:false})});const failed=response();
  await bad({method:'GET',query:{case:'s12-requests'}},failed);assert.equal(failed.code,503);assert.deepEqual(Object.keys(failed.body),['error']);
 });
+
+ test('official sample summary and visible data-k metrics use the same real check results',async()=>{
+ const{renderOperations}=await import('../src/render-operations.mjs');const{send}=backend();
+ const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
+ assert.deepEqual([report.total,report.blocked,report.failed,report.notRun],[20,14,0,6]);
+ assert.equal(report.total,report.blocked+report.failed+report.notRun);
+ assert.equal(report.counts.blocked,7);
+ const html=renderOperations(await readFile(new URL('../views/index.html',import.meta.url),'utf8'),report);
+ for(const[k,v]of Object.entries({total:20,blocked:14,failed:0,notRun:6}))assert.ok(html.includes(`data-k="${k}">${v}</dd>`));
+ const bad=structuredClone(report);bad.blocked=99;assert.throws(()=>renderOperations('',bad));
+ });

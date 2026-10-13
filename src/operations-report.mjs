@@ -22,10 +22,13 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
   for(let i=rows.length;i<20;i++)rows.push({requestId:null,checkedAt:null,method:null,path:'remaining_check',
     stages:[],caseId:null,status:null,expectedStatus:[],source:'not_attempted_after_failure',result:'not_run'});
   let backup;try{backup=verifiedPolicyBackup(await readPolicyBackup());}catch{}
+  const matched=rows.filter(r=>r.result==='matched').length,notRun=rows.filter(r=>r.result==='not_run').length;
   return{schema:'aleph.operations.report.v1',checkedAt:new Date().toISOString(),commit,
     source:'student_actual_self_check',complete,ready:complete&&failed===0,
-    counts:{total:rows.length,executed:count,blocked,matched:rows.filter(r=>r.result==='matched').length,
-      failed,notRun:rows.filter(r=>r.result==='not_run').length},
+    // Official sample's top-level summary counts satisfied check expectations.
+    // This includes normal-response checks; HTTP denial count stays separate.
+    total:rows.length,blocked:matched,failed,notRun,
+    counts:{total:rows.length,executed:count,blocked,matched,failed,notRun},
     rules:[...RULE_IDS],detection:{source:'fixed_synthetic_api',cases:rows.filter(r=>r.caseId?.startsWith('s09-')).length},
     revocation:{status:'not_connected',executed:false},
     ownerVerification:{list:'not_run',noteRestore:'not_run',includedInRepresentativeCounts:false},
