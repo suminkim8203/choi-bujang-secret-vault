@@ -40,7 +40,13 @@ respond는 원본 경보 시각에서15분 만료·근거 ID를 가진 로컬 �
 
 공식24건을 원본 그대로 가져왔고 실제 xdr:run 결과 block8/alert8/record8입니다. 미서명 신규/변경 서비스, 임시 파일을 실행하는 낯선 예약 작업, 비정상 시작 폴더 추가의 명시 증거를 구분합니다. 기존 서명 서비스·업데이트·목록 조회는 정상이며 서명 미확인·한 번의 변경 등 부족한 증거는 알림입니다. [MITRE T1543](https://attack.mitre.org/techniques/T1543/), [T1053](https://attack.mitre.org/techniques/T1053/), 시작 폴더에 해당하는 [T1547.001](https://attack.mitre.org/techniques/T1547/001/)을 대조했습니다.
 
-다섯 필드24행 읽기, 독립 decide, 근거 PATTERNS,15분 만료/근거 경보ID의 로컬 agentName 격리 후보8개와 알림 메타데이터8개를 준비했습니다. 이 agent 이름의 실제 검증된 기기 ID 매핑·운영 등록은 미연결입니다. 기존 판정기와 다른 사용자를 막는 규칙은 보존합니다. 정상/무관 대상·기존 거부·만료·ID/수준 변경·단독 VM3검사 통과. 실제 포털 판정은 아직 미실행입니다. 재현: npm run xdr:run -- persistence → node xdr/persistence/read-alerts.mjs → node xdr/persistence/respond.mjs → node --test test/xdr-persistence.test.mjs.
+다섯 필드24행 읽기, 독립 decide, 근거 PATTERNS,15분 만료/근거 경보ID의 로컬 agentName 격리 후보8개와 알림 메타데이터8개를 준비했습니다. 이 agent 이름의 실제 검증된 기기 ID 매핑·운영 등록은 미연결입니다. 기존 판정기와 다른 사용자를 막는 규칙은 보존합니다. 정상/무관 대상·기존 거부·만료·ID/수준 변경·단독 VM3검사 통과. 실제 첫 제출0d34181aaed447b9628f2826fe1330a28157f7d0는100/100·조건4개·가점3개 통과했습니다. [판정](docs/evidence/xdr04-100.png). 재현: npm run xdr:run -- persistence → node xdr/persistence/read-alerts.mjs → node xdr/persistence/respond.mjs → node --test test/xdr-persistence.test.mjs.
+
+## 보너스 xdr-05 · 권한 가로채기 (2026-10-13)
+
+공식26건을 보존했고 실제 xdr:run은 block9/alert8/record9입니다. 원격/다중 계정 관리자 추가·즉시 권한 명령, 제거 뒤 관리자 재추가, 낯선 주소/시간의 관리자 실행·다른 계정 권한을 사용한 징후를 구분합니다. 정상 관리 계정의 평소 로그인·그룹/세션 조회·로그아웃은 기록이며 취소·실패·단순 권한 변경은 알림입니다. [MITRE T1068](https://attack.mitre.org/techniques/T1068/)과 [T1078](https://attack.mitre.org/techniques/T1078/)을 참고하지만 실제 취약점 악용·계정 도용을 운영에서 확정했다고 하지 않습니다.
+
+독립 decide/원본26행 다섯 필드/근거 상수/계정 대상15분 만료 거부 후보9개·알림8개,3검사 통과입니다. 실제 검증된 사용자 ID 매핑·운영 세션 회수는 미연결이며 기존 판정 규칙을 유지합니다. 포털 제출·판정은 아직 미실행입니다. 재현: npm run xdr:run -- privilege → node xdr/privilege/read-alerts.mjs → node xdr/privilege/respond.mjs → node --test test/xdr-privilege.test.mjs.
 
 ## 11단계 · 설치형 웹앱과 서버 기기 승인 화면 (2026-10-13)
 
