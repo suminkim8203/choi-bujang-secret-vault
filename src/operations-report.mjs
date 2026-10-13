@@ -12,7 +12,7 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
   const identity=await manifest.json();
   if(!manifest.ok||identity.commit!==commit||identity.step!==config.step)throw Error('check_deployment_mismatch');
   const rows=[];let complete=true;
-  try{await runAttackChecks(config,{send,includeOperations:false,onResponse:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),
+  try{await runAttackChecks(config,{send,onResponse:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),
     source:row.caseId?'fixed_synthetic_api':'anonymous_api',result:expected(row).includes(row.status)?'matched':'mismatch'}),
     onSkip:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),source:'write_not_run',result:'not_run'})});}
   catch{complete=false;if(rows.length)rows[rows.length-1].result='mismatch';}
@@ -21,10 +21,6 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
   const failed=rows.filter(r=>r.result==='mismatch').length;
   for(let i=rows.length;i<20;i++)rows.push({requestId:null,checkedAt:null,method:null,path:'remaining_check',
     stages:[],caseId:null,status:null,expectedStatus:[],source:'not_attempted_after_failure',result:'not_run'});
-  rows.push({requestId:null,checkedAt:null,method:'GET',path:'/api/my/notes',stages:[3,4,5,8,11],caseId:null,status:null,expectedStatus:[200],
-    source:'authenticated_owner_api',result:'not_run'});
-  rows.push({requestId:null,checkedAt:null,method:'POST',path:'/api/restore/:id',stages:[10],caseId:null,status:null,expectedStatus:[200],
-    source:'authenticated_owner_api',result:'not_run'});
   let backup;try{backup=verifiedPolicyBackup(await readPolicyBackup());}catch{}
   return{schema:'aleph.operations.report.v1',checkedAt:new Date().toISOString(),commit,
     source:'student_actual_self_check',complete,ready:complete&&failed===0,
@@ -32,6 +28,7 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
       failed,notRun:rows.filter(r=>r.result==='not_run').length},
     rules:[...RULE_IDS],detection:{source:'fixed_synthetic_api',cases:rows.filter(r=>r.caseId?.startsWith('s09-')).length},
     revocation:{status:'not_connected',executed:false},
+    ownerVerification:{list:'not_run',noteRestore:'not_run',includedInRepresentativeCounts:false},
     recovery:{policyRevision:backup?.policyRevision??null,policyBackupVerified:!!backup,noteRestoreInThisRun:false},
     assault41:{total:41,localExecuted:0,localNotRun:41,judgeResult:'see_official_portal'},rows};
 }

@@ -14,7 +14,7 @@ function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
     else if(url.pathname==='/data.json')body={notes:[]};
     else if(url.pathname==='/manifest.json')body={display:'standalone',start_url:'/',name:'fixture',icons:[{}]};
     else if(url.pathname==='/api/device/status')body={approved:false,reason:'device_not_registered'};
-    else if(url.pathname==='/api/checks')body=url.searchParams.get('case')==='s12-requests'?Array.from({length:22},(_,i)=>i<14?{status:200,requestId:`receipt_${i}`,checkedAt:'2026-10-13T00:00:00Z'}:{status:null,requestId:null,checkedAt:null,result:'not_run'}):url.search?runDetectionCheck(url.searchParams.get('case'))??await runDecisionCheck(url.searchParams.get('case'))
+    else if(url.pathname==='/api/checks')body=url.searchParams.get('case')==='s12-requests'?Array.from({length:20},(_,i)=>i<14?{status:200,requestId:`receipt_${i}`,checkedAt:'2026-10-13T00:00:00Z'}:{status:null,requestId:null,checkedAt:null,result:'not_run'}):url.search?runDetectionCheck(url.searchParams.get('case'))??await runDecisionCheck(url.searchParams.get('case'))
       :{schema:'aleph.operations.report.v1',ready:true,counts:{failed:0}};
     else if(url.pathname.startsWith('/rest/v1/')){status=401;body={code:'42501'};}
     else{status=401;body=invalidAnonymousBody?{private:'fixture-response-not-exported'}:{error:'login_required'};}
@@ -23,8 +23,8 @@ function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
 }
 test('ops report counts executed HTTP observations and separately leaves owner requests and all 41 full trials unrun',async()=>{
   const{send,calls}=backend();const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
-  assert.equal(report.complete,true);assert.equal(report.counts.executed,14);assert.equal(report.counts.notRun,8);
-  assert.equal(report.rows.length,22);assert.equal(calls.length,15);assert.equal(report.counts.failed,0);
+  assert.equal(report.complete,true);assert.equal(report.counts.executed,14);assert.equal(report.counts.notRun,6);
+  assert.equal(report.rows.length,20);assert.equal(calls.length,15);assert.equal(report.counts.failed,0);
   assert.ok(calls.every(c=>['GET','HEAD'].includes(c.options.method??'GET')));
   assert.ok(calls.slice(1).every(c=>typeof c.options.alephEvidence.caseId==='string'&&c.options.alephEvidence.requestKey==='read'));
   assert.equal(report.rows.filter(r=>r.source==='write_not_run').length,6);
@@ -35,17 +35,22 @@ test('ops report counts executed HTTP observations and separately leaves owner r
   assert.ok(report.rows.filter(r=>r.status===null).every(r=>r.requestId===null&&r.checkedAt===null));
   for(const key of['title','body','owner_id','token','apikey','srcip'])assert.ok(!report.rows.some(r=>Object.hasOwn(r,key)));
 });
-test('bundle checker uses GET only and stays runnable when the sandbox URL omits searchParams',async()=>{
+test('bundle and screen share one plan while checker uses GET only and stays runnable when the sandbox URL omits searchParams',async()=>{
  const NativeURL=URL,{send,calls}=backend();class LimitedURL extends NativeURL{get searchParams(){return undefined;}}
  let checks;try{globalThis.URL=LimitedURL;checks=await runAttackChecks(config,{send});}finally{globalThis.URL=NativeURL;}
- assert.equal(calls.length,15);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
- assert.equal(checks.filter(c=>c.observed==='not_run').length,5);
- assert.equal(checks.length,20);assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)(?:; jsonReady=true|; jsonArrayLength=22)?$/u.test(c.observed)));
+ assert.equal(calls.length,14);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
+ assert.equal(checks.filter(c=>c.observed==='not_run').length,6);
+ assert.equal(checks.length,20);assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)(?:; jsonReady=true|)?$/u.test(c.observed)));
  assert.ok(calls.every(c=>checks.some(x=>x.attackId===c.options.alephEvidence.caseId)));
+ const screen=await collectOperationsReport({config,send:backend().send,commit,readPolicyBackup:async()=>policy});
+ assert.deepEqual(screen.rows.map(r=>r.attackId),checks.map(c=>c.attackId));
+ assert.equal(screen.counts.executed,checks.filter(c=>c.observed!=='not_run').length);
+ assert.equal(screen.counts.notRun,checks.filter(c=>c.observed==='not_run').length);
+ assert.deepEqual(screen.ownerVerification,{list:'not_run',noteRestore:'not_run',includedInRepresentativeCounts:false});
 });
 test('failed body validation and unmatched deployments never become successful check counts',async()=>{
   const{send}=backend({invalidAnonymousBody:true});const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
-  assert.equal(report.complete,false);assert.equal(report.counts.executed,2);assert.equal(report.counts.notRun,20);
+  assert.equal(report.complete,false);assert.equal(report.counts.executed,2);assert.equal(report.counts.notRun,18);
   assert.equal(report.counts.failed,1);assert.equal(report.counts.blocked,0);
   assert.ok(!JSON.stringify(report).includes('fixture-response-not-exported'));
   const wrong=backend({wrongCommit:true});await assert.rejects(collectOperationsReport({config,send:wrong.send,commit}));
@@ -79,8 +84,8 @@ test('server-rendered root displays the same real report without script executio
  const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
  const template=await readFile(new URL('../views/index.html',import.meta.url),'utf8');
  const html=renderOperations(template,report);assert.ok(html.includes('<dd id="ops-total">14</dd>'));
- assert.ok(html.includes('<dd id="ops-not-run">8</dd>'));assert.ok(html.includes('fixture_request_2'));
- assert.equal((html.match(/<tbody id="ops-rows">[\s\S]*?<\/tbody>/u)[0].match(/<tr>/gu)||[]).length,22);
+ assert.ok(html.includes('<dd id="ops-not-run">6</dd>'));assert.ok(html.includes('fixture_request_2'));
+ assert.equal((html.match(/<tbody id="ops-rows">[\s\S]*?<\/tbody>/u)[0].match(/<tr>/gu)||[]).length,20);
  const bad=structuredClone(report);bad.counts.executed=41;assert.throws(()=>renderOperations(template,bad));
  const payload=structuredClone(report);payload.rows[0].path='</script><img src=x>';
  const escaped=renderOperations(template,payload);assert.ok(!escaped.includes('</script><img src=x>'));
@@ -91,7 +96,7 @@ test('receipt-array API matches the full table, preserves unrun rows and rejects
  const{send}=backend();const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
  const handler=createChecksHandler({config,collect:async()=>report,env:()=>({VERCEL_GIT_COMMIT_SHA:commit})});
  const res=response();await handler({method:'GET',query:{case:'s12-requests'}},res);
- assert.equal(res.code,200);assert.equal(res.body.length,22);assert.equal(res.body.filter(r=>r.status!==null).length,14);assert.ok(res.body.filter(r=>r.status!==null).every(r=>r.requestId&&r.checkedAt));
+ assert.equal(res.code,200);assert.equal(res.body.length,20);assert.equal(res.body.filter(r=>r.status!==null).length,14);assert.ok(res.body.filter(r=>r.status!==null).every(r=>r.requestId&&r.checkedAt));
  const bad=createChecksHandler({config,collect:async()=>({...report,ready:false})});const failed=response();
  await bad({method:'GET',query:{case:'s12-requests'}},failed);assert.equal(failed.code,503);assert.deepEqual(Object.keys(failed.body),['error']);
 });

@@ -5,7 +5,7 @@ import {randomUUID} from 'node:crypto';
 
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
-export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip,includeOperations=config.step>=12}={}) {
+export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip}={}) {
   const receipts=new Map();
   const caseFor=(url,options)=>{
     const q=url.href.match(/[?&]case=([^&#]+)/u)?.[1];
@@ -23,7 +23,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     throw Error('unknown_check_identity');
   };
   const skipWrite=(attackId,expected,method,path)=>{
-    onSkip?.({requestId:null,checkedAt:null,method,path:path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),caseId:null,status:null});
+    onSkip?.({attackId,requestId:null,checkedAt:null,method,path:path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),caseId:null,status:null});
     return{attackId,expected,observed:'not_run'};
   };
   const fetch=async(target,options={})=>{
@@ -32,7 +32,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId,
       ...(attackId?{caseId:attackId,requestKey:options.alephEvidence?.requestKey??'read'}:{})}});
     if(attackId)receipts.set(attackId,{status:result.status,method:options.method??'GET'});
-    if(onResponse)onResponse({requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
+    if(onResponse)onResponse({attackId,requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
       checkedAt:new Date().toISOString(),method:options.method??'GET',
       path:url.pathname.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),
       caseId:url.href.match(/[?&]case=([^&#]+)/u)?.[1]??null,status:result.status});
@@ -232,15 +232,8 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       checks.push({attackId:'device_initial_status',expected:'확인된 등록 기기 세션이 없으면 승인 전',
         observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
-    if(includeOperations){
-      const summary=await fetch(new URL('/api/checks?case=s12-requests',app),{redirect:'error',signal:AbortSignal.timeout(20000),alephEvidence:{requestKey:'summary'}});
-      const report=await summary.json();
-      if(summary.status!==200||!Array.isArray(report)||report.length!==22||report.filter(r=>r.status!==null).length!==14
-        ||report.some(r=>r.status===null?(r.result!=='not_run'||r.requestId!==null||r.checkedAt!==null):(!Number.isInteger(r.status)||!r.requestId||!r.checkedAt)))throw Error('operations_summary_not_ready');
-      receipts.get('operations_summary').jsonArrayLength=report.length;
-      checks.splice(checks.findIndex(c=>c.attackId==='anonymous_delete'),1);
-      checks.push({attackId:'operations_summary',expected:'실제 작전실 서버 API의 기록 준비 상태 확인',observed:''});
-    }
+    // One plan drives both the submission and visible records. Reading that
+    // report is not an additional representative attack check.
     return config.step>=12?checks.map(check=>{const r=receipts.get(check.attackId);return{...check,observed:r?
       `HTTP ${r.status}${typeof r.jsonReady==='boolean'?`; jsonReady=${r.jsonReady}`:''}${Number.isInteger(r.jsonArrayLength)?`; jsonArrayLength=${r.jsonArrayLength}`:''}`:'not_run'};}):checks;
   }
