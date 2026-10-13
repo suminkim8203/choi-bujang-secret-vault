@@ -17,10 +17,13 @@ test('normal and composite unusual engine fixtures differ and keep stage 6 denia
 test('region alone does not block and client headers never become engine signals', async () => {
   const { normal, suspicious } = fixtureRequests();
   assert.equal((await decide({ ...normal, signals: { ...normal.signals, region: 'foreign' } })).decision, 'allow');
-  const unknown = { ...normal, signals: { source: 'none', region: 'unknown', network: 'unknown', hour: 3 },
+  const productionPath = '/notes/33333333-3333-4333-8333-333333333333';
+  const unknown = { ...normal, path: productionPath,
+    signals: { source: 'none', region: 'unknown', network: 'unknown', hour: 3 },
     headers: { 'x-region': 'foreign', 'x-network': 'unusual' } };
   assert.equal((await decide(unknown)).decision, 'allow');
-  assert.equal((await decide({ ...suspicious, signals: { ...suspicious.signals, source: 'client' } })).decision, 'step_up');
+  assert.equal((await decide({ ...suspicious, path: productionPath,
+    signals: { ...suspicious.signals, source: 'client' } })).decision, 'step_up');
 });
 
 test('only engine-confirmed recent step up resolves the additional check', async () => {

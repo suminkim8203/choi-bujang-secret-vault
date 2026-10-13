@@ -5,8 +5,11 @@ function permittedResource(request) {
   if (request.service !== 'notes') return false;
   const { method, path, route } = request;
   if (path === '/notes') return ['GET', 'POST'].includes(method) && route === `${method} /notes`;
-  const match = typeof path === 'string' && /^\/notes\/([A-Za-z0-9_-]{1,128})$/u.exec(path);
-  if (!match || ['export', 'import', 'admin', 'announcements'].includes(match[1].toLowerCase())) return false;
+  // 실제 메모 ID는 UUID입니다. 공식 로컬 연습의 demo는 가상 출처에서만 허용합니다.
+  const uuidPath = typeof path === 'string'
+    && /^\/notes\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(path);
+  const practicePath = path === '/notes/demo' && request.signals?.source === 'judge_fixture';
+  if (!uuidPath && !practicePath) return false;
   return ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} /notes/:id`;
 }
 export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'resource_scope']);

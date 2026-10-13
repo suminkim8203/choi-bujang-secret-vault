@@ -11,13 +11,15 @@ test('resource allowlist pairs exact verified service, method, path and route', 
   for (const method of ['GET', 'PUT', 'DELETE']) {
     assert.equal((await decide({ ...normal, method, route: `${method} /notes/:id` })).decision, 'allow');
   }
-  for (const edit of [{ service: 'announcements' }, { path: '/admin' },
+  for (const edit of [{ service: 'announcements' }, { path: '/admin' }, { path: '/notes/other' },
     { path: '/notes/export' }, { path: '/notes/demo/extra' }, { path: '/notes/../admin' },
     { path: '/notes/%2e%2e' }, { method: 'PATCH' }, { route: 'GET /admin' }]) {
     const result = await decide({ ...normal, ...edit });
     assert.equal(result.decision, 'deny');
     assert.equal(result.reasonCode, 'resource_not_allowed');
   }
+  assert.equal((await decide({ ...normal, path: '/notes/33333333-3333-4333-8333-333333333333',
+    signals: { source: 'none', region: 'unknown', network: 'unknown', hour: 14 } })).decision, 'allow');
 });
 
 const a = '11111111-1111-4111-8111-111111111111';
