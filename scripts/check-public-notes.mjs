@@ -60,6 +60,7 @@ export async function checkPublicNotes({ localOnly = false } = {}) {
     if (config.step >= 4) paths.push('/verify-access.html', '/verify-access.js');
     if (config.step >= 10) paths.push('/verify-recovery.html', '/verify-recovery.js');
     if (config.step >= 11) paths.push('/device-gate.js', '/manifest.json', '/offline.html', '/sw.js');
+    if (config.step >= 12) paths.push('/operations.js');
     for (const path of paths) {
       const response = await fetch(new URL(path, app), {
         redirect: 'error', signal: AbortSignal.timeout(10000), cache: 'no-store',

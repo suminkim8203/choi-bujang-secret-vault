@@ -1,11 +1,21 @@
 import { publicDatabase } from './public-db-config.mjs';
 import { fixtureRequests } from '../scripts/fixture-7.mjs';
 import { decide } from './decider.mjs';
+import {randomUUID} from 'node:crypto';
 
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
-export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}={}) {
+  const fetch=async(target,options={})=>{
+    const requestId=randomUUID(),url=new URL(target);
+    const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId}});
+    if(onResponse)onResponse({requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
+      checkedAt:new Date().toISOString(),method:options.method??'GET',
+      path:url.pathname.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),
+      caseId:url.searchParams.get('case'),status:result.status});
+    return result;
+  };
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -36,6 +46,12 @@ export async function runAttackChecks(config) {
     if (!response.ok || !emptyStatic) throw new Error('공개 정적 메모 제거를 확인하지 못했습니다.');
     const checks = [{ attackId: 'static_note_read', expected: '공개 data.json에 메모가 없어야 함',
       observed: '실제 공개 응답 HTTP200; 메모 배열 비어 있음' }];
+    async function decisionCheck(caseId,expected){
+      const result=await fetch(new URL(`/api/checks?case=${caseId}`,app),{redirect:'error',signal:AbortSignal.timeout(10000)});
+      const body=await result.json();
+      if(result.status!==200||body.synthetic!==true||body.ready!==true||body.decision!==expected)throw Error('서버 가상 판정 확인 실패');
+      return `실제 GET HTTP200; 고정 가상 사건 ${expected}·ready=true; 실제 운영 기기 연결과 구분`;
+    }
     const id = '00000000-0000-4000-8000-000000000000';
     for (const [attackId, method, path, invalid] of [
       ['anonymous_list', 'GET', '/api/notes', false],
@@ -92,7 +108,8 @@ export async function runAttackChecks(config) {
       }
       checks.push({ attackId: 'device_registration_fixture',
         expected: '로컬 가상 요청: 등록 허용, 미등록 및 누락 deny/device_not_registered',
-        observed: '실행한 가상 요청 3건 일치; 운영 기기 등록·mTLS 연결의 증거는 아님' });
+        observed: config.step>=12?await decisionCheck('s06-registered','allow')
+          :'실행한 가상 요청 3건 일치; 운영 기기 등록·mTLS 연결의 증거는 아님' });
     }
     if (config.step >= 7) {
       const { suspicious } = fixtureRequests();
@@ -102,7 +119,8 @@ export async function runAttackChecks(config) {
           || after.decision !== 'allow') throw new Error('복합 이상 가상 요청 재확인 판정 실패');
       checks.push({ attackId: 'step_up_fixture',
         expected: '가상 복합 이상 사건은 step_up, 엔진 확인 재인증 뒤 allow',
-        observed: '로컬 가상 요청에서 확인 전 step_up·확인 후 allow; 실제 재로그인·자료 차단은 미실행' });
+        observed: config.step>=12?await decisionCheck('s07-risk','step_up')
+          :'로컬 가상 요청에서 확인 전 step_up·확인 후 allow; 실제 재로그인·자료 차단은 미실행' });
     }
     if (config.step >= 8) {
       const ownList = await fetch(new URL('/api/my/notes', app), {
@@ -124,7 +142,8 @@ export async function runAttackChecks(config) {
         if ((await decide({ ...normal, path })).decision !== 'deny') throw new Error('다른 구역 가상 요청 거부 실패');
       }
       checks.push({ attackId: 'resource_scope_fixture', expected: '가상 미허용 경로와 기능 경로 거부',
-        observed: '로컬 가상 요청3건 deny 확인; API 소유자 점검과 구분' });
+        observed: config.step>=12?await decisionCheck('s08-other-zone','deny')
+          :'로컬 가상 요청3건 deny 확인; API 소유자 점검과 구분' });
     }
     if (config.step >= 9) {
       // Stage 10 keeps representative normal/burst/spread checks within the official 20-row cap.

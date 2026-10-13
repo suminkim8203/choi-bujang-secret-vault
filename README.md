@@ -1,8 +1,38 @@
-# BYTE BACK 방어전 · 11단계 저장점
+# BYTE BACK 방어전 · 12단계 저장점
+
+## 12단계 · 실측 기록을 읽는 탈환 작전실 (2026-10-13)
+
+현재 구현·로컬100검사·빌드 통과이며 운영 배포·실제12단계 판정은 아직 미실행입니다. 직전11단계100점 묶음은 artifacts/step11-submitted-2dd6504.json에 보존했습니다.
+
+작전실은 GET /api/checks의 서버 실행 결과만 읽습니다. 서버는 자신의 배포 manifest와 Vercel 저장점을 대조한 뒤 고정된20개 자기 점검 요청을 실제로 보내고 HTTP 상태·요청 ID·확인 시각·관련 단계·출처를 수집합니다. 수집한 결과만 세고 메모 본문·토큰·계정·주소·API 키·원문 오류는 공개하지 않습니다. 정상 공개 응답과 금지 익명/공개 DB 응답, 고정 가상 사건의 서버 API 결과를 구분합니다. 공지/메모 구역·로그인·기기 상태·복구 한 건 권한·보안 헤더·원본 발급자는 유지합니다.
+
+20개 실제 HTTP 가운데4개는 공개 고정 가상 판정/탐지 사례입니다. 단순 로컬 함수 결과를 새 HTTP 영수증으로 쓰지 않습니다. 응답의 x-vercel-id 또는 sb-request-id가 있으면 그 ID를 사용하고, 없으면 실제 전송 호출에 연결한 client: UUID로 명시합니다. alephEvidence의 요청 메타데이터는 헤더나 URL에 넣지 않습니다. 실제 로그인 본인 목록·메모 복구2개는 이번 점검에서 미실행이므로 HTTP 상태·ID·시각을 null로 남깁니다. 이전 단계의 실습/심판 증거와 이번 실행을 합쳐서 새 정상 실측으로 쓰지 않습니다.
+
+대표 표22행은 실행20·미실행2입니다. 첫 오류 뒤 남은 요청을 미실행으로 채우고 실패를 성공으로 세지 않습니다. 배포 SHA가 다르거나 기록을 읽을 수 없으면 화면 숫자는 —로 남습니다. 동시에 들어온 요청은 한 실행으로 모으고 보호 자료를 캐시하지 않습니다. 정책 규칙은 실제 RULE_IDS, 탐지는 실행한 고정 가상 사건 수, 회수는 실제 연결 미확인, 복구는 다시 읽어 검증한 정책 사본의 버전을 표시합니다. 실습 사본의 검증과 실제 DB 메모 복구·엔진 접속 회수는 별개입니다.
+
+41종 총공세의 로컬 전체 시험은 아직0/41·미실행41로 표시합니다.20개 대표 요청을41종의 완료로 바꾸지 않습니다. 실제12단계 심판과41종 격파 여부는 포털에서 별도로 확인한 뒤 판정 커밋과 함께 기록합니다. 화면의 성공 문구로 통과를 주장하지 않습니다.
+
+### 출처와 재현 절차
+
+| 출처 | 이 프로젝트의 범위 | 실제 연결 상태 |
+|---|---|---|
+| 학생 구현 | 판정/탐지 함수, 메모·복구 API와 SQL, 기기 승인 경계/PWA, 실제 요청 수집과 작전실, XDR 모듈 | 이 저장소 코드·Vercel 배포·학습 Supabase DB |
+| 공식 시작 틀/라이브러리 | src/verify-login.mjs 원본, 공식 bundler/시험 실행기, Supabase SDK/jose | 원본 계약과 서버 토큰 검증 보존 |
+| 제공 엔진 | **ALEPH SDP 엔진 사용**: 세션·기기 등록·서명 검증, 판정기 호출/집행과 엔진 감사 기록 | 학생 운영 경로의 실제 엔진 연결은 미확인; 공식 심판 가상 결과와 구분 |
+
+설치: 별도 폴더에 공개 저장소를 clone하고 검사한 커밋을 checkout한 뒤 Node22이상에서 npm ci를 실행합니다. package-lock.json의 고정 의존성을 사용합니다. 비밀값·개인키·토큰·계정 정보를 복사하거나 제출 파일에 포장하지 않습니다. 기존 Vercel 서버 환경변수의 이름은 SUPABASE_URL/SUPABASE_SECRET_KEY이며 값은 공식 비밀 입력란에서 관리합니다. 새 비밀값을 요구하거나 저장하지 않습니다.
+
+실행: node --test test/*.test.mjs → npm run decider:test → npm run fixture:7 → npm run detect:test → npm run build -- --local. 로컬 빌드는 정적 파일 검증이며 Vercel API·실제 운영 엔진 실행을 뜻하지 않습니다. 운영은 GitHub main push로 기존 Vercel 프로젝트가 build-public을 실행하며 public과api를 배포합니다. 실제 /aleph.json SHA·step·issuer/routes/restoreRoute·nosniff를 확인하고 npm run bundle을 실행합니다. 묶음 schema는 aleph.defense.submission.v2이고 아직 심판에 제출하지 않았으면 미제출로 남깁니다.
+
+중지(안내만, 미실행): 로컬 시험 프로세스는 종료합니다. 운영 중지는 Vercel 프로젝트 Settings → General → Pause Project에서 영향과 프로젝트 이름을 확인해 일시 중지합니다. 제공 엔진의 경로 중지는 운영 담당자의 절차가 필요하며 학생 코드만으로 엔진 정책을 변경하지 않습니다. [Vercel 공식 프로젝트 중지 안내](https://vercel.com/docs/projects/managing-projects#pausing-a-project).
+
+복구(안내만, 임시 시험 외 운영 롤백 미실행): 검사한 안전 커밋·배포를 선택하며 사용자 미커밋 변경과 DB/감사 이력을 먼저 보존합니다. 안전한 별도 clone에서 그 커밋을 checkout해 검증한 뒤 다시 배포하거나 [Vercel Instant Rollback](https://vercel.com/docs/instant-rollback)에서 확인한 이전 운영 배포로 되돌립니다. Hobby는 바로 이전 운영 배포만 대상으로 하며 도메인·환경·외부 DB 영향을 확인하고 실행합니다. 롤백 후 자동 도메인 배정은 Undo Rollback 전까지 중지되므로 후속 배포 절차도 다시 확인합니다. git reset --hard·강제 이력 변경·저장소/DB 삭제는 쓰지 않습니다. 정책 시험은 npm run recovery:policy로 차이를 본 뒤 확인한 시험 SHA에만 --apply합니다. 메모 복구는 검증된 로그인 소유자의 POST /api/restore/:noteId로 한 건만 복원하며 다른 메모·감사·서비스는 보존합니다. 복구 후 정상 요청·금지 요청을 다시 검사하고 아직 실행하지 않은 시험은 미실행으로 둡니다.
 
 ## 11단계 · 설치형 웹앱과 서버 기기 승인 화면 (2026-10-13)
 
-현재 구현·로컬95검사·빌드는 통과했고 운영 배포·실제 심판 판정은 아직 미실행입니다. 직전10단계는 실제100점이며 묶음은 artifacts/step10-submitted-eae23e0.json에 보존했습니다. 점수판1,000/1,200·3차500/700·괴물35/41과11단계 제출 가능을 확인했습니다.
+**첫 실제 제출2dd65042350d8512a677fa0374a45d3b94e440e5에서100/100·조건6개 모두·가점3개 통과했습니다.** [판정 사진](docs/evidence/stage11-100.png). 서명 없음·경로 변경·본문 변경 공격3개가 모두 격파로 표시됐습니다. 이 판정과 현재 운영 등록 어댑터 미연결·실제 OS 설치 미실행은 구분합니다. 실제 제출 묶음은 artifacts/step11-submitted-2dd6504.json에 보존했고 접수ID는 읽지 않았습니다.
+
+11단계 제출 전 로컬95검사·빌드와 운영 배포를 검증했습니다. 위의100점 판정이 최신 결과입니다. 직전10단계100점 묶음은 artifacts/step10-submitted-eae23e0.json에 보존했습니다.
 
 public/manifest.json의 앱 이름·아이콘·start_url /·standalone, 첫 화면의 manifest 링크와 오프라인 안내를 추가했습니다. public/sw.js는 오직 공개 offline.html만 캐시합니다. 메모 API·로그인·기기 상태·보호 화면은 캐시하지 않고 오프라인에서 자료를 숨깁니다. 별도 접속 프로그램·실제 OS 설치는 하지 않았고 설치 표시를 승인으로 사용하지 않습니다. [MDN manifest](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Manifest)와 [서비스 워커 안내](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers)를 대조했습니다.
 

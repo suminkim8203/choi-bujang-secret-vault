@@ -7,9 +7,11 @@
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <style>
 :root{color-scheme:light}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:#f5f6f8;color:#172334;font:16px/1.65 system-ui,sans-serif}main{max-width:880px;margin:48px auto;padding:0 24px}h1{margin:4px 0 12px}h2{font-size:22px}h3{margin:0}header{display:flex;gap:16px;align-items:center;justify-content:space-between}form,article{background:white;border:1px solid #d9e0e8;border-radius:14px;padding:24px;margin:16px 0}label{display:block;font-weight:600;margin:14px 0 6px}input,textarea{width:100%;border:1px solid #acb7c6;border-radius:7px;padding:12px;font:inherit}textarea{resize:vertical;min-height:110px}button{border:0;border-radius:7px;background:#214ecc;color:white;padding:10px 18px;font:inherit;cursor:pointer;margin:12px 8px 0 0}button:disabled{opacity:.5;cursor:wait}article p{white-space:pre-wrap;overflow-wrap:anywhere}small,.subtle{color:#526276}#message{min-height:28px}footer{border-top:1px solid #d9e0e8;padding-top:16px;margin-top:32px;font-size:14px}.eyebrow{color:#214ecc;font-weight:700;letter-spacing:2px;font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:10px;border-bottom:1px solid #d9e0e8;text-align:left;vertical-align:top}td{overflow-wrap:anywhere}dl{display:grid;grid-template-columns:minmax(130px,1fr) 3fr;gap:10px}dd{margin:0;overflow-wrap:anywhere}
 </style>
 <script src="/vendor/supabase.js" defer></script>
 <script src="/app.js" type="module"></script>
+<script src="/operations.js" type="module"></script>
 </head>
 <body><main>
 <header><div><div class="eyebrow">BYTE BACK · 접속 앱</div><h1>가상 자료실</h1></div><button id="logout" hidden>로그아웃</button></header>
@@ -19,5 +21,6 @@
 <form id="login-form"><h2>로그인</h2><label for="email">이메일</label><input id="email" name="email" type="email" autocomplete="username" required><label for="password">비밀번호</label><input id="password" name="password" type="password" autocomplete="current-password" required><button id="login" type="submit" disabled>로그인</button></form>
 <section id="workspace" hidden><h2>내 메모</h2><p id="empty" hidden>아직 내 메모가 없습니다. 아래에서 가상 메모를 추가하세요.</p><div id="notes"></div>
 <form id="note-form"><h2>메모 작성</h2><label for="title">제목</label><input id="title" name="title" maxlength="120" required><label for="body">내용</label><textarea id="body" name="body" maxlength="10000" required></textarea><button id="save-note" type="submit">메모 추가</button><button id="cancel-edit" type="button" hidden>수정 취소</button></form></section>
+<section aria-labelledby="ops-title"><h2 id="ops-title">탈환 작전실</h2><p>실제 서버 자기 점검과 공개 가상 사건의 API 결과입니다. 심판 판정과 실제 운영 엔진 연결은 별도로 확인합니다.</p><button id="ops-refresh" type="button">현재 점검 실행</button><p id="ops-meta" role="status">서버 기록 확인 전입니다.</p><dl><dt>실제 HTTP 요청</dt><dd id="ops-total">—</dd><dt>거부 응답 확인</dt><dd id="ops-blocked">—</dd><dt>점검 불일치</dt><dd id="ops-failed">—</dd><dt>미실행 대표 요청</dt><dd id="ops-not-run">—</dd><dt>판정 규칙</dt><dd id="ops-rules">미확인</dd><dt>탐지 사건</dt><dd id="ops-detect">미확인</dd><dt>접속 회수</dt><dd id="ops-revoke">미확인</dd><dt>복구 버전</dt><dd id="ops-restore">미확인</dd></dl><p id="ops-assault">41종 실행 기록은 확인 전입니다.</p><div style="overflow:auto"><table><thead><tr><th>관련 단계</th><th>동작</th><th>경로</th><th>기대</th><th>실측</th><th>요청 ID</th><th>확인 시각</th><th>출처</th></tr></thead><tbody id="ops-rows"></tbody></table></div></section>
 <footer>최신 정적 파일에는 메모가 없습니다. 이전 공개 Git 커밋·옛 배포의 가상 자료는 삭제되지 않았습니다. 현재 API에서는 로그인한 사람도 본인 메모만 조회·수정·삭제할 수 있습니다.</footer>
 </main></body></html>

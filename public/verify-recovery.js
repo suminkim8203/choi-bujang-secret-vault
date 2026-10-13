@@ -56,7 +56,7 @@ $('cleanup').addEventListener('click',()=>action(async()=>{assert(temporaryId&&p
   const result=await request(item(temporaryId),'DELETE');report('중단된 임시 메모 정리',`HTTP${result.status}`);
   assert([200,404].includes(result.status));temporaryId=null;preparedOwner=null;}));
 try{const[metadata,descriptor]=await Promise.all([fetch('/aleph.json',{cache:'no-store'}),fetch('/database.json',{cache:'no-store'})]);
-  assert(metadata.ok&&descriptor.ok);const deployed=await metadata.json(),database=await descriptor.json();assert(deployed.step===10);
+  assert(metadata.ok&&descriptor.ok);const deployed=await metadata.json(),database=await descriptor.json();assert(deployed.step>=10&&deployed.step<=12);
   $('identity').textContent=`10단계 운영 저장점 ${deployed.commit}`;
   client=window.supabase.createClient(database.url,database.publishableKey,{auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}});
   client.auth.onAuthStateChange((_event,next)=>{session=next;controls();});

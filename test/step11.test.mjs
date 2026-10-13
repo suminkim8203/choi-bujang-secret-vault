@@ -66,6 +66,6 @@ test('offline cache excludes private routes; browser SDK instances persist no to
 test('stage11 deployment retains the original API, recovery route, issuer and notes zones',()=>{
   const env={VERCEL_GIT_PROVIDER:'github',VERCEL_GIT_REPO_OWNER:'student',VERCEL_GIT_REPO_SLUG:'practice',
     VERCEL_GIT_COMMIT_SHA:'a'.repeat(40),VERCEL_URL:'practice.vercel.app'};
-  const result=deploymentIdentity(env,config);assert.equal(result.step,11);assert.equal(result.restoreRoute,'/api/restore/:noteId');
+  const result=deploymentIdentity(env,{...config,step:11});assert.equal(result.step,11);assert.equal(result.restoreRoute,'/api/restore/:noteId');
   assert.deepEqual(result.allowedRoutes,config.allowedRoutes);assert.equal(result.judgeIssuer,config.judgeIssuer);
 });

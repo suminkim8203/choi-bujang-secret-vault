@@ -3,7 +3,8 @@ import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
 import { detect } from '../src/detect.mjs';
 import { checkDetection } from '../scripts/detect-test.mjs';
-import checkHandler from '../api/checks.js';
+import {createChecksHandler} from '../api/checks.js';
+const checkHandler=createChecksHandler({config:{step:9}});
 import { deploymentIdentity } from '../scripts/deployment-identity.mjs';
 
 const START = Date.UTC(2026, 9, 1);
