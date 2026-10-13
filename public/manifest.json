@@ -1,0 +1,7 @@
+{
+  "id":"/", "name":"BYTE BACK 안전 자료실", "short_name":"안전 자료실",
+  "description":"서버의 기기 승인과 로그인 확인 뒤 이용하는 가상 자료실",
+  "lang":"ko", "start_url":"/", "scope":"/", "display":"standalone",
+  "background_color":"#f5f6f8", "theme_color":"#214ecc",
+  "icons":[{"src":"/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}

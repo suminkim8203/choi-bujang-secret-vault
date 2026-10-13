@@ -37,7 +37,7 @@ export function deploymentIdentity(env, config) {
   if (env.VERCEL_GIT_PROVIDER !== 'github' || !OWNER.test(owner || '')
       || !REPO.test(repo || '') || repo === '.' || repo === '..'
       || repo.toLowerCase().endsWith('.git') || !SHA.test(commit || '')
-      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(config?.step)
+      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(config?.step)
       || (config.step === 2 && (!Array.isArray(allowedRoutes)
         || allowedRoutes.length !== 1 || allowedRoutes[0] !== '/api/notes'))
       || (config.step >= 3 && (!Array.isArray(allowedRoutes)
@@ -47,7 +47,7 @@ export function deploymentIdentity(env, config) {
         || identityProvider.audience !== 'authenticated'
         || identityProvider.jwksUrl !== `${identityProvider.issuer}/.well-known/jwks.json`))
       || (config.step >= 5 && config.originalApiUrl !== expectedOriginalApi)
-      || (config.step === 10 && config.restoreRoute !== '/api/restore/:noteId')
+      || (config.step >= 10 && config.restoreRoute !== '/api/restore/:noteId')
       || typeof config.judgeIssuer !== 'string'
       || !/^https:\/\/[a-z0-9-]+\.up\.railway\.app\/defense\/judge$/iu.test(config.judgeIssuer)
       || typeof config.sampleMarker !== 'string'

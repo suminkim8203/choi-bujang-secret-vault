@@ -115,8 +115,9 @@ test('DB conflicts or verification mismatch do not produce successful restore re
 test('stage10 manifest declares the exact restore route and preserves preceding zones and issuer',()=>{
   const env={VERCEL_GIT_PROVIDER:'github',VERCEL_GIT_REPO_OWNER:'student',VERCEL_GIT_REPO_SLUG:'practice',
     VERCEL_GIT_COMMIT_SHA:'a'.repeat(40),VERCEL_URL:'practice.vercel.app'};
-  const result=deploymentIdentity(env,config);assert.equal(result.step,10);
+  const stage10={...config,step:10};
+  const result=deploymentIdentity(env,stage10);assert.equal(result.step,10);
   assert.equal(result.restoreRoute,'/api/restore/:noteId');assert.deepEqual(result.allowedRoutes,config.allowedRoutes);
   assert.equal(result.judgeIssuer,config.judgeIssuer);assert.equal(result.identityProvider.issuer,config.identityProvider.issuer);
-  assert.throws(()=>deploymentIdentity(env,{...config,restoreRoute:'/api/restore'}));
+  assert.throws(()=>deploymentIdentity(env,{...stage10,restoreRoute:'/api/restore'}));
 });

@@ -90,7 +90,7 @@ try {
   const deployed = await metadata.json(); database = await descriptor.json();
   assert(Number.isInteger(deployed.step) && deployed.step >= 5 && deployed.step <= 12);
   $('identity').textContent = `${deployed.step}단계 운영 저장점 ${deployed.commit}`;
-  client = window.supabase.createClient(database.url, database.publishableKey);
+  client = window.supabase.createClient(database.url, database.publishableKey, {auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}});
   client.auth.onAuthStateChange((_event, next) => { session = next; controls(); });
   const { data, error } = await client.auth.getSession(); assert(!error); session = data.session; controls();
 } catch { $('state').textContent = '로그인 설정 또는 운영 배포를 확인할 수 없습니다.'; }

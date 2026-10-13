@@ -5,7 +5,7 @@ import { decide } from './decider.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -128,7 +128,7 @@ export async function runAttackChecks(config) {
     }
     if (config.step >= 9) {
       // Stage 10 keeps representative normal/burst/spread checks within the official 20-row cap.
-      const cases = config.step >= 10 ? ['s09-normal-read', 's09-burst-read', 's09-spread-read']
+      const cases = config.step >= 11 ? ['s09-burst-read'] : config.step >= 10 ? ['s09-normal-read', 's09-burst-read', 's09-spread-read']
         : ['s09-normal-read', 's09-boundary-read', 's09-burst-read', 's09-split-users', 's09-spread-read', 's09-nonread'];
       for (const caseId of cases) {
         const result = await fetch(new URL(`/api/checks?case=${caseId}`, app), {
@@ -162,6 +162,19 @@ export async function runAttackChecks(config) {
       if(![401,403].includes(result.status)||code!=='42501')throw Error('공개 DB 백업 읽기 거부 확인 실패');
       checks.push({attackId:'direct_backup_read',expected:'공개용 키로 사전 메모 백업 직접 읽기 거부',
         observed:`실제 DB 백업 요청 HTTP${result.status}; PostgreSQL42501 권한 거부`});
+    }
+    if(config.step>=11){
+      const manifest=await fetch(new URL('/manifest.json',app),{redirect:'error',signal:AbortSignal.timeout(10000)});
+      const metadata=await manifest.json();
+      if(manifest.status!==200||metadata.display!=='standalone'||metadata.start_url!=='/'
+        ||typeof metadata.name!=='string'||!Array.isArray(metadata.icons)||!metadata.icons.length)throw Error('PWA 설정 확인 실패');
+      checks.push({attackId:'pwa_manifest',expected:'설치형 웹앱 manifest와 이름·아이콘·시작 주소',
+        observed:'실제 GET HTTP200; standalone·시작 주소·앱 이름·아이콘 확인. 실제 OS 설치는 미실행'});
+      const status=await fetch(new URL('/api/device/status',app),{redirect:'error',signal:AbortSignal.timeout(10000)});
+      const state=await status.json();
+      if(status.status!==200||state.approved!==false||Object.keys(state).sort().join(',')!=='approved,reason')throw Error('승인 전 기기 상태 거부 확인 실패');
+      checks.push({attackId:'device_initial_status',expected:'확인된 등록 기기 세션이 없으면 승인 전',
+        observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
     return checks;
   }

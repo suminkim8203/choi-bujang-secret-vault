@@ -58,7 +58,7 @@ $('cleanup').addEventListener('click',()=>action(async()=>{assert(temporaryId&&p
 try{const[metadata,descriptor]=await Promise.all([fetch('/aleph.json',{cache:'no-store'}),fetch('/database.json',{cache:'no-store'})]);
   assert(metadata.ok&&descriptor.ok);const deployed=await metadata.json(),database=await descriptor.json();assert(deployed.step===10);
   $('identity').textContent=`10단계 운영 저장점 ${deployed.commit}`;
-  client=window.supabase.createClient(database.url,database.publishableKey);
+  client=window.supabase.createClient(database.url,database.publishableKey,{auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}});
   client.auth.onAuthStateChange((_event,next)=>{session=next;controls();});
   const{data,error}=await client.auth.getSession();assert(!error);session=data.session;controls();
 }catch{$('state').textContent='운영 배포나 로그인 상태를 확인할 수 없습니다.';}
