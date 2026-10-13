@@ -8,7 +8,7 @@ import {randomUUID} from 'node:crypto';
 export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip}={}) {
   const receipts=new Map();
   const caseFor=(url,options)=>{
-    const q=url.searchParams.get('case');
+    const q=url.href.match(/[?&]case=([^&#]+)/u)?.[1];
     if(q)return({'s06-registered':'device_registration_fixture','s07-risk':'step_up_fixture','s08-other-zone':'resource_scope_fixture'})[q]??q;
     if(url.pathname==='/data.json')return'static_note_read';
     if(url.pathname==='/api/notes')return options.headers?.Authorization?'malformed_token':'anonymous_list';
@@ -34,7 +34,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     if(onResponse)onResponse({requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
       checkedAt:new Date().toISOString(),method:options.method??'GET',
       path:url.pathname.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),
-      caseId:url.searchParams.get('case'),status:result.status});
+      caseId:url.href.match(/[?&]case=([^&#]+)/u)?.[1]??null,status:result.status});
     return result;
   };
   if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');

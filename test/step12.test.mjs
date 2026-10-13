@@ -2,11 +2,13 @@ import{test}from'node:test';import assert from'node:assert/strict';import{readFi
 import{collectOperationsReport}from'../src/operations-report.mjs';import{createChecksHandler}from'../api/checks.js';
 import{runDecisionCheck}from'../src/decision-check.mjs';import{runDetectionCheck}from'../src/detection-check.mjs';
 import{deploymentIdentity}from'../scripts/deployment-identity.mjs';
+import{runAttackChecks}from'../src/attack-check.mjs';
 const config=JSON.parse(await readFile(new URL('../aleph.config.json',import.meta.url),'utf8'));
 const commit='a'.repeat(40),policy=await readFile(new URL('../recovery/policy-v9.json',import.meta.url),'utf8');
 function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
+  const ParsedURL=URL;
   let count=0;const calls=[];
-  const send=async(target,options={})=>{const url=new URL(target);calls.push({path:url.pathname,options});count++;
+  const send=async(target,options={})=>{const url=new ParsedURL(target);calls.push({path:url.pathname,options});count++;
     let body,status=200;
     if(url.pathname==='/aleph.json')body={step:12,commit:wrongCommit?'b'.repeat(40):commit};
     else if(url.pathname==='/data.json')body={notes:[]};
@@ -31,6 +33,14 @@ test('ops report counts executed HTTP observations and separately leaves owner r
   assert.ok(report.rows.filter(r=>r.status!==null).every(r=>r.requestId&&Number.isFinite(Date.parse(r.checkedAt))));
   assert.ok(report.rows.filter(r=>r.status===null).every(r=>r.requestId===null&&r.checkedAt===null));
   for(const key of['title','body','owner_id','token','apikey','srcip'])assert.ok(!report.rows.some(r=>Object.hasOwn(r,key)));
+});
+test('bundle checker uses GET only and stays runnable when the sandbox URL omits searchParams',async()=>{
+ const NativeURL=URL,{send,calls}=backend();class LimitedURL extends NativeURL{get searchParams(){return undefined;}}
+ let checks;try{globalThis.URL=LimitedURL;checks=await runAttackChecks(config,{send});}finally{globalThis.URL=NativeURL;}
+ assert.equal(calls.length,14);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
+ assert.equal(checks.filter(c=>c.observed==='not_run').length,6);
+ assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP(?:200|401|403)$/u.test(c.observed)));
+ assert.ok(calls.every(c=>checks.some(x=>x.attackId===c.options.alephEvidence.caseId)));
 });
 test('failed body validation and unmatched deployments never become successful check counts',async()=>{
   const{send}=backend({invalidAnonymousBody:true});const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
