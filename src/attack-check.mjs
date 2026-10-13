@@ -6,13 +6,31 @@ import {randomUUID} from 'node:crypto';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip}={}) {
+  const receipts=new Map();
+  const caseFor=(url,options)=>{
+    const q=url.searchParams.get('case');
+    if(q)return({'s06-registered':'device_registration_fixture','s07-risk':'step_up_fixture','s08-other-zone':'resource_scope_fixture'})[q]??q;
+    if(url.pathname==='/data.json')return'static_note_read';
+    if(url.pathname==='/api/notes')return options.headers?.Authorization?'malformed_token':'anonymous_list';
+    if(url.pathname.startsWith('/api/notes/'))return'anonymous_item';
+    if(url.pathname==='/api/my/notes')return'anonymous_own_list';
+    if(url.pathname.startsWith('/api/restore/'))return'anonymous_restore_get';
+    if(url.pathname.endsWith('/aleph_note_backups'))return'direct_backup_read';
+    if(url.pathname.startsWith('/rest/v1/'))return'direct_database_read';
+    if(url.pathname==='/manifest.json')return'pwa_manifest';
+    if(url.pathname==='/api/device/status')return'device_initial_status';
+    throw Error('unknown_check_identity');
+  };
   const skipWrite=(attackId,expected,method,path)=>{
     onSkip?.({requestId:null,checkedAt:null,method,path:path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),caseId:null,status:null});
-    return{attackId,expected,observed:'not_run: 12단계 제출 격리 환경은 GET·HEAD만 허용하므로 쓰기 요청 미실행'};
+    return{attackId,expected,observed:'not_run'};
   };
   const fetch=async(target,options={})=>{
     const requestId=randomUUID(),url=new URL(target);
-    const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId}});
+    const attackId=config.step>=12?caseFor(url,options):null;
+    const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId,
+      ...(attackId?{caseId:attackId,requestKey:'read'}:{})}});
+    if(attackId)receipts.set(attackId,result.status);
     if(onResponse)onResponse({requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
       checkedAt:new Date().toISOString(),method:options.method??'GET',
       path:url.pathname.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),
@@ -211,7 +229,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       checks.push({attackId:'device_initial_status',expected:'확인된 등록 기기 세션이 없으면 승인 전',
         observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
-    return checks;
+    return config.step>=12?checks.map(check=>({...check,observed:receipts.has(check.attackId)?`HTTP${receipts.get(check.attackId)}`:'not_run'})):checks;
   }
   if (config.step === 2) {
     const results = [{ attackId: 'static_note_read', expected: '공개 data.json에 메모가 없어야 함',

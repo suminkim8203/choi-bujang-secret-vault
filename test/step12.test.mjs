@@ -23,6 +23,7 @@ test('ops report counts executed HTTP observations and separately leaves owner r
   assert.equal(report.complete,true);assert.equal(report.counts.executed,14);assert.equal(report.counts.notRun,8);
   assert.equal(report.rows.length,22);assert.equal(calls.length,15);assert.equal(report.counts.failed,0);
   assert.ok(calls.every(c=>['GET','HEAD'].includes(c.options.method??'GET')));
+  assert.ok(calls.slice(1).every(c=>typeof c.options.alephEvidence.caseId==='string'&&c.options.alephEvidence.requestKey==='read'));
   assert.equal(report.rows.filter(r=>r.source==='write_not_run').length,6);
   assert.equal(report.assault41.localExecuted,0);assert.equal(report.assault41.localNotRun,41);
   assert.equal(report.revocation.executed,false);assert.equal(report.recovery.policyBackupVerified,true);
