@@ -63,5 +63,10 @@
       "pathPattern": "/notes/:id",
       "zone": "my-notes"
     }
-  ]
+  ],
+  "policyRevision": "safe-stage9",
+  "restoreScope": {
+    "service": "notes",
+    "maxNotes": 1
+  }
 }

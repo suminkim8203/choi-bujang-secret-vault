@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createRecoveryHandler,noteContentHash} from '../src/recovery-api.mjs';
-import {previewTrialPolicy,restoreTrialPolicy,verifiedPolicyBackup} from '../src/policy-recovery.mjs';
+import {previewTrialPolicy,restoreTrialPolicy,verifiedPolicyBackup,verifyNoteRestorePlan,SAFE_POLICY_REVISION} from '../src/policy-recovery.mjs';
 import {deploymentIdentity} from '../scripts/deployment-identity.mjs';
 import {decide} from '../src/decider.mjs';
 import {fixtureRequests} from '../scripts/fixture-7.mjs';
@@ -18,10 +18,11 @@ backup.content_hash=noteContentHash(backup.title,backup.content);
 const response=()=>({headers:{},setHeader(k,v){this.headers[k]=v;},status(s){this.code=s;return this;},json(x){this.body=x;return this;}});
 const request=(method='POST',body)=>({method,headers:{authorization:'Bearer test-only'},query:{noteId:id},body});
 const env=()=>({SUPABASE_URL:config.database.url,SUPABASE_SECRET_KEY:'sb_'+'secret_'+'fixture_value_not_a_real_key'});
-function handler({row=backup,identity={kind:'judge',identity:'b',userId:owner},rpcStatus=200,rpcResult}={}) {
+function handler({row=backup,identity={kind:'judge',identity:'b',userId:owner},rpcStatus=200,rpcResult,
+  readPolicyBackup=async()=>backupText}={}) {
   const calls=[];
   let auditReads=0;
-  const run=createRecoveryHandler({config,env,verify:async()=>identity,send:async(url,options)=>{
+  const run=createRecoveryHandler({config,env,readPolicyBackup,verify:async()=>identity,send:async(url,options)=>{
     calls.push({url:new URL(url),options});
     if(new URL(url).pathname.endsWith('/aleph_note_backups'))return{ok:true,json:async()=>row?[row]:[]};
     if(new URL(url).pathname.endsWith('/aleph_recovery_audit')){
@@ -67,8 +68,24 @@ test('authenticated own recovery previews hash and uses server identity for a si
   const res=response();await run(request(),res);assert.equal(res.code,200);
   const rpc=calls.find(x=>x.url.pathname==='/rest/v1/rpc/aleph_restore_note');assert.ok(rpc);
   assert.deepEqual(JSON.parse(rpc.options.body),{p_id:id,p_owner:owner});
-  assert.deepEqual(Object.keys(res.body).sort(),['auditPreserved','contentHash','id','ownerMatched','restored']);
+  assert.deepEqual(Object.keys(res.body).sort(),['auditPreserved','backupVerified','contentHash','id','ownerMatched','policyRevision','restored','scopeCount']);
   assert.equal(res.body.auditPreserved,true);
+  assert.equal(res.body.backupVerified,true);assert.equal(res.body.policyRevision,SAFE_POLICY_REVISION);assert.equal(res.body.scopeCount,1);
+});
+test('policy revision mismatch, multi-note scopes and wider routes are refused before restoration',()=>{
+  const valid={backupText,expectedPolicyRevision:SAFE_POLICY_REVISION,
+    scope:{service:'notes',noteIds:[id]},currentRoutes:config.allowedRoutes};
+  assert.equal(verifyNoteRestorePlan(valid).backupVerified,true);
+  for(const input of[{...valid,expectedPolicyRevision:'other-revision'},
+    {...valid,scope:{service:'notes',noteIds:[id,other]}},
+    {...valid,currentRoutes:[...config.allowedRoutes,{service:'notes',method:'GET',pathPattern:'/admin',zone:'all'}]}])
+    assert.throws(()=>verifyNoteRestorePlan(input));
+});
+test('unreadable or corrupted policy backups stop the real HTTP handler before any database call',async()=>{
+  for(const readPolicyBackup of[async()=>{throw Error('unavailable');},async()=>backupText+' ']){
+    const{run,calls}=handler({readPolicyBackup});const res=response();await run(request(),res);
+    assert.equal(res.code,503);assert.equal(calls.length,0);assert.deepEqual(Object.keys(res.body),['error']);
+  }
 });
 test('unverified, non-B judge, extra fields and malformed targets never invoke restoration',async()=>{
   for(const identity of[null,{kind:'judge',identity:'a',userId:owner},{kind:'student',userId:'invalid'}]){

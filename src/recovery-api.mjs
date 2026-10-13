@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
+import {readFile} from 'node:fs/promises';
 import { createLoginVerifier } from './verify-login.mjs';
+import {verifyNoteRestorePlan,SAFE_POLICY_REVISION} from './policy-recovery.mjs';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 export function noteContentHash(title, content) {
   if (typeof title !== 'string' || typeof content !== 'string') throw Error('invalid_backup');
@@ -15,7 +17,8 @@ function databaseConfig(env,config) {
     || env.SUPABASE_SECRET_KEY.length<24) throw Error('invalid_recovery_config');
   return { base, key:env.SUPABASE_SECRET_KEY };
 }
-export function createRecoveryHandler({ config, env=()=>process.env, send=(...args)=>fetch(...args), verify }={}) {
+export function createRecoveryHandler({ config, env=()=>process.env, send=(...args)=>fetch(...args), verify,
+  readPolicyBackup=()=>readFile(new URL('../recovery/policy-v9.json',import.meta.url),'utf8') }={}) {
   let verifier;
   return async function handler(request,response) {
     response.setHeader('Cache-Control','no-store'); response.setHeader('X-Content-Type-Options','nosniff');
@@ -35,6 +38,10 @@ export function createRecoveryHandler({ config, env=()=>process.env, send=(...ar
         ||(body!==undefined&&body!==null&&body!==''
           &&(typeof body!=='object'||Array.isArray(body)||Object.keys(body).length!==0)))return fail(400);
       const owner=identity.userId.toLowerCase(),id=query.noteId.toLowerCase();
+      // Re-read the pinned pre-incident policy before any private DB access or restoration.
+      // Missing/corrupt/wrong-revision/multi-note/widened-route plans cannot reach the RPC.
+      const plan=verifyNoteRestorePlan({backupText:await readPolicyBackup(),expectedPolicyRevision:SAFE_POLICY_REVISION,
+        scope:{service:'notes',noteIds:[id]},currentRoutes:config.allowedRoutes});
       const backupURL=new URL('/rest/v1/aleph_note_backups',db.base);
       backupURL.searchParams.set('id',`eq.${id}`);backupURL.searchParams.set('owner_id',`eq.${owner}`);
       backupURL.searchParams.set('select','id,owner_id,title,content,created_at,content_hash,version');backupURL.searchParams.set('limit','2');
@@ -46,7 +53,8 @@ export function createRecoveryHandler({ config, env=()=>process.env, send=(...ar
         ||b.version!=='note-v1'||typeof b.created_at!=='string'||!Number.isFinite(Date.parse(b.created_at))
         ||b.content_hash!==noteContentHash(b.title,b.content))return fail(503);
       if(request.method==='GET')return response.status(200).json({id,version:b.version,
-        contentHash:b.content_hash,ownerMatched:true,fields:['title','content','created_at']});
+        contentHash:b.content_hash,ownerMatched:true,backupVerified:plan.backupVerified,
+        policyRevision:plan.policyRevision,scopeCount:plan.scopeCount,fields:['title','content','created_at']});
       const auditURL=new URL('/rest/v1/aleph_recovery_audit',db.base);
       auditURL.searchParams.set('note_id',`eq.${id}`);auditURL.searchParams.set('select','audit_id');
       auditURL.searchParams.set('order','audit_id.asc');auditURL.searchParams.set('limit','1000');
@@ -65,7 +73,8 @@ export function createRecoveryHandler({ config, env=()=>process.env, send=(...ar
       const after=await auditIds();
       if(after.length<=before.length||!before.every(value=>after.includes(value)))return fail(503);
       // Return the verification summary only, never backup text, owner ID or DB diagnostics.
-      return response.status(200).json({id,restored:true,contentHash:b.content_hash,ownerMatched:true,auditPreserved:true});
+      return response.status(200).json({id,restored:true,contentHash:b.content_hash,ownerMatched:true,auditPreserved:true,
+        backupVerified:plan.backupVerified,policyRevision:plan.policyRevision,scopeCount:plan.scopeCount});
     }catch{return fail(503);}
   };
 }
