@@ -10,9 +10,42 @@
     "jwksUrl": "https://vpicvdydirvwjaeuemzb.supabase.co/auth/v1/.well-known/jwks.json"
   },
   "allowedRoutes": [
-    "/api/notes",
-    "/api/notes/:id",
-    "/api/announcements/:id"
+    {
+      "service": "notes",
+      "method": "GET",
+      "pathPattern": "/api/notes",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "POST",
+      "pathPattern": "/api/notes",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "GET",
+      "pathPattern": "/api/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "PUT",
+      "pathPattern": "/api/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "DELETE",
+      "pathPattern": "/api/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "announcements",
+      "method": "GET",
+      "pathPattern": "/api/announcements/:id",
+      "zone": "class-notices"
+    }
   ],
   "originalApiUrl": "https://vpicvdydirvwjaeuemzb.supabase.co/rest/v1/aleph_defense_notes",
   "restoreRoute": null,

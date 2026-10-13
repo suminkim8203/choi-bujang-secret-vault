@@ -5,6 +5,24 @@ import { decide } from '../src/decider.mjs';
 import { fixtureRequests } from '../scripts/fixture-7.mjs';
 import { createNotesHandler } from '../src/notes-api.mjs';
 import { createAnnouncementsHandler } from '../src/announcements-api.mjs';
+import { deploymentIdentity } from '../scripts/deployment-identity.mjs';
+
+test('stage 8 manifest declares exact service, action and zone without expanding routes', async () => {
+  const config = JSON.parse(await readFile(new URL('../aleph.config.json', import.meta.url), 'utf8'));
+  const env = { VERCEL_GIT_PROVIDER: 'github', VERCEL_GIT_REPO_OWNER: 'student',
+    VERCEL_GIT_REPO_SLUG: 'practice', VERCEL_GIT_COMMIT_SHA: 'a'.repeat(40), VERCEL_URL: 'practice.vercel.app' };
+  const identity = deploymentIdentity(env, config);
+  assert.deepEqual(identity.allowedRoutes, config.allowedRoutes);
+  assert.notEqual(identity.allowedRoutes[0], config.allowedRoutes[0]);
+  for (const edit of [{ zone: 'instructor-materials' }, { pathPattern: '/api/admin/notes' },
+    { method: 'PATCH' }, { role: 'teacher' }]) {
+    const rows = config.allowedRoutes.map(row => ({ ...row }));
+    rows[0] = { ...rows[0], ...edit };
+    assert.throws(() => deploymentIdentity(env, { ...config, allowedRoutes: rows }));
+  }
+  assert.throws(() => deploymentIdentity(env, { ...config,
+    allowedRoutes: config.allowedRoutes.map(() => config.allowedRoutes[0]) }));
+});
 
 test('resource allowlist pairs exact verified service, method, path and route', async () => {
   const { normal } = fixtureRequests();

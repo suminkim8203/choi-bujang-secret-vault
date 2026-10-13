@@ -3,6 +3,23 @@ const REPO = /^[A-Za-z0-9._-]{1,100}$/u;
 const SHA = /^[a-f0-9]{40}$/iu;
 const HOST = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/iu;
 
+function validZoneRoutes(routes) {
+  if (!Array.isArray(routes)) return false;
+  const expected = new Set([
+    'notes|GET|/api/notes|my-notes', 'notes|POST|/api/notes|my-notes',
+    'notes|GET|/api/notes/:id|my-notes', 'notes|PUT|/api/notes/:id|my-notes',
+    'notes|DELETE|/api/notes/:id|my-notes',
+    'announcements|GET|/api/announcements/:id|class-notices',
+  ]);
+  if (routes.length !== expected.size) return false;
+  for (const row of routes) {
+    if (!row || typeof row !== 'object' || Array.isArray(row)
+        || Object.keys(row).sort().join(',') !== 'method,pathPattern,service,zone') return false;
+    if (!expected.delete(`${row.service}|${row.method}|${row.pathPattern}|${row.zone}`)) return false;
+  }
+  return expected.size === 0;
+}
+
 export function deploymentIdentity(env, config) {
   const owner = env.VERCEL_GIT_REPO_OWNER;
   const repo = env.VERCEL_GIT_REPO_SLUG;
@@ -22,9 +39,8 @@ export function deploymentIdentity(env, config) {
       || (config.step === 2 && (!Array.isArray(allowedRoutes)
         || allowedRoutes.length !== 1 || allowedRoutes[0] !== '/api/notes'))
       || (config.step >= 3 && (!Array.isArray(allowedRoutes)
-        || JSON.stringify(allowedRoutes) !== JSON.stringify(config.step >= 8
-          ? ['/api/notes', '/api/notes/:id', '/api/announcements/:id']
-          : ['/api/notes', '/api/notes/:id'])
+        || (config.step >= 8 ? !validZoneRoutes(allowedRoutes)
+          : JSON.stringify(allowedRoutes) !== JSON.stringify(['/api/notes', '/api/notes/:id']))
         || !identityProvider || identityProvider.issuer !== `${config.database?.url}/auth/v1`
         || identityProvider.audience !== 'authenticated'
         || identityProvider.jwksUrl !== `${identityProvider.issuer}/.well-known/jwks.json`))
@@ -44,7 +60,8 @@ export function deploymentIdentity(env, config) {
     judgeIssuer: config.judgeIssuer,
     ...(config.step === 1 ? { sampleMarker: config.sampleMarker } : {}),
     ...(config.step >= 5 ? { originalApiUrl: config.originalApiUrl } : {}),
-    ...(config.step >= 2 ? { allowedRoutes: [...allowedRoutes] } : {}),
+    ...(config.step >= 2 ? { allowedRoutes: allowedRoutes.map(row =>
+      typeof row === 'string' ? row : { ...row }) } : {}),
     ...(config.step >= 3 ? { identityProvider: {
       issuer: identityProvider.issuer, audience: identityProvider.audience, jwksUrl: identityProvider.jwksUrl,
     } } : {}),
