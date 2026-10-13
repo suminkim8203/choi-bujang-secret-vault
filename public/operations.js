@@ -20,4 +20,4 @@ async function refresh(){const button=$('ops-refresh');button.disabled=true;empt
   }catch{empty();$('ops-meta').textContent='서버 기록을 확인하지 못했습니다. 수치를 채우거나 성공으로 처리하지 않습니다.';}
   finally{button.disabled=false;}
 }
-$('ops-refresh').addEventListener('click',refresh);refresh();
+$('ops-refresh').addEventListener('click',refresh);if(!$('ops-record'))refresh();

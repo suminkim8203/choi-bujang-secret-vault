@@ -72,3 +72,16 @@ test('stage12 published identity still binds protected routes, policy recovery a
   assert.equal(result.step,12);assert.deepEqual(result.allowedRoutes,config.allowedRoutes);
   assert.equal(result.restoreRoute,config.restoreRoute);assert.equal(result.judgeIssuer,config.judgeIssuer);
 });
+
+test('server-rendered root displays the same real report without script execution and rejects fabricated counts',async()=>{
+ const{renderOperations}=await import('../src/render-operations.mjs');const{send}=backend();
+ const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
+ const template=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
+ const html=renderOperations(template,report);assert.ok(html.includes('<dd id="ops-total">14</dd>'));
+ assert.ok(html.includes('<dd id="ops-not-run">8</dd>'));assert.ok(html.includes('fixture_request_2'));
+ assert.equal((html.match(/<tbody id="ops-rows">[\s\S]*?<\/tbody>/u)[0].match(/<tr>/gu)||[]).length,22);
+ const bad=structuredClone(report);bad.counts.executed=41;assert.throws(()=>renderOperations(template,bad));
+ const payload=structuredClone(report);payload.rows[0].path='</script><img src=x>';
+ const escaped=renderOperations(template,payload);assert.ok(!escaped.includes('</script><img src=x>'));
+ assert.ok(escaped.includes('&lt;/script&gt;'));assert.ok(escaped.includes('\\u003c/script>'));
+});
