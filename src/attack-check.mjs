@@ -105,6 +105,15 @@ export async function runAttackChecks(config) {
         observed: '로컬 가상 요청에서 확인 전 step_up·확인 후 allow; 실제 재로그인·자료 차단은 미실행' });
     }
     if (config.step >= 8) {
+      const ownList = await fetch(new URL('/api/my/notes', app), {
+        redirect: 'error', signal: AbortSignal.timeout(10000) });
+      let ownBody;
+      try { ownBody = await ownList.json(); } catch { /* No raw bodies in evidence. */ }
+      if (ownList.status !== 401 || !ownBody || Object.keys(ownBody).join(',') !== 'error') {
+        throw new Error('익명 본인 목록 전용 경로 거부 확인 실패');
+      }
+      checks.push({ attackId: 'anonymous_own_list', expected: '익명 본인 목록 전용 경로 HTTP401',
+        observed: '실제 GET /api/my/notes HTTP401; 자료 없는 거부 응답 확인' });
       const announcement = await fetch(new URL(`/api/announcements/${id}`, app), {
         method: 'PUT', redirect: 'error', signal: AbortSignal.timeout(10000) });
       if (announcement.status !== 401) throw new Error('익명 공지 수정 거부 확인 실패');

@@ -32,7 +32,7 @@ async function run(action) {
 $('prepare').addEventListener('click', () => run(async () => {
   assert(!$('own-id').value);
   $('results').textContent = '';
-  const initial = await request('/api/notes');
+  const initial = await request('/api/my/notes');
   report('본인 목록', `HTTP${initial.status}; ${Array.isArray(initial.body) ? initial.body.length : '확인 불가'}건`);
   assert(initial.status === 200 && Array.isArray(initial.body));
   const id = crypto.randomUUID();
@@ -60,7 +60,7 @@ $('read-other').addEventListener('click', () => run(async () => {
 $('cross').addEventListener('click', () => run(async () => {
   const id = $('other-id').value.trim();
   assert(UUID.test(id) && !seeded.test(id) && id !== $('own-id').value);
-  const listed = await request('/api/notes');
+  const listed = await request('/api/my/notes');
   report('상대 ID 본인 목록 제외', `HTTP${listed.status}`);
   assert(listed.status === 200 && Array.isArray(listed.body) && !listed.body.some(row => row.id === id));
   for (const method of ['GET', 'PUT', 'DELETE']) {
@@ -79,7 +79,7 @@ $('finish').addEventListener('click', () => run(async () => {
   const deleted = await request(item(id), 'DELETE');
   report('본인 임시 메모 삭제', `HTTP${deleted.status}`); assert(deleted.status === 200);
   const gone = await request(item(id)); report('삭제 후 개별 조회', `HTTP${gone.status}`); assert(gone.status === 404);
-  const list = await request('/api/notes');
+  const list = await request('/api/my/notes');
   report('정리 후 본인 목록', `HTTP${list.status}; ${Array.isArray(list.body) ? list.body.length : '확인 불가'}건`);
   assert(list.status === 200 && !list.body.some(row => row.id === id));
   $('own-id').value = ''; preparedOwner = null;

@@ -29,7 +29,7 @@ async function api(path, options = {}) {
 
 async function refreshNotes() {
   const current = generation;
-  const notes = await api('/api/notes');
+  const notes = await api('/api/my/notes');
   if (current !== generation || !session) return;
   if (!Array.isArray(notes)) throw new Error('메모 응답을 확인할 수 없습니다.');
   list.replaceChildren();

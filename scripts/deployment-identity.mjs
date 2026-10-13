@@ -6,7 +6,7 @@ const HOST = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/iu;
 function validZoneRoutes(routes) {
   if (!Array.isArray(routes)) return false;
   const expected = new Set([
-    'notes|GET|/api/notes|my-notes', 'notes|POST|/api/notes|my-notes',
+    'notes|GET|/api/my/notes|my-notes', 'notes|POST|/api/notes|my-notes',
     'notes|GET|/api/notes/:id|my-notes', 'notes|PUT|/api/notes/:id|my-notes',
     'notes|DELETE|/api/notes/:id|my-notes',
     'announcements|GET|/api/announcements/:id|class-notices',

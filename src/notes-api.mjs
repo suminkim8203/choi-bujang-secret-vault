@@ -38,7 +38,7 @@ function displayRow(row) {
   return { id: row.id, title: row.title, body: row.content };
 }
 
-export function createNotesHandler({ config, item = false, env = () => process.env,
+export function createNotesHandler({ config, item = false, listOnly = false, env = () => process.env,
   send = (...args) => fetch(...args), verify } = {}) {
   let verifier;
   return async function handler(request, response) {
@@ -63,7 +63,7 @@ export function createNotesHandler({ config, item = false, env = () => process.e
       const ownerProtected = config.step >= 4;
       const owner = identity.userId.toLowerCase();
       const method = request.method;
-      const methods = item ? ['GET', 'PUT', 'DELETE'] : ['GET', 'POST'];
+      const methods = item ? ['GET', 'PUT', 'DELETE'] : listOnly ? ['GET'] : ['GET', 'POST'];
       if (!methods.includes(method)) {
         response.setHeader('Allow', methods.join(', '));
         return fail(405);

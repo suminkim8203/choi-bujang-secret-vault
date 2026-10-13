@@ -4,9 +4,10 @@
 function permittedResource(request) {
   if (request.service !== 'notes') return false;
   const { method, path, route } = request;
-  if (path === '/notes' || path === '/api/notes') {
-    return ['GET', 'POST'].includes(method) && route === `${method} ${path}`;
-  }
+  // 본인 목록 구역과 전체 목록처럼 보이는 일반 경로를 구별합니다.
+  // 최종 서버는 이 전용 경로에서도 검증된 소유자만 필터링합니다.
+  if (path === '/api/my/notes') return method === 'GET' && route === 'GET /api/my/notes';
+  if (path === '/api/notes') return method === 'POST' && route === 'POST /api/notes';
   // 실제 메모 ID는 UUID입니다. 공식 로컬 연습의 demo는 가상 출처에서만 허용합니다.
   const uuidPath = typeof path === 'string'
     && /^\/(?:api\/)?notes\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(path);

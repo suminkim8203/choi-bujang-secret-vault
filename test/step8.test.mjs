@@ -42,6 +42,12 @@ test('resource allowlist pairs exact verified service, method, path and route', 
   const deployedPath = '/api/notes/33333333-3333-4333-8333-333333333333';
   assert.equal((await decide({ ...normal, path: deployedPath, route: 'GET /api/notes/:id' })).decision, 'allow');
   assert.equal((await decide({ ...normal, path: '/api/notes/export', route: 'GET /api/notes/:id' })).decision, 'deny');
+  assert.equal((await decide({ ...normal, path: '/api/my/notes', route: 'GET /api/my/notes' })).decision, 'allow');
+  for (const path of ['/api/notes', '/notes']) {
+    assert.equal((await decide({ ...normal, path, route: `GET ${path}` })).decision, 'deny');
+  }
+  assert.equal((await decide({ ...normal, method: 'POST', path: '/api/notes', route: 'POST /api/notes' })).decision, 'allow');
+  assert.equal((await decide({ ...normal, method: 'POST', path: '/api/my/notes', route: 'POST /api/my/notes' })).decision, 'deny');
 });
 
 const a = '11111111-1111-4111-8111-111111111111';
@@ -49,6 +55,27 @@ const b = '22222222-2222-4222-8222-222222222222';
 const id = '33333333-3333-4333-8333-333333333333';
 const res = () => ({ headers: {}, setHeader(k, v) { this.headers[k] = v; },
   status(code) { this.code = code; return this; }, json(body) { this.body = body; return this; } });
+
+test('dedicated own-list endpoint filters owner and rejects writes without a DB call', async () => {
+  const config = JSON.parse(await readFile(new URL('../aleph.config.json', import.meta.url), 'utf8'));
+  let calls = 0;
+  const handler = createNotesHandler({ config, listOnly: true,
+    env: () => ({ SUPABASE_URL: config.database.url, SUPABASE_SECRET_KEY: 'sb_'+'secret_'+'x'.repeat(30) }),
+    verify: async () => ({ userId: a }), send: async url => {
+      calls++; assert.equal(url.searchParams.get('owner_id'), `eq.${a}`);
+      return Response.json([{ id, owner_id: a, title: 'fixture', content: 'fixture' }]);
+    } });
+  const own = res(); await handler({ method: 'GET', headers: { authorization: 'Bearer local-fixture' } }, own);
+  assert.equal(own.code, 200); assert.equal(own.body.length, 1);
+  assert.deepEqual(Object.keys(own.body[0]).sort(), ['body', 'id', 'title']);
+  for (const method of ['POST', 'PUT', 'DELETE']) {
+    const denied = res(); await handler({ method, headers: { authorization: 'Bearer local-fixture' } }, denied);
+    assert.equal(denied.code, 405); assert.equal(denied.headers.Allow, 'GET');
+  }
+  assert.equal(calls, 1);
+  const anonymous = res(); await handler({ method: 'GET', headers: {} }, anonymous);
+  assert.equal(anonymous.code, 401); assert.equal(calls, 1);
+});
 
 test('final note API keeps atomic owner filtering and rejects query-based scope changes', async () => {
   const config = { ...JSON.parse(await readFile(new URL('../aleph.config.json', import.meta.url), 'utf8')), step: 8 };

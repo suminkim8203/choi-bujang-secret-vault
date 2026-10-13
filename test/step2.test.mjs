@@ -53,7 +53,7 @@ test('public files contain no note rows and the page reads the server route', as
   }
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   const app = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
-  assert.match(app, /api\('\/api\/notes'/u);
+  assert.match(app, /api\('\/api\/(?:my\/)?notes'/u);
   assert.doesNotMatch(app, /SUPABASE_SECRET_KEY|sb_secret_/u);
   assert.doesNotMatch(html, /SUPABASE_SECRET_KEY|sb_secret_/u);
 });
