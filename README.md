@@ -2,7 +2,7 @@
 
 ## 12단계 · 실측 기록을 읽는 탈환 작전실 (2026-10-13)
 
-현재 구현·로컬103검사·빌드 통과이며 운영 배포·실제12단계 판정은 아직 미실행입니다. 직전11단계100점 묶음은 artifacts/step11-submitted-2dd6504.json에 보존했습니다.
+현재 운영 배포·실제12단계 판정을 확인했습니다. **최고53/100·미통과**, 최신8e5fd23 판정은45점(최고53 유지)이며 필수8개 중 기록과 화면 수치 한 항목이 남았습니다. [판정](docs/evidence/stage12-53.png)과 [운영 화면](docs/evidence/stage12-server-screen.png)을 보존했습니다. 로컬103검사·빌드와 운영 API/HTML/화면의 수치 일치는 통과했지만 이를 심판 통과라고 하지 않습니다. 구체적인 비교 수치 계약은 학생 안내에서 확보하지 못해 추가 근거 전 추정 재제출을 보류합니다. 직전11단계100점 묶음은 artifacts/step11-submitted-2dd6504.json에 보존했습니다.
 
 작전실은 GET /api/checks의 서버 실행 결과만 읽습니다. 서버는 자신의 배포 manifest와 Vercel 저장점을 대조한 뒤 20개 자기 점검 중 읽기14개를 실제로 보내고 HTTP 상태·요청 ID·확인 시각·관련 단계·출처를 수집합니다. 수집한 결과만 세고 메모 본문·토큰·계정·주소·API 키·원문 오류는 공개하지 않습니다. 정상 공개 응답과 금지 익명/공개 DB 응답, 고정 가상 사건의 서버 API 결과를 구분합니다. 공지/메모 구역·로그인·기기 상태·복구 한 건 권한·보안 헤더·원본 발급자는 유지합니다.
 
@@ -29,6 +29,12 @@
 중지(안내만, 미실행): 로컬 시험 프로세스는 종료합니다. 운영 중지는 Vercel 프로젝트 Settings → General → Pause Project에서 영향과 프로젝트 이름을 확인해 일시 중지합니다. 제공 엔진의 경로 중지는 운영 담당자의 절차가 필요하며 학생 코드만으로 엔진 정책을 변경하지 않습니다. [Vercel 공식 프로젝트 중지 안내](https://vercel.com/docs/projects/managing-projects#pausing-a-project).
 
 복구(안내만, 임시 시험 외 운영 롤백 미실행): 검사한 안전 커밋·배포를 선택하며 사용자 미커밋 변경과 DB/감사 이력을 먼저 보존합니다. 안전한 별도 clone에서 그 커밋을 checkout해 검증한 뒤 다시 배포하거나 [Vercel Instant Rollback](https://vercel.com/docs/instant-rollback)에서 확인한 이전 운영 배포로 되돌립니다. Hobby는 바로 이전 운영 배포만 대상으로 하며 도메인·환경·외부 DB 영향을 확인하고 실행합니다. 롤백 후 자동 도메인 배정은 Undo Rollback 전까지 중지되므로 후속 배포 절차도 다시 확인합니다. git reset --hard·강제 이력 변경·저장소/DB 삭제는 쓰지 않습니다. 정책 시험은 npm run recovery:policy로 차이를 본 뒤 확인한 시험 SHA에만 --apply합니다. 메모 복구는 검증된 로그인 소유자의 POST /api/restore/:noteId로 한 건만 복원하며 다른 메모·감사·서비스는 보존합니다. 복구 후 정상 요청·금지 요청을 다시 검사하고 아직 실행하지 않은 시험은 미실행으로 둡니다.
+
+## 보너스 xdr-03 · 알려진 취약점 (2026-10-13)
+
+공식24건을 원본 그대로 가져와 source.json에 출처·SHA256을 기록했습니다. read-alerts는24행/다섯 항목을 보존하고 decide는 독립 파일로만 동작합니다. 실제 npm run xdr:run -- known-cve 결과는 block8/alert8/record8입니다. 명확한 요청 필드의 완결된 원격 JNDI 형태만 차단 후보로, 취약점 이름·교육 문맥·잘린 형태는 알림으로 둡니다. 정상 활동은 경보 번호·수준으로 차단하지 않습니다. [Apache 공식 취약점 자료](https://logging.apache.org/security.html)와 [MITRE T1190](https://attack.mitre.org/techniques/T1190/)를 대조했습니다.
+
+respond는 원본 경보 시각에서15분 만료·근거 ID를 가진 로컬 거부 오버레이8개, 알림 메타데이터8개를 작성했습니다. 실제 운영 ZTNA 등록·집행은 미연결이고 기존 판정 규칙은 보존했습니다. 포털 제출·판정은 아직 미실행이며 통과라고 쓰지 않습니다. 재현: npm run xdr:run -- known-cve → node xdr/known-cve/read-alerts.mjs → node xdr/known-cve/respond.mjs → node --test test/xdr-known-cve.test.mjs. 경보ID/수준 변경·단독 VM·입력 보존·만료·기존 거부·무관 대상 허용3검사 통과. 12단계 제출 묶음은 별도 저장점 artifacts/step12-retry-8e5fd23.json으로 보존합니다.
 
 ## 11단계 · 설치형 웹앱과 서버 기기 승인 화면 (2026-10-13)
 
