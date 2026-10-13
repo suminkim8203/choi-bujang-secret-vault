@@ -1,9 +1,11 @@
 import { publicDatabase } from './public-db-config.mjs';
+import { fixtureRequests } from '../scripts/fixture-7.mjs';
+import { decide } from './decider.mjs';
 
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5, 6].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -76,6 +78,21 @@ export async function runAttackChecks(config) {
       if (![401, 403].includes(write.status) || writeCode !== '42501') throw new Error('원본 DB 직접 수정 권한 거부 확인 실패');
       checks.push({ attackId: 'direct_database_update', expected: '공개용 키의 원본 DB 직접 수정은 권한 오류로 거부',
         observed: `실제 PATCH 요청 HTTP${write.status}; PostgreSQL42501 권한 거부` });
+    }
+    if (config.step >= 6) {
+      const { normal } = fixtureRequests();
+      const registered = await decide(normal);
+      const unregistered = await decide({ ...normal, deviceRegistered: false });
+      const absent = { ...normal }; delete absent.deviceRegistered;
+      const missing = await decide(absent);
+      if (registered.decision !== 'allow' || unregistered.decision !== 'deny'
+          || unregistered.reasonCode !== 'device_not_registered'
+          || missing.decision !== 'deny' || missing.reasonCode !== 'device_not_registered') {
+        throw new Error('등록·미등록·등록값 누락 가상 요청 판정 실패');
+      }
+      checks.push({ attackId: 'device_registration_fixture',
+        expected: '로컬 가상 요청: 등록 허용, 미등록 및 누락 deny/device_not_registered',
+        observed: '실행한 가상 요청 3건 일치; 운영 기기 등록·mTLS 연결의 증거는 아님' });
     }
     return checks;
   }
