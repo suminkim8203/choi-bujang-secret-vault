@@ -5,7 +5,11 @@ import {randomUUID} from 'node:crypto';
 
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
-export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}={}) {
+export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip}={}) {
+  const skipWrite=(attackId,expected,method,path)=>{
+    onSkip?.({requestId:null,checkedAt:null,method,path:path.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),caseId:null,status:null});
+    return{attackId,expected,observed:'not_run: 12단계 제출 격리 환경은 GET·HEAD만 허용하므로 쓰기 요청 미실행'};
+  };
   const fetch=async(target,options={})=>{
     const requestId=randomUUID(),url=new URL(target);
     const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId}});
@@ -61,6 +65,9 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}=
       ['anonymous_delete', 'DELETE', `/api/notes/${id}`, false],
       ['malformed_token', 'GET', '/api/notes', true],
     ]) {
+      if(config.step>=12&&!['GET','HEAD'].includes(method)){
+        checks.push(skipWrite(attackId,'익명 쓰기 요청은 자료 변경 없이 HTTP401이어야 함',method,path));continue;
+      }
       const result = await fetch(new URL(path, app), { method,
         ...(invalid ? { headers: { Authorization: 'Bearer invalid-login-token' } } : {}),
         redirect: 'error', signal: AbortSignal.timeout(10000) });
@@ -83,6 +90,8 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}=
     checks.push({ attackId: 'direct_database_read', expected: '공개용 키로 DB 직접 읽기 거부',
       observed: `실제 DB 직접 요청 HTTP${direct.status}; PostgreSQL42501 권한 거부` });
     if (config.step >= 5) {
+      if(config.step>=12)checks.push(skipWrite('direct_database_update','공개용 키의 원본 DB 직접 수정은 권한 오류로 거부','PATCH',original.pathname));
+      else{
       const writeTarget = new URL(config.originalApiUrl);
       writeTarget.searchParams.set('id', `eq.${id}`);
       const write = await fetch(writeTarget, { method: 'PATCH',
@@ -94,6 +103,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}=
       if (![401, 403].includes(write.status) || writeCode !== '42501') throw new Error('원본 DB 직접 수정 권한 거부 확인 실패');
       checks.push({ attackId: 'direct_database_update', expected: '공개용 키의 원본 DB 직접 수정은 권한 오류로 거부',
         observed: `실제 PATCH 요청 HTTP${write.status}; PostgreSQL42501 권한 거부` });
+      }
     }
     if (config.step >= 6) {
       const { normal } = fixtureRequests();
@@ -132,11 +142,14 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}=
       }
       checks.push({ attackId: 'anonymous_own_list', expected: '익명 본인 목록 전용 경로 HTTP401',
         observed: '실제 GET /api/my/notes HTTP401; 자료 없는 거부 응답 확인' });
+      if(config.step>=12)checks.push(skipWrite('anonymous_announcement_update','익명 공지 수정 HTTP401','PUT',`/api/announcements/${id}`));
+      else{
       const announcement = await fetch(new URL(`/api/announcements/${id}`, app), {
         method: 'PUT', redirect: 'error', signal: AbortSignal.timeout(10000) });
       if (announcement.status !== 401) throw new Error('익명 공지 수정 거부 확인 실패');
       checks.push({ attackId: 'anonymous_announcement_update', expected: '익명 공지 수정 HTTP401',
         observed: '실제 PUT 요청 HTTP401; 공지 구역 접근 거부' });
+      }
       const { normal } = fixtureRequests();
       for (const path of ['/admin', '/notes/export', '/notes/demo/extra']) {
         if ((await decide({ ...normal, path })).decision !== 'deny') throw new Error('다른 구역 가상 요청 거부 실패');
@@ -168,6 +181,9 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse}=
     }
     if (config.step >= 10) {
       for (const method of ['GET','POST']) {
+        if(config.step>=12&&method==='POST'){
+          checks.push(skipWrite('anonymous_restore_post','익명 복구 실행 HTTP401','POST',`/api/restore/${id}`));continue;
+        }
         const result = await fetch(new URL(`/api/restore/${id}`,app), {
           method,redirect:'error',signal:AbortSignal.timeout(10000) });
         const body = await result.json();

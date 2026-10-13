@@ -15,7 +15,7 @@ async function refresh(){const button=$('ops-refresh');button.disabled=true;empt
     for(const row of report.rows){const tr=document.createElement('tr');const values=[row.stages.join('·')||'—',row.method??'—',row.path,
       row.expectedStatus.length?row.expectedStatus.map(v=>`HTTP${v}`).join(' / '):'확인 필요',
       row.status===null?'미실행':`HTTP${row.status}`,row.requestId??'미실행',row.checkedAt??'미실행',
-      row.source==='fixed_synthetic_api'?'실제 HTTP · 고정 가상 사건':row.source==='authenticated_owner_api'?'로그인 본인 요청 · 미실행':row.source==='not_attempted_after_failure'?'중단 뒤 미실행':'실제 익명 HTTP'];
+      row.source==='fixed_synthetic_api'?'실제 HTTP · 고정 가상 사건':row.source==='authenticated_owner_api'?'로그인 본인 요청 · 미실행':row.source==='write_not_run'?'쓰기 요청 · 격리 환경 제한으로 미실행':row.source==='not_attempted_after_failure'?'중단 뒤 미실행':'실제 익명 HTTP'];
       for(const value of values){const td=document.createElement('td');td.textContent=value;tr.append(td);}$('ops-rows').append(tr);}
   }catch{empty();$('ops-meta').textContent='서버 기록을 확인하지 못했습니다. 수치를 채우거나 성공으로 처리하지 않습니다.';}
   finally{button.disabled=false;}

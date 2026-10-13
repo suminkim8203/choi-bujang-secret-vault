@@ -20,13 +20,15 @@ function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
 }
 test('ops report counts executed HTTP observations and separately leaves owner requests and all 41 full trials unrun',async()=>{
   const{send,calls}=backend();const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
-  assert.equal(report.complete,true);assert.equal(report.counts.executed,20);assert.equal(report.counts.notRun,2);
-  assert.equal(report.rows.length,22);assert.equal(calls.length,21);assert.equal(report.counts.failed,0);
+  assert.equal(report.complete,true);assert.equal(report.counts.executed,14);assert.equal(report.counts.notRun,8);
+  assert.equal(report.rows.length,22);assert.equal(calls.length,15);assert.equal(report.counts.failed,0);
+  assert.ok(calls.every(c=>['GET','HEAD'].includes(c.options.method??'GET')));
+  assert.equal(report.rows.filter(r=>r.source==='write_not_run').length,6);
   assert.equal(report.assault41.localExecuted,0);assert.equal(report.assault41.localNotRun,41);
   assert.equal(report.revocation.executed,false);assert.equal(report.recovery.policyBackupVerified,true);
   assert.equal(report.rows.filter(r=>r.source==='fixed_synthetic_api').length,4);
-  assert.ok(report.rows.slice(0,20).every(r=>r.requestId&&Number.isFinite(Date.parse(r.checkedAt))));
-  assert.ok(report.rows.slice(20).every(r=>r.requestId===null&&r.status===null&&r.checkedAt===null));
+  assert.ok(report.rows.filter(r=>r.status!==null).every(r=>r.requestId&&Number.isFinite(Date.parse(r.checkedAt))));
+  assert.ok(report.rows.filter(r=>r.status===null).every(r=>r.requestId===null&&r.checkedAt===null));
   for(const key of['title','body','owner_id','token','apikey','srcip'])assert.ok(!report.rows.some(r=>Object.hasOwn(r,key)));
 });
 test('failed body validation and unmatched deployments never become successful check counts',async()=>{

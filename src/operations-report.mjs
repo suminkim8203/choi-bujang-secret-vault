@@ -13,12 +13,13 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
   if(!manifest.ok||identity.commit!==commit||identity.step!==config.step)throw Error('check_deployment_mismatch');
   const rows=[];let complete=true;
   try{await runAttackChecks(config,{send,onResponse:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),
-    source:row.caseId?'fixed_synthetic_api':'anonymous_api',result:expected(row).includes(row.status)?'matched':'mismatch'})});}
+    source:row.caseId?'fixed_synthetic_api':'anonymous_api',result:expected(row).includes(row.status)?'matched':'mismatch'}),
+    onSkip:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),source:'write_not_run',result:'not_run'})});}
   catch{complete=false;if(rows.length)rows[rows.length-1].result='mismatch';}
   // No raw response, owner, username, note text, token or source address leaves this report.
-  const count=rows.length,blocked=rows.filter(r=>r.result==='matched'&&[401,403].includes(r.status)).length;
+  const count=rows.filter(r=>r.status!==null).length,blocked=rows.filter(r=>r.result==='matched'&&[401,403].includes(r.status)).length;
   const failed=rows.filter(r=>r.result==='mismatch').length;
-  for(let i=count;i<20;i++)rows.push({requestId:null,checkedAt:null,method:null,path:'remaining_check',
+  for(let i=rows.length;i<20;i++)rows.push({requestId:null,checkedAt:null,method:null,path:'remaining_check',
     stages:[],caseId:null,status:null,expectedStatus:[],source:'not_attempted_after_failure',result:'not_run'});
   rows.push({requestId:null,checkedAt:null,method:'GET',path:'/api/my/notes',stages:[3,4,5,8,11],caseId:null,status:null,expectedStatus:[200],
     source:'authenticated_owner_api',result:'not_run'});
