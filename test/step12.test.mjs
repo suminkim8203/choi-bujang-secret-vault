@@ -39,7 +39,7 @@ test('bundle checker uses GET only and stays runnable when the sandbox URL omits
  let checks;try{globalThis.URL=LimitedURL;checks=await runAttackChecks(config,{send});}finally{globalThis.URL=NativeURL;}
  assert.equal(calls.length,14);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
  assert.equal(checks.filter(c=>c.observed==='not_run').length,6);
- assert.ok(checks.every(c=>c.observed==='not_run'||([200,401,403].includes(JSON.parse(c.observed).status)&&JSON.parse(c.observed).method==='GET')));
+ assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)$/u.test(c.observed)));
  assert.ok(calls.every(c=>checks.some(x=>x.attackId===c.options.alephEvidence.caseId)));
 });
 test('failed body validation and unmatched deployments never become successful check counts',async()=>{

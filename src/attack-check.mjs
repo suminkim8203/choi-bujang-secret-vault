@@ -229,7 +229,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       checks.push({attackId:'device_initial_status',expected:'확인된 등록 기기 세션이 없으면 승인 전',
         observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
-    return config.step>=12?checks.map(check=>({...check,observed:receipts.has(check.attackId)?JSON.stringify(receipts.get(check.attackId)):'not_run'})):checks;
+    return config.step>=12?checks.map(check=>({...check,observed:receipts.has(check.attackId)?`HTTP ${receipts.get(check.attackId).status}`:'not_run'})):checks;
   }
   if (config.step === 2) {
     const results = [{ attackId: 'static_note_read', expected: '공개 data.json에 메모가 없어야 함',
