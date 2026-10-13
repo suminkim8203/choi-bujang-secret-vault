@@ -106,7 +106,7 @@ function showSession(next) {
   document.querySelector('#logout').hidden = !session;
   document.querySelector('#login-state').textContent = session ? '로그인됨' : '로그인하지 않음';
   if (session) checkDevice().then(approved=>approved?refreshNotes():undefined).catch(error => say(error.message));
-  else say('로그인하면 내 실습 메모를 볼 수 있습니다.');
+  else {say('로그인과 서버의 기기 승인 뒤 내 실습 메모를 볼 수 있습니다.');checkDevice();}
 }
 
 loginForm.addEventListener('submit', async event => {
