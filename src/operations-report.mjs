@@ -12,7 +12,7 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
   const identity=await manifest.json();
   if(!manifest.ok||identity.commit!==commit||identity.step!==config.step)throw Error('check_deployment_mismatch');
   const rows=[];let complete=true;
-  try{await runAttackChecks(config,{send,onResponse:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),
+  try{await runAttackChecks(config,{send,includeOperations:false,onResponse:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),
     source:row.caseId?'fixed_synthetic_api':'anonymous_api',result:expected(row).includes(row.status)?'matched':'mismatch'}),
     onSkip:row=>rows.push({...row,stages:stages(row),expectedStatus:expected(row),source:'write_not_run',result:'not_run'})});}
   catch{complete=false;if(rows.length)rows[rows.length-1].result='mismatch';}
@@ -27,7 +27,7 @@ export async function collectOperationsReport({config,send=globalThis.fetch,comm
     source:'authenticated_owner_api',result:'not_run'});
   let backup;try{backup=verifiedPolicyBackup(await readPolicyBackup());}catch{}
   return{schema:'aleph.operations.report.v1',checkedAt:new Date().toISOString(),commit,
-    source:'student_actual_self_check',complete,
+    source:'student_actual_self_check',complete,ready:complete&&failed===0,
     counts:{total:rows.length,executed:count,blocked,matched:rows.filter(r=>r.result==='matched').length,
       failed,notRun:rows.filter(r=>r.result==='not_run').length},
     rules:[...RULE_IDS],detection:{source:'fixed_synthetic_api',cases:rows.filter(r=>r.caseId?.startsWith('s09-')).length},

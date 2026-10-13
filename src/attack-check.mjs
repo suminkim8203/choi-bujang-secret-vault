@@ -5,7 +5,7 @@ import {randomUUID} from 'node:crypto';
 
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
-export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip}={}) {
+export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,onSkip,includeOperations=config.step>=12}={}) {
   const receipts=new Map();
   const caseFor=(url,options)=>{
     const q=url.href.match(/[?&]case=([^&#]+)/u)?.[1];
@@ -19,6 +19,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     if(url.pathname.startsWith('/rest/v1/'))return'direct_database_read';
     if(url.pathname==='/manifest.json')return'pwa_manifest';
     if(url.pathname==='/api/device/status')return'device_initial_status';
+    if(url.pathname==='/api/checks')return'operations_summary';
     throw Error('unknown_check_identity');
   };
   const skipWrite=(attackId,expected,method,path)=>{
@@ -29,7 +30,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     const requestId=randomUUID(),url=new URL(target);
     const attackId=config.step>=12?caseFor(url,options):null;
     const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId,
-      ...(attackId?{caseId:attackId,requestKey:'read'}:{})}});
+      ...(attackId?{caseId:attackId,requestKey:options.alephEvidence?.requestKey??'read'}:{})}});
     if(attackId)receipts.set(attackId,{status:result.status,method:options.method??'GET'});
     if(onResponse)onResponse({requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
       checkedAt:new Date().toISOString(),method:options.method??'GET',
@@ -60,6 +61,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       visible = data?.sampleMarker === config.sampleMarker && Array.isArray(data.notes)
         && data.notes.length > 0;
       emptyStatic = Array.isArray(data?.notes) && data.notes.length === 0;
+      if(config.step>=12&&emptyStatic)receipts.get('static_note_read').jsonArrayLength=data.notes.length;
     } catch {
       // A non-JSON response is a failed check, not a successful deployment.
     }
@@ -72,6 +74,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       const result=await fetch(new URL(`/api/checks?case=${caseId}`,app),{redirect:'error',signal:AbortSignal.timeout(10000)});
       const body=await result.json();
       if(result.status!==200||body.synthetic!==true||body.ready!==true||body.decision!==expected)throw Error('서버 가상 판정 확인 실패');
+      if(config.step>=12)receipts.get(({'s06-registered':'device_registration_fixture','s07-risk':'step_up_fixture','s08-other-zone':'resource_scope_fixture'})[caseId]).jsonReady=body.ready;
       return `실제 GET HTTP200; 고정 가상 사건 ${expected}·ready=true; 실제 운영 기기 연결과 구분`;
     }
     const id = '00000000-0000-4000-8000-000000000000';
@@ -195,6 +198,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
         }
         checks.push({ attackId: caseId, expected: `고정 가상 사건 결과 ${expected}`,
           observed: `실제 점검 GET HTTP200; synthetic=true·ready=true·action=${expected}. 실제 접속 회수·경과 시간은 미검증` });
+        if(config.step>=12)receipts.get(caseId).jsonReady=body.ready;
       }
     }
     if (config.step >= 10) {
@@ -229,7 +233,16 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       checks.push({attackId:'device_initial_status',expected:'확인된 등록 기기 세션이 없으면 승인 전',
         observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
-    return config.step>=12?checks.map(check=>({...check,observed:receipts.has(check.attackId)?`HTTP ${receipts.get(check.attackId).status}`:'not_run'})):checks;
+    if(includeOperations){
+      const summary=await fetch(new URL('/api/checks',app),{redirect:'error',signal:AbortSignal.timeout(20000),alephEvidence:{requestKey:'summary'}});
+      const report=await summary.json();
+      if(summary.status!==200||report.schema!=='aleph.operations.report.v1'||report.ready!==true||report.counts.failed!==0)throw Error('operations_summary_not_ready');
+      receipts.get('operations_summary').jsonReady=report.ready;
+      checks.splice(checks.findIndex(c=>c.attackId==='anonymous_delete'),1);
+      checks.push({attackId:'operations_summary',expected:'실제 작전실 서버 API의 기록 준비 상태 확인',observed:''});
+    }
+    return config.step>=12?checks.map(check=>{const r=receipts.get(check.attackId);return{...check,observed:r?
+      `HTTP ${r.status}${typeof r.jsonReady==='boolean'?`; jsonReady=${r.jsonReady}`:''}${Number.isInteger(r.jsonArrayLength)?`; jsonArrayLength=${r.jsonArrayLength}`:''}`:'not_run'};}):checks;
   }
   if (config.step === 2) {
     const results = [{ attackId: 'static_note_read', expected: '공개 data.json에 메모가 없어야 함',

@@ -14,7 +14,8 @@ function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
     else if(url.pathname==='/data.json')body={notes:[]};
     else if(url.pathname==='/manifest.json')body={display:'standalone',start_url:'/',name:'fixture',icons:[{}]};
     else if(url.pathname==='/api/device/status')body={approved:false,reason:'device_not_registered'};
-    else if(url.pathname==='/api/checks')body=runDetectionCheck(url.searchParams.get('case'))??await runDecisionCheck(url.searchParams.get('case'));
+    else if(url.pathname==='/api/checks')body=url.search?runDetectionCheck(url.searchParams.get('case'))??await runDecisionCheck(url.searchParams.get('case'))
+      :{schema:'aleph.operations.report.v1',ready:true,counts:{failed:0}};
     else if(url.pathname.startsWith('/rest/v1/')){status=401;body={code:'42501'};}
     else{status=401;body=invalidAnonymousBody?{private:'fixture-response-not-exported'}:{error:'login_required'};}
     return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json','x-vercel-id':`fixture_request_${count}`}});
@@ -37,9 +38,9 @@ test('ops report counts executed HTTP observations and separately leaves owner r
 test('bundle checker uses GET only and stays runnable when the sandbox URL omits searchParams',async()=>{
  const NativeURL=URL,{send,calls}=backend();class LimitedURL extends NativeURL{get searchParams(){return undefined;}}
  let checks;try{globalThis.URL=LimitedURL;checks=await runAttackChecks(config,{send});}finally{globalThis.URL=NativeURL;}
- assert.equal(calls.length,14);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
- assert.equal(checks.filter(c=>c.observed==='not_run').length,6);
- assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)$/u.test(c.observed)));
+ assert.equal(calls.length,15);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
+ assert.equal(checks.filter(c=>c.observed==='not_run').length,5);
+ assert.equal(checks.length,20);assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)(?:; jsonReady=true|; jsonArrayLength=0)?$/u.test(c.observed)));
  assert.ok(calls.every(c=>checks.some(x=>x.attackId===c.options.alephEvidence.caseId)));
 });
 test('failed body validation and unmatched deployments never become successful check counts',async()=>{
