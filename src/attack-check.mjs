@@ -30,7 +30,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     const attackId=config.step>=12?caseFor(url,options):null;
     const result=await send(target,{...options,alephEvidence:{...options.alephEvidence,requestId,
       ...(attackId?{caseId:attackId,requestKey:'read'}:{})}});
-    if(attackId)receipts.set(attackId,result.status);
+    if(attackId)receipts.set(attackId,{status:result.status,method:options.method??'GET'});
     if(onResponse)onResponse({requestId:result.headers?.get('x-vercel-id')??result.headers?.get('sb-request-id')??`client:${requestId}`,
       checkedAt:new Date().toISOString(),method:options.method??'GET',
       path:url.pathname.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/giu,':id'),
@@ -229,7 +229,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       checks.push({attackId:'device_initial_status',expected:'확인된 등록 기기 세션이 없으면 승인 전',
         observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
-    return config.step>=12?checks.map(check=>({...check,observed:receipts.has(check.attackId)?`HTTP${receipts.get(check.attackId)}`:'not_run'})):checks;
+    return config.step>=12?checks.map(check=>({...check,observed:receipts.has(check.attackId)?JSON.stringify(receipts.get(check.attackId)):'not_run'})):checks;
   }
   if (config.step === 2) {
     const results = [{ attackId: 'static_note_read', expected: '공개 data.json에 메모가 없어야 함',
