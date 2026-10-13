@@ -34,7 +34,13 @@
 
 공식24건을 원본 그대로 가져와 source.json에 출처·SHA256을 기록했습니다. read-alerts는24행/다섯 항목을 보존하고 decide는 독립 파일로만 동작합니다. 실제 npm run xdr:run -- known-cve 결과는 block8/alert8/record8입니다. 명확한 요청 필드의 완결된 원격 JNDI 형태만 차단 후보로, 취약점 이름·교육 문맥·잘린 형태는 알림으로 둡니다. 정상 활동은 경보 번호·수준으로 차단하지 않습니다. [Apache 공식 취약점 자료](https://logging.apache.org/security.html)와 [MITRE T1190](https://attack.mitre.org/techniques/T1190/)를 대조했습니다.
 
-respond는 원본 경보 시각에서15분 만료·근거 ID를 가진 로컬 거부 오버레이8개, 알림 메타데이터8개를 작성했습니다. 실제 운영 ZTNA 등록·집행은 미연결이고 기존 판정 규칙은 보존했습니다. 포털 제출·판정은 아직 미실행이며 통과라고 쓰지 않습니다. 재현: npm run xdr:run -- known-cve → node xdr/known-cve/read-alerts.mjs → node xdr/known-cve/respond.mjs → node --test test/xdr-known-cve.test.mjs. 경보ID/수준 변경·단독 VM·입력 보존·만료·기존 거부·무관 대상 허용3검사 통과. 12단계 제출 묶음은 별도 저장점 artifacts/step12-retry-8e5fd23.json으로 보존합니다.
+respond는 원본 경보 시각에서15분 만료·근거 ID를 가진 로컬 거부 오버레이8개, 알림 메타데이터8개를 작성했습니다. 실제 운영 ZTNA 등록·집행은 미연결이고 기존 판정 규칙은 보존했습니다. 실제 첫 제출8bd2d907ec1f031ec9c086fa6b54f5511112307e는100/100·조건4개·가점3개 통과했습니다. [판정](docs/evidence/xdr03-100.png). 운영 엔진 집행과 별개입니다. 재현: npm run xdr:run -- known-cve → node xdr/known-cve/read-alerts.mjs → node xdr/known-cve/respond.mjs → node --test test/xdr-known-cve.test.mjs. 경보ID/수준 변경·단독 VM·입력 보존·만료·기존 거부·무관 대상 허용3검사 통과. 12단계 제출 묶음은 별도 저장점 artifacts/step12-retry-8e5fd23.json으로 보존합니다.
+
+## 보너스 xdr-04 · 지속성 프로그램 (2026-10-13)
+
+공식24건을 원본 그대로 가져왔고 실제 xdr:run 결과 block8/alert8/record8입니다. 미서명 신규/변경 서비스, 임시 파일을 실행하는 낯선 예약 작업, 비정상 시작 폴더 추가의 명시 증거를 구분합니다. 기존 서명 서비스·업데이트·목록 조회는 정상이며 서명 미확인·한 번의 변경 등 부족한 증거는 알림입니다. [MITRE T1543](https://attack.mitre.org/techniques/T1543/), [T1053](https://attack.mitre.org/techniques/T1053/), 시작 폴더에 해당하는 [T1547.001](https://attack.mitre.org/techniques/T1547/001/)을 대조했습니다.
+
+다섯 필드24행 읽기, 독립 decide, 근거 PATTERNS,15분 만료/근거 경보ID의 로컬 agentName 격리 후보8개와 알림 메타데이터8개를 준비했습니다. 이 agent 이름의 실제 검증된 기기 ID 매핑·운영 등록은 미연결입니다. 기존 판정기와 다른 사용자를 막는 규칙은 보존합니다. 정상/무관 대상·기존 거부·만료·ID/수준 변경·단독 VM3검사 통과. 실제 포털 판정은 아직 미실행입니다. 재현: npm run xdr:run -- persistence → node xdr/persistence/read-alerts.mjs → node xdr/persistence/respond.mjs → node --test test/xdr-persistence.test.mjs.
 
 ## 11단계 · 설치형 웹앱과 서버 기기 승인 화면 (2026-10-13)
 
