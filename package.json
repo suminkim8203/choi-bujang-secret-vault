@@ -8,6 +8,7 @@
     "bundle": "node scripts/bundle.mjs",
     "decider:test": "node scripts/decider-test.mjs",
     "detect:test": "node scripts/detect-test.mjs",
+    "recovery:policy": "node scripts/recovery-policy.mjs",
     "fixture:7": "node scripts/fixture-7.mjs",
     "xdr:read": "node xdr/brute-force/read-alerts.mjs",
     "xdr:run": "node scripts/xdr-run.mjs",

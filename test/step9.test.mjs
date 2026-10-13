@@ -73,6 +73,7 @@ test('public checks run fixed synthetic inputs only and never return a subject o
 
 test('stage 9 deployment retains identity, API protection and declared engine zones', async () => {
   const config = JSON.parse(await readFile(new URL('../aleph.config.json', import.meta.url), 'utf8'));
+  config.step = 9; // Historical stage-9 contract remains valid after later stages.
   const result = deploymentIdentity({ VERCEL_GIT_PROVIDER: 'github', VERCEL_GIT_REPO_OWNER: 'student',
     VERCEL_GIT_REPO_SLUG: 'practice', VERCEL_GIT_COMMIT_SHA: 'a'.repeat(40),
     VERCEL_URL: 'practice.vercel.app' }, config);

@@ -8,6 +8,7 @@
     "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }]
   }],
   "rewrites": [
+    { "source": "/api/restore/:noteId", "destination": "/api/restore" },
     { "source": "/api/notes/:id", "destination": "/api/note" },
     { "source": "/api/announcements/:id", "destination": "/api/announcement" }
   ]

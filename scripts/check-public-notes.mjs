@@ -58,6 +58,7 @@ export async function checkPublicNotes({ localOnly = false } = {}) {
     // local copies alone does not establish what the production browser gets.
     if (config.step >= 3) paths.push('/app.js', '/vendor/supabase.js');
     if (config.step >= 4) paths.push('/verify-access.html', '/verify-access.js');
+    if (config.step >= 10) paths.push('/verify-recovery.html', '/verify-recovery.js');
     for (const path of paths) {
       const response = await fetch(new URL(path, app), {
         redirect: 'error', signal: AbortSignal.timeout(10000), cache: 'no-store',

@@ -5,7 +5,7 @@ import { decide } from './decider.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -127,8 +127,10 @@ export async function runAttackChecks(config) {
         observed: '로컬 가상 요청3건 deny 확인; API 소유자 점검과 구분' });
     }
     if (config.step >= 9) {
-      for (const caseId of ['s09-normal-read', 's09-boundary-read', 's09-burst-read',
-        's09-split-users', 's09-spread-read', 's09-nonread']) {
+      // Stage 10 keeps representative normal/burst/spread checks within the official 20-row cap.
+      const cases = config.step >= 10 ? ['s09-normal-read', 's09-burst-read', 's09-spread-read']
+        : ['s09-normal-read', 's09-boundary-read', 's09-burst-read', 's09-split-users', 's09-spread-read', 's09-nonread'];
+      for (const caseId of cases) {
         const result = await fetch(new URL(`/api/checks?case=${caseId}`, app), {
           redirect: 'error', signal: AbortSignal.timeout(10000),
           alephEvidence: { caseId, requestKey: 'read' },
@@ -144,6 +146,22 @@ export async function runAttackChecks(config) {
         checks.push({ attackId: caseId, expected: `고정 가상 사건 결과 ${expected}`,
           observed: `실제 점검 GET HTTP200; synthetic=true·ready=true·action=${expected}. 실제 접속 회수·경과 시간은 미검증` });
       }
+    }
+    if (config.step >= 10) {
+      for (const method of ['GET','POST']) {
+        const result = await fetch(new URL(`/api/restore/${id}`,app), {
+          method,redirect:'error',signal:AbortSignal.timeout(10000) });
+        const body = await result.json();
+        if(result.status!==401||Object.keys(body).join(',')!=='error')throw Error('익명 복구 거부 확인 실패');
+        checks.push({attackId:`anonymous_restore_${method.toLowerCase()}`,
+          expected:'익명 복구 사본 조회·실행 거부',observed:`실제 ${method} 복구 요청 HTTP401; 자료 없는 오류`});
+      }
+      const target = new URL('/rest/v1/aleph_note_backups?select=id&limit=1',database.url);
+      const result = await fetch(target,{headers:{apikey:database.publishableKey},redirect:'error',signal:AbortSignal.timeout(10000)});
+      const code = (await result.json())?.code;
+      if(![401,403].includes(result.status)||code!=='42501')throw Error('공개 DB 백업 읽기 거부 확인 실패');
+      checks.push({attackId:'direct_backup_read',expected:'공개용 키로 사전 메모 백업 직접 읽기 거부',
+        observed:`실제 DB 백업 요청 HTTP${result.status}; PostgreSQL42501 권한 거부`});
     }
     return checks;
   }
