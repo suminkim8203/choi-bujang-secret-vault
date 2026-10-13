@@ -19,7 +19,7 @@ function permittedResource(request) {
   const base = path.startsWith('/api/') ? '/api/notes' : '/notes';
   return ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} ${base}/:id`;
 }
-export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'resource_scope']);
+export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'route_not_allowed']);
 
 function requiresStepUp(request) {
   const signals = request.signals;
@@ -46,7 +46,7 @@ export async function decide(request) {
   const registered = request.deviceRegistered === true;
   if (registered && !permittedResource(request)) {
     return { schema: 'aleph.decision.v1', requestId: request.requestId,
-      decision: 'deny', reasonCode: 'resource_not_allowed', ruleIds: [RULE_IDS[2]] };
+      decision: 'deny', reasonCode: 'route_not_allowed', ruleIds: [RULE_IDS[2]] };
   }
   if (registered && requiresStepUp(request) && !freshStepUp(request)) {
     return { schema: 'aleph.decision.v1', requestId: request.requestId,

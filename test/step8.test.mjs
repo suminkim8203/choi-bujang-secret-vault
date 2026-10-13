@@ -34,7 +34,7 @@ test('resource allowlist pairs exact verified service, method, path and route', 
     { path: '/notes/%2e%2e' }, { method: 'PATCH' }, { route: 'GET /admin' }]) {
     const result = await decide({ ...normal, ...edit });
     assert.equal(result.decision, 'deny');
-    assert.equal(result.reasonCode, 'resource_not_allowed');
+    assert.equal(result.reasonCode, 'route_not_allowed');
   }
   assert.equal((await decide({ ...normal, path: '/notes/33333333-3333-4333-8333-333333333333',
     signals: { source: 'none', region: 'unknown', network: 'unknown', hour: 14 } })).decision, 'allow');
