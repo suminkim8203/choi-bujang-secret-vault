@@ -14,6 +14,9 @@ test('stage 8 manifest declares exact service, action and zone without expanding
   const identity = deploymentIdentity(env, config);
   assert.deepEqual(identity.allowedRoutes, config.allowedRoutes);
   assert.notEqual(identity.allowedRoutes[0], config.allowedRoutes[0]);
+  const { normal } = fixtureRequests();
+  assert.ok(identity.allowedRoutes.some(row => row.service === normal.service
+    && `${row.method} ${row.pathPattern}` === normal.route));
   for (const edit of [{ zone: 'instructor-materials' }, { pathPattern: '/api/admin/notes' },
     { method: 'PATCH' }, { role: 'teacher' }]) {
     const rows = config.allowedRoutes.map(row => ({ ...row }));

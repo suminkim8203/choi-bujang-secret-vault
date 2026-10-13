@@ -10,6 +10,8 @@ function validZoneRoutes(routes) {
     'notes|GET|/api/notes/:id|my-notes', 'notes|PUT|/api/notes/:id|my-notes',
     'notes|DELETE|/api/notes/:id|my-notes',
     'announcements|GET|/api/announcements/:id|class-notices',
+    'notes|GET|/notes/:id|my-notes', 'notes|PUT|/notes/:id|my-notes',
+    'notes|DELETE|/notes/:id|my-notes',
   ]);
   if (routes.length !== expected.size) return false;
   for (const row of routes) {

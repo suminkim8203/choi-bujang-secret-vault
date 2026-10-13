@@ -45,6 +45,24 @@
       "method": "GET",
       "pathPattern": "/api/announcements/:id",
       "zone": "class-notices"
+    },
+    {
+      "service": "notes",
+      "method": "GET",
+      "pathPattern": "/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "PUT",
+      "pathPattern": "/notes/:id",
+      "zone": "my-notes"
+    },
+    {
+      "service": "notes",
+      "method": "DELETE",
+      "pathPattern": "/notes/:id",
+      "zone": "my-notes"
     }
   ],
   "originalApiUrl": "https://vpicvdydirvwjaeuemzb.supabase.co/rest/v1/aleph_defense_notes",
