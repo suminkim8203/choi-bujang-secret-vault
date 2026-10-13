@@ -10,7 +10,7 @@ test('engine-confirmed registration allows normal reading with the exact respons
   const result = await decide(normal);
   assert.deepEqual(result, { schema: normal.schema, requestId: normal.requestId,
     decision: 'allow', reasonCode: 'approved', ruleIds: ['device_registered'] });
-  assert.deepEqual(RULE_IDS, ['device_registered']);
+  assert.ok(RULE_IDS.includes('device_registered'));
 });
 
 test('missing, false and truthy nonboolean registration all fail closed', async () => {

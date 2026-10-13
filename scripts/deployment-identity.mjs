@@ -18,7 +18,7 @@ export function deploymentIdentity(env, config) {
   if (env.VERCEL_GIT_PROVIDER !== 'github' || !OWNER.test(owner || '')
       || !REPO.test(repo || '') || repo === '.' || repo === '..'
       || repo.toLowerCase().endsWith('.git') || !SHA.test(commit || '')
-      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5, 6].includes(config?.step)
+      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5, 6, 7].includes(config?.step)
       || (config.step === 2 && (!Array.isArray(allowedRoutes)
         || allowedRoutes.length !== 1 || allowedRoutes[0] !== '/api/notes'))
       || (config.step >= 3 && (!Array.isArray(allowedRoutes)

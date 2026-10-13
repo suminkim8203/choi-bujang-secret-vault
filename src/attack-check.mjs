@@ -5,7 +5,7 @@ import { decide } from './decider.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5, 6].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5, 6, 7].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -93,6 +93,16 @@ export async function runAttackChecks(config) {
       checks.push({ attackId: 'device_registration_fixture',
         expected: '로컬 가상 요청: 등록 허용, 미등록 및 누락 deny/device_not_registered',
         observed: '실행한 가상 요청 3건 일치; 운영 기기 등록·mTLS 연결의 증거는 아님' });
+    }
+    if (config.step >= 7) {
+      const { suspicious } = fixtureRequests();
+      const before = await decide(suspicious);
+      const after = await decide({ ...suspicious, stepUp: { verified: true, authAgeSeconds: 60 } });
+      if (before.decision !== 'step_up' || before.reasonCode !== 'step_up_required'
+          || after.decision !== 'allow') throw new Error('복합 이상 가상 요청 재확인 판정 실패');
+      checks.push({ attackId: 'step_up_fixture',
+        expected: '가상 복합 이상 사건은 step_up, 엔진 확인 재인증 뒤 allow',
+        observed: '로컬 가상 요청에서 확인 전 step_up·확인 후 allow; 실제 재로그인·자료 차단은 미실행' });
     }
     return checks;
   }
