@@ -1,0 +1,38 @@
+{
+  "schema": "aleph.student.xdr.patterns.v1",
+  "moduleKey": "exfiltration",
+  "patterns": [
+    {
+      "name": "exfiltration.large-novel-destination",
+      "condition": "처음 보는 외부 목적지에 실제50MB 이상 자료 전송",
+      "evidence": "MITRE T1048의 기법과 경보의 명시 신호를 비교하며 일반 활동과 구분합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1048/"
+    },
+    {
+      "name": "exfiltration.offhours-archive-transfer",
+      "condition": "업무 시간 밖 대용량 압축 파일/반복 전송",
+      "evidence": "MITRE T1048의 기법과 경보의 명시 신호를 비교하며 일반 활동과 구분합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1048/"
+    },
+    {
+      "name": "exfiltration.repeated-channel-transfer",
+      "condition": "명령 통로·낯선 포트와 대용량 반복 전송의 결합",
+      "evidence": "MITRE T1041의 기법과 경보의 명시 신호를 비교하며 일반 활동과 구분합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1041/"
+    },
+    {
+      "name": "exfiltration.evidence-review",
+      "condition": "신호 일부만 있거나 증거가 누락·충돌해 차단 근거가 부족함",
+      "evidence": "명확한 패턴과 단순 이름·심각도는 구분합니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1048/"
+    },
+    {
+      "name": "exfiltration.normal-event",
+      "condition": "확인된 정상 조회·로그인·기존 업무 활동",
+      "evidence": "정상 행위는 기술명·경보 수준만으로 차단하지 않습니다.",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1048/"
+    }
+  ],
+  "policy": "0.85 이상 block,0.5 이상 alert,그 미만 record. 반복·수량·50MB는 실습 정책이며 공식 표준 임계치가 아닙니다.",
+  "limits": "가상 한국어 집계 경보를 해석하며 실제 PC 인벤토리·권한·통신 원문 수집과 운영 집행은 미연결입니다."
+}

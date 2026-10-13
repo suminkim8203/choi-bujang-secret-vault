@@ -61,3 +61,13 @@
 {"moduleKey":"privilege","alertId":"pv-15","observedAt":"2026-09-27T04:17:05.000Z","action":"alert"}
 {"moduleKey":"privilege","alertId":"pv-16","observedAt":"2026-09-27T05:07:22.000Z","action":"alert"}
 {"moduleKey":"privilege","alertId":"pv-17","observedAt":"2026-09-27T06:19:41.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-11","observedAt":"2026-09-27T00:24:10.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-12","observedAt":"2026-09-27T00:52:22.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-13","observedAt":"2026-09-27T01:17:36.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-14","observedAt":"2026-09-27T01:46:04.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-15","observedAt":"2026-09-27T02:19:13.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-16","observedAt":"2026-09-27T03:13:29.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-17","observedAt":"2026-09-27T04:21:07.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-18","observedAt":"2026-09-27T05:12:44.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-19","observedAt":"2026-09-27T06:06:18.000Z","action":"alert"}
+{"moduleKey":"exfiltration","alertId":"ex-20","observedAt":"2026-09-27T06:55:02.000Z","action":"alert"}

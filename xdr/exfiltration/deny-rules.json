@@ -1,0 +1,168 @@
+{
+  "schema": "aleph.student.xdr.overlay.v1",
+  "rules": [
+    {
+      "id": "xdr.exfiltration.ex-01",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-01",
+      "targetKind": "destination",
+      "targetValue": "203.0.113.50",
+      "sourceAddress": "192.0.2.20",
+      "observedAt": "2026-09-27T00:16:03.000Z",
+      "expiresAt": "2026-09-27T00:31:03.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-02",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-02",
+      "targetKind": "destination",
+      "targetValue": "198.51.100.40",
+      "sourceAddress": "192.0.2.20",
+      "observedAt": "2026-09-27T00:16:48.000Z",
+      "expiresAt": "2026-09-27T00:31:48.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-03",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-03",
+      "targetKind": "destination",
+      "targetValue": "203.0.113.50",
+      "sourceAddress": "198.51.100.20",
+      "observedAt": "2026-09-27T01:05:14.000Z",
+      "expiresAt": "2026-09-27T01:20:14.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-04",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-04",
+      "targetKind": "destination",
+      "targetValue": "198.51.100.40",
+      "sourceAddress": "203.0.113.20",
+      "observedAt": "2026-09-27T01:20:07.000Z",
+      "expiresAt": "2026-09-27T01:35:07.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-05",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-05",
+      "targetKind": "destination",
+      "targetValue": "203.0.113.55",
+      "sourceAddress": "192.0.2.25",
+      "observedAt": "2026-09-27T02:04:26.000Z",
+      "expiresAt": "2026-09-27T02:19:26.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-06",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-06",
+      "targetKind": "destination",
+      "targetValue": "192.0.2.90",
+      "sourceAddress": "198.51.100.25",
+      "observedAt": "2026-09-27T03:02:19.000Z",
+      "expiresAt": "2026-09-27T03:17:19.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-07",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-07",
+      "targetKind": "destination",
+      "targetValue": "198.51.100.45",
+      "sourceAddress": "203.0.113.25",
+      "observedAt": "2026-09-27T04:12:08.000Z",
+      "expiresAt": "2026-09-27T04:27:08.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-08",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-08",
+      "targetKind": "destination",
+      "targetValue": "203.0.113.60",
+      "sourceAddress": "192.0.2.26",
+      "observedAt": "2026-09-27T05:03:41.000Z",
+      "expiresAt": "2026-09-27T05:18:41.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-09",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-09",
+      "targetKind": "destination",
+      "targetValue": "203.0.113.61",
+      "sourceAddress": "198.51.100.26",
+      "observedAt": "2026-09-27T06:08:12.000Z",
+      "expiresAt": "2026-09-27T06:23:12.000Z"
+    },
+    {
+      "id": "xdr.exfiltration.ex-10",
+      "moduleKey": "exfiltration",
+      "alertId": "ex-10",
+      "targetKind": "destination",
+      "targetValue": "198.51.100.46",
+      "sourceAddress": "203.0.113.26",
+      "observedAt": "2026-09-27T07:01:05.000Z",
+      "expiresAt": "2026-09-27T07:16:05.000Z"
+    }
+  ],
+  "alerts": [
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-11",
+      "observedAt": "2026-09-27T00:24:10.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-12",
+      "observedAt": "2026-09-27T00:52:22.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-13",
+      "observedAt": "2026-09-27T01:17:36.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-14",
+      "observedAt": "2026-09-27T01:46:04.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-15",
+      "observedAt": "2026-09-27T02:19:13.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-16",
+      "observedAt": "2026-09-27T03:13:29.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-17",
+      "observedAt": "2026-09-27T04:21:07.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-18",
+      "observedAt": "2026-09-27T05:12:44.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-19",
+      "observedAt": "2026-09-27T06:06:18.000Z",
+      "action": "alert"
+    },
+    {
+      "moduleKey": "exfiltration",
+      "alertId": "ex-20",
+      "observedAt": "2026-09-27T06:55:02.000Z",
+      "action": "alert"
+    }
+  ],
+  "engineConnected": false
+}

@@ -46,7 +46,13 @@ respond는 원본 경보 시각에서15분 만료·근거 ID를 가진 로컬 �
 
 공식26건을 보존했고 실제 xdr:run은 block9/alert8/record9입니다. 원격/다중 계정 관리자 추가·즉시 권한 명령, 제거 뒤 관리자 재추가, 낯선 주소/시간의 관리자 실행·다른 계정 권한을 사용한 징후를 구분합니다. 정상 관리 계정의 평소 로그인·그룹/세션 조회·로그아웃은 기록이며 취소·실패·단순 권한 변경은 알림입니다. [MITRE T1068](https://attack.mitre.org/techniques/T1068/)과 [T1078](https://attack.mitre.org/techniques/T1078/)을 참고하지만 실제 취약점 악용·계정 도용을 운영에서 확정했다고 하지 않습니다.
 
-독립 decide/원본26행 다섯 필드/근거 상수/계정 대상15분 만료 거부 후보9개·알림8개,3검사 통과입니다. 실제 검증된 사용자 ID 매핑·운영 세션 회수는 미연결이며 기존 판정 규칙을 유지합니다. 포털 제출·판정은 아직 미실행입니다. 재현: npm run xdr:run -- privilege → node xdr/privilege/read-alerts.mjs → node xdr/privilege/respond.mjs → node --test test/xdr-privilege.test.mjs.
+독립 decide/원본26행 다섯 필드/근거 상수/계정 대상15분 만료 거부 후보9개·알림8개,3검사 통과입니다. 실제 검증된 사용자 ID 매핑·운영 세션 회수는 미연결이며 기존 판정 규칙을 유지합니다. 실제 첫 제출2eef528bd706832387eea7d656d53df2bc46a004는100/100·조건4개·가점3개 통과했습니다. [판정](docs/evidence/xdr05-100.png). 재현: npm run xdr:run -- privilege → node xdr/privilege/read-alerts.mjs → node xdr/privilege/respond.mjs → node --test test/xdr-privilege.test.mjs.
+
+## 보너스 xdr-06 · 자료 유출 (2026-10-13)
+
+공식30건 보존, 실제 xdr:run 결과 block10/alert10/record10입니다. 실제 전송·50MB 이상 크기와 낯선 외부 목적지 또는 반복/비업무 시간/명령 통로 신호의 결합만 차단 후보로 둡니다. 50MB는 이 실습 정책이며 표준 임계치라고 하지 않습니다. 중간/작은 전송·압축만 수행·실패·불충분한 변화는 알림, 정상 읽기·작은 동기화·로그아웃 등은 기록입니다. [MITRE T1041](https://attack.mitre.org/techniques/T1041/)과 [T1048](https://attack.mitre.org/techniques/T1048/)을 대조했습니다.
+
+독립 decide/원본30행 다섯 필드/근거 상수/목적지 대상15분 만료·경보ID 후보10개·알림10개와3검사 통과입니다. 실제 목적지 검증·운영 통신 차단은 미연결이고 기존 판정 규칙을 유지합니다. 포털 판정은 아직 미실행입니다. 재현: npm run xdr:run -- exfiltration → node xdr/exfiltration/read-alerts.mjs → node xdr/exfiltration/respond.mjs → node --test test/xdr-exfiltration.test.mjs.
 
 ## 11단계 · 설치형 웹앱과 서버 기기 승인 화면 (2026-10-13)
 
