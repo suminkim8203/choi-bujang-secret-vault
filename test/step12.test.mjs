@@ -3,6 +3,9 @@ import{collectOperationsReport}from'../src/operations-report.mjs';import{createC
 import{runDecisionCheck}from'../src/decision-check.mjs';import{runDetectionCheck}from'../src/detection-check.mjs';
 import{deploymentIdentity}from'../scripts/deployment-identity.mjs';
 import{runAttackChecks}from'../src/attack-check.mjs';
+import{assertOperationRecord,sealOperationRecord}from'../src/operation-record.mjs';
+import{readOperationsReport,createOperationStore}from'../src/operation-store.mjs';
+import{createHome}from'../api/home.js';
 const config=JSON.parse(await readFile(new URL('../aleph.config.json',import.meta.url),'utf8'));
 const commit='a'.repeat(40),policy=await readFile(new URL('../recovery/policy-v9.json',import.meta.url),'utf8');
 function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
@@ -48,12 +51,10 @@ test('bundle and screen share one plan while checker uses GET only and stays run
  assert.equal(screen.counts.notRun,checks.filter(c=>c.observed==='not_run').length);
  assert.deepEqual(screen.ownerVerification,{list:'not_run',noteRestore:'not_run',includedInRepresentativeCounts:false});
 });
-test('failed body validation and unmatched deployments never become successful check counts',async()=>{
-  const{send}=backend({invalidAnonymousBody:true});const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
-  assert.equal(report.complete,false);assert.equal(report.counts.executed,2);assert.equal(report.counts.notRun,18);
-  assert.equal(report.counts.failed,1);assert.equal(report.counts.blocked,0);
-  assert.ok(!JSON.stringify(report).includes('fixture-response-not-exported'));
-  const wrong=backend({wrongCommit:true});await assert.rejects(collectOperationsReport({config,send:wrong.send,commit}));
+test('failed body validation and unmatched deployments cannot create a confirmed success record',async()=>{
+ const{send}=backend({invalidAnonymousBody:true});
+ await assert.rejects(collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy}),/operation_checks_incomplete/u);
+ const wrong=backend({wrongCommit:true});await assert.rejects(collectOperationsReport({config,send:wrong.send,commit}));
 });
 test('fixed decision API cases stay synthetic and preserve normal, risk and other-zone expectations',async()=>{
   for(const[name,expected]of[['s06-registered','allow'],['s07-risk','step_up'],['s08-other-zone','deny']]){
@@ -88,7 +89,7 @@ test('server-rendered root displays the same real report without script executio
  assert.equal((html.match(/<tbody id="ops-rows">[\s\S]*?<\/tbody>/u)[0].match(/<tr>/gu)||[]).length,20);
  const bad=structuredClone(report);bad.counts.executed=41;assert.throws(()=>renderOperations(template,bad));
  const payload=structuredClone(report);payload.rows[0].path='</script><img src=x>';
- const escaped=renderOperations(template,payload);assert.ok(!escaped.includes('</script><img src=x>'));
+ const escaped=renderOperations(template,sealOperationRecord(payload));assert.ok(!escaped.includes('</script><img src=x>'));
  assert.ok(escaped.includes('&lt;/script&gt;'));assert.ok(escaped.includes('\\u003c/script>'));
 });
 
@@ -106,8 +107,52 @@ test('receipt-array API matches the full table, preserves unrun rows and rejects
  const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
  assert.deepEqual([report.total,report.blocked,report.failed,report.notRun],[20,14,0,6]);
  assert.equal(report.total,report.blocked+report.failed+report.notRun);
- assert.equal(report.counts.blocked,7);
+ assert.equal(report.counts.denied,7);
  const html=renderOperations(await readFile(new URL('../views/index.html',import.meta.url),'utf8'),report);
  for(const[k,v]of Object.entries({total:20,blocked:14,failed:0,notRun:6}))assert.ok(html.includes(`data-k="${k}">${v}</dd>`));
  const bad=structuredClone(report);bad.blocked=99;assert.throws(()=>renderOperations('',bad));
  });
+
+function memoryStore(){let saved=null;return{read:async()=>saved&&structuredClone(saved),insert:async report=>{saved??=structuredClone(report);}};}
+test('independent API and HTML handlers repeatedly read identical confirmed IDs, times, hash and summary',async()=>{
+ const store=memoryStore();let runs=0;const collect=async()=>{runs++;return collectOperationsReport({config,send:backend().send,commit,readPolicyBackup:async()=>policy});};
+ const read=()=>readOperationsReport({config,commit,store,collect});
+ const api=createChecksHandler({config,collect:read,env:()=>({VERCEL_GIT_COMMIT_SHA:commit})});
+ const first=response();await api({method:'GET',query:{}},first);
+ const independent=createChecksHandler({config,collect:read,env:()=>({VERCEL_GIT_COMMIT_SHA:commit})});
+ const second=response();await independent({method:'GET',query:{}},second);
+ const home=createHome({collect:read,env:()=>({VERCEL_GIT_COMMIT_SHA:commit})});
+ const html={...response(),send(value){this.html=value;return this;}};await home({method:'GET'},html);
+ const embedded=JSON.parse(html.html.match(/id="ops-record">([\s\S]*?)<\/script>/u)[1]);
+ assert.equal(runs,1);assert.deepEqual(first.body,second.body);assert.deepEqual(first.body,embedded);
+ assert.equal(first.body.blocked,first.body.counts.blocked);assert.equal(first.body.counts.denied,7);
+ assert.deepEqual(first.body.attackAttempts,await runAttackChecks(config,{send:backend().send}));
+ assert.ok(first.body.attackAttempts.every(a=>Object.keys(a).sort().join(',')==='attackId,expected,observed'));
+});
+test('concurrent workers return the winning immutable database record rather than their own rejected candidate',async()=>{
+ const store=memoryStore();let arrive=0,release;const barrier=new Promise(resolve=>release=resolve);
+ const collect=async()=>{const report=await collectOperationsReport({config,send:backend().send,commit,readPolicyBackup:async()=>policy});
+ const candidate=sealOperationRecord({...report,checkedAt:arrive===0?'2026-10-13T01:00:00Z':'2026-10-13T01:01:00Z'});
+ if(++arrive===2)release();await barrier;return candidate;};
+ const[a,b]=await Promise.all([readOperationsReport({config,commit,store,collect}),readOperationsReport({config,commit,store,collect})]);
+ assert.equal(arrive,2);assert.deepEqual(a,b);assert.deepEqual(a,await store.read(commit));
+});
+test('record tampering, private fields and unavailable storage fail closed without fallback counters',async()=>{
+ const report=await collectOperationsReport({config,send:backend().send,commit,readPolicyBackup:async()=>policy});
+ const changed=structuredClone(report);changed.rows[0].requestId='different';assert.throws(()=>assertOperationRecord(changed),/operation_hash_mismatch/u);
+ const privateData=structuredClone(report);privateData.rows[0].body='fictional-private-response';assert.throws(()=>sealOperationRecord(privateData));
+ let runs=0;await assert.rejects(readOperationsReport({config,commit,store:{read:async()=>{throw Error('unavailable');}},collect:async()=>{runs++;return report;}}));assert.equal(runs,0);
+});
+test('REST store only reads and insert-if-absent, scopes the table and never returns upstream errors or key values',async()=>{
+ let saved,requests=[];const fakeKey='sb_'+'secret_'+'fixture-not-real';const env=()=>({SUPABASE_URL:config.database.url,SUPABASE_SECRET_KEY:fakeKey});
+ const send=async(target,options)=>{const url=new URL(target);requests.push({path:url.pathname,method:options.method??'GET',prefer:options.headers.Prefer});
+ if(options.method==='POST'){const candidate=JSON.parse(options.body);saved??=candidate;return new Response(null,{status:201});}
+ return new Response(JSON.stringify(saved?[{report:saved.report}]:[]));};
+ const store=createOperationStore({config,env,send});assert.equal(await store.read(commit),null);
+ const record=await collectOperationsReport({config,send:backend().send,commit,readPolicyBackup:async()=>policy});
+ await store.insert(record);const loser=sealOperationRecord({...record,checkedAt:'2026-10-13T02:00:00Z'});await store.insert(loser);
+ assert.deepEqual(await store.read(commit),record);assert.ok(requests.every(r=>r.path==='/rest/v1/aleph_operations_reports'));
+ assert.ok(requests.filter(r=>r.method==='POST').every(r=>r.prefer==='resolution=ignore-duplicates,return=minimal'));
+ const bad=createOperationStore({config,env,send:async()=>new Response('fictional-private-upstream-error',{status:403})});
+ await assert.rejects(bad.read(commit),error=>error.message==='operation_store_unavailable'&&!error.message.includes(fakeKey));
+});

@@ -1,13 +1,10 @@
+import{assertOperationRecord}from'./operation-record.mjs';
 const escape=value=>String(value).replace(/[&<>"']/gu,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 export function renderOperations(template,report){
-  if(report?.schema!=='aleph.operations.report.v1'||!Array.isArray(report.rows)||report.rows.length>50
-    ||report.counts.total!==report.rows.length||report.counts.executed!==report.rows.filter(r=>r.status!==null).length
-    ||report.counts.notRun!==report.rows.filter(r=>r.result==='not_run').length
-    ||report.total!==report.counts.total||report.blocked!==report.counts.matched
-    ||report.failed!==report.counts.failed||report.notRun!==report.counts.notRun)throw Error('operations_counts_mismatch');
+  assertOperationRecord(report);
   const text={
-    'ops-record-total':report.total,'ops-matched':report.blocked,'ops-total':report.counts.executed,'ops-blocked':report.counts.blocked,'ops-failed':report.failed,'ops-not-run':report.notRun,
-    'ops-meta':`확인 시각 ${report.checkedAt} · 검사한 커밋 ${report.commit} · ${report.complete?'대표 점검 완료':'점검 중단'}`,
+    'ops-record-total':report.total,'ops-matched':report.blocked,'ops-total':report.counts.executed,'ops-blocked':report.counts.denied,'ops-failed':report.failed,'ops-not-run':report.notRun,
+    'ops-meta':`확인 시각 ${report.checkedAt} · 확정 기록 ${report.recordId} · 지문 ${report.recordHash}`,
     'ops-rules':report.rules.join(', '),'ops-detect':`고정 가상 사건 API ${report.detection.cases}건 · 실제 사건 전달 미연결`,
     'ops-revoke':'실제 운영 접속 회수 미실행·미연결',
     'ops-restore':`정책 사본 ${report.recovery.policyRevision??'확인 불가'} · 검증 ${report.recovery.policyBackupVerified?'확인':'실패'} · 이번 점검의 로그인 메모 복구 미실행`,

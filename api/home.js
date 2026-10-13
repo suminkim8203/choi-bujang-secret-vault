@@ -1,6 +1,6 @@
 import{readFile}from'node:fs/promises';import config from'../aleph.config.json'with{type:'json'};
-import{collectOperationsReport}from'../src/operations-report.mjs';import{renderOperations}from'../src/render-operations.mjs';
-export function createHome({collect=collectOperationsReport,readTemplate=()=>readFile(new URL('../views/index.html',import.meta.url),'utf8'),env=()=>process.env}={}){
+import{readOperationsReport}from'../src/operation-store.mjs';import{renderOperations}from'../src/render-operations.mjs';
+export function createHome({collect=readOperationsReport,readTemplate=()=>readFile(new URL('../views/index.html',import.meta.url),'utf8'),env=()=>process.env}={}){
  return async function handler(request,response){
   response.setHeader('Cache-Control','no-store');response.setHeader('X-Content-Type-Options','nosniff');
   response.setHeader('Content-Type','text/html; charset=utf-8');

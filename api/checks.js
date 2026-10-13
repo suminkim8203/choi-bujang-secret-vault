@@ -1,10 +1,10 @@
 import { runDetectionCheck } from '../src/detection-check.mjs';
 import{runDecisionCheck}from'../src/decision-check.mjs';
-import{collectOperationsReport}from'../src/operations-report.mjs';
+import{readOperationsReport}from'../src/operation-store.mjs';
 import config from'../aleph.config.json'with{type:'json'};
 
 // 고정 가상 탐지 사례의 상태만 공개합니다. 실제 사건 입력·로그 읽기·회수 기능은 없습니다.
-export function createChecksHandler({config,collect=collectOperationsReport,env=()=>process.env}={}){
+export function createChecksHandler({config,collect=readOperationsReport,env=()=>process.env}={}){
   let running;
   return function handler(request, response) {
   response.setHeader('Cache-Control', 'no-store');
@@ -16,7 +16,8 @@ export function createChecksHandler({config,collect=collectOperationsReport,env=
   const query=request.query??{};
   const receiptArray=Object.keys(query).join(',')==='case'&&query.case==='s12-requests';
   if((Object.keys(query).length===0||receiptArray)&&config.step>=12){
-    // Coalesce concurrent public self-checks; do not store private records or claim judge results.
+    // Read the immutable database record; a missing record is collected once
+    // and inserted without overwriting a winner from another worker.
     running??=collect({config,commit:env().VERCEL_GIT_COMMIT_SHA}).finally(()=>{running=null;});
     return running.then(report=>receiptArray?(report.ready?response.status(200).json(report.rows)
       :response.status(503).json({error:'checks_unavailable'})):response.status(200).json(report))
