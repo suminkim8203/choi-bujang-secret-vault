@@ -5,7 +5,7 @@ import { decide } from './decider.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5, 6, 7, 8].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5, 6, 7, 8, 9].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -125,6 +125,25 @@ export async function runAttackChecks(config) {
       }
       checks.push({ attackId: 'resource_scope_fixture', expected: '가상 미허용 경로와 기능 경로 거부',
         observed: '로컬 가상 요청3건 deny 확인; API 소유자 점검과 구분' });
+    }
+    if (config.step >= 9) {
+      for (const caseId of ['s09-normal-read', 's09-boundary-read', 's09-burst-read',
+        's09-split-users', 's09-spread-read', 's09-nonread']) {
+        const result = await fetch(new URL(`/api/checks?case=${caseId}`, app), {
+          redirect: 'error', signal: AbortSignal.timeout(10000),
+          alephEvidence: { caseId, requestKey: 'read' },
+        });
+        let body;
+        try { body = await result.json(); } catch { /* No raw bodies in evidence. */ }
+        const expected = caseId === 's09-burst-read' ? 'propose_revocation' : 'observe';
+        if (result.status !== 200 || body?.synthetic !== true || body.ready !== true
+            || body.action !== expected || Object.keys(body).sort().join(',') !== 'action,ready,reasonCode,synthetic'
+            || body.reasonCode !== (expected === 'observe' ? null : 'burst_read')) {
+          throw new Error('배포된 가상 탐지 점검 확인 실패');
+        }
+        checks.push({ attackId: caseId, expected: `고정 가상 사건 결과 ${expected}`,
+          observed: `실제 점검 GET HTTP200; synthetic=true·ready=true·action=${expected}. 실제 접속 회수·경과 시간은 미검증` });
+      }
     }
     return checks;
   }
