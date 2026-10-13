@@ -9,7 +9,7 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
   const receipts=new Map();
   const caseFor=(url,options)=>{
     const q=url.href.match(/[?&]case=([^&#]+)/u)?.[1];
-    if(q)return({'s06-registered':'device_registration_fixture','s07-risk':'step_up_fixture','s08-other-zone':'resource_scope_fixture'})[q]??q;
+    if(q)return({'s06-registered':'device_registration_fixture','s07-risk':'step_up_fixture','s08-other-zone':'resource_scope_fixture','s12-requests':'operations_summary'})[q]??q;
     if(url.pathname==='/data.json')return'static_note_read';
     if(url.pathname==='/api/notes')return options.headers?.Authorization?'malformed_token':'anonymous_list';
     if(url.pathname.startsWith('/api/notes/'))return'anonymous_item';
@@ -61,7 +61,6 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
       visible = data?.sampleMarker === config.sampleMarker && Array.isArray(data.notes)
         && data.notes.length > 0;
       emptyStatic = Array.isArray(data?.notes) && data.notes.length === 0;
-      if(config.step>=12&&emptyStatic)receipts.get('static_note_read').jsonArrayLength=data.notes.length;
     } catch {
       // A non-JSON response is a failed check, not a successful deployment.
     }
@@ -234,10 +233,10 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
         observed:'실제 GET HTTP200; approved=false. 사용자 정보·기기 키 없음; 운영 등록 어댑터 미연결'});
     }
     if(includeOperations){
-      const summary=await fetch(new URL('/api/checks',app),{redirect:'error',signal:AbortSignal.timeout(20000),alephEvidence:{requestKey:'summary'}});
+      const summary=await fetch(new URL('/api/checks?case=s12-requests',app),{redirect:'error',signal:AbortSignal.timeout(20000),alephEvidence:{requestKey:'summary'}});
       const report=await summary.json();
-      if(summary.status!==200||report.schema!=='aleph.operations.report.v1'||report.ready!==true||report.counts.failed!==0)throw Error('operations_summary_not_ready');
-      receipts.get('operations_summary').jsonReady=report.ready;
+      if(summary.status!==200||!Array.isArray(report)||report.length!==14||report.some(r=>!Number.isInteger(r.status)||!r.requestId||!r.checkedAt))throw Error('operations_summary_not_ready');
+      receipts.get('operations_summary').jsonArrayLength=report.length;
       checks.splice(checks.findIndex(c=>c.attackId==='anonymous_delete'),1);
       checks.push({attackId:'operations_summary',expected:'실제 작전실 서버 API의 기록 준비 상태 확인',observed:''});
     }

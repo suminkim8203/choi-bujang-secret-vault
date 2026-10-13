@@ -14,10 +14,13 @@ export function createChecksHandler({config,collect=collectOperationsReport,env=
     return response.status(405).json({ error: 'method_not_allowed' });
   }
   const query=request.query??{};
-  if(Object.keys(query).length===0&&config.step>=12){
+  const receiptArray=Object.keys(query).join(',')==='case'&&query.case==='s12-requests';
+  if((Object.keys(query).length===0||receiptArray)&&config.step>=12){
     // Coalesce concurrent public self-checks; do not store private records or claim judge results.
     running??=collect({config,commit:env().VERCEL_GIT_COMMIT_SHA}).finally(()=>{running=null;});
-    return running.then(report=>response.status(200).json(report)).catch(()=>response.status(503).json({error:'checks_unavailable'}));
+    return running.then(report=>receiptArray?(report.ready?response.status(200).json(report.rows.filter(r=>r.status!==null))
+      :response.status(503).json({error:'checks_unavailable'})):response.status(200).json(report))
+      .catch(()=>response.status(503).json({error:'checks_unavailable'}));
   }
   if (Object.keys(query).join(',') !== 'case'||typeof query.case!=='string') {
     return response.status(400).json({ error: 'invalid_check_case' });

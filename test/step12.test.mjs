@@ -14,7 +14,7 @@ function backend({invalidAnonymousBody=false,wrongCommit=false}={}){
     else if(url.pathname==='/data.json')body={notes:[]};
     else if(url.pathname==='/manifest.json')body={display:'standalone',start_url:'/',name:'fixture',icons:[{}]};
     else if(url.pathname==='/api/device/status')body={approved:false,reason:'device_not_registered'};
-    else if(url.pathname==='/api/checks')body=url.search?runDetectionCheck(url.searchParams.get('case'))??await runDecisionCheck(url.searchParams.get('case'))
+    else if(url.pathname==='/api/checks')body=url.searchParams.get('case')==='s12-requests'?Array.from({length:14},(_,i)=>({status:200,requestId:`receipt_${i}`,checkedAt:'2026-10-13T00:00:00Z'})):url.search?runDetectionCheck(url.searchParams.get('case'))??await runDecisionCheck(url.searchParams.get('case'))
       :{schema:'aleph.operations.report.v1',ready:true,counts:{failed:0}};
     else if(url.pathname.startsWith('/rest/v1/')){status=401;body={code:'42501'};}
     else{status=401;body=invalidAnonymousBody?{private:'fixture-response-not-exported'}:{error:'login_required'};}
@@ -40,7 +40,7 @@ test('bundle checker uses GET only and stays runnable when the sandbox URL omits
  let checks;try{globalThis.URL=LimitedURL;checks=await runAttackChecks(config,{send});}finally{globalThis.URL=NativeURL;}
  assert.equal(calls.length,15);assert.ok(calls.every(c=>(c.options.method??'GET')==='GET'));
  assert.equal(checks.filter(c=>c.observed==='not_run').length,5);
- assert.equal(checks.length,20);assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)(?:; jsonReady=true|; jsonArrayLength=0)?$/u.test(c.observed)));
+ assert.equal(checks.length,20);assert.ok(checks.every(c=>c.observed==='not_run'||/^HTTP (?:200|401|403)(?:; jsonReady=true|; jsonArrayLength=14)?$/u.test(c.observed)));
  assert.ok(calls.every(c=>checks.some(x=>x.attackId===c.options.alephEvidence.caseId)));
 });
 test('failed body validation and unmatched deployments never become successful check counts',async()=>{
@@ -85,4 +85,13 @@ test('server-rendered root displays the same real report without script executio
  const payload=structuredClone(report);payload.rows[0].path='</script><img src=x>';
  const escaped=renderOperations(template,payload);assert.ok(!escaped.includes('</script><img src=x>'));
  assert.ok(escaped.includes('&lt;/script&gt;'));assert.ok(escaped.includes('\\u003c/script>'));
+});
+
+test('receipt-array API returns only actually completed observations and no incomplete success',async()=>{
+ const{send}=backend();const report=await collectOperationsReport({config,send,commit,readPolicyBackup:async()=>policy});
+ const handler=createChecksHandler({config,collect:async()=>report,env:()=>({VERCEL_GIT_COMMIT_SHA:commit})});
+ const res=response();await handler({method:'GET',query:{case:'s12-requests'}},res);
+ assert.equal(res.code,200);assert.equal(res.body.length,14);assert.ok(res.body.every(r=>r.status!==null&&r.requestId&&r.checkedAt));
+ const bad=createChecksHandler({config,collect:async()=>({...report,ready:false})});const failed=response();
+ await bad({method:'GET',query:{case:'s12-requests'}},failed);assert.equal(failed.code,503);assert.deepEqual(Object.keys(failed.body),['error']);
 });
