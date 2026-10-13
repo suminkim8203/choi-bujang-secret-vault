@@ -51,7 +51,7 @@ test('public files contain no note rows and the page reads the server route', as
   for (const path of ['data.json', 'public/data.json']) {
     assert.deepEqual(JSON.parse(await readFile(new URL('../' + path, import.meta.url), 'utf8')), { notes: [] });
   }
-  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const html = await readFile(new URL('../views/index.html', import.meta.url), 'utf8');
   const app = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
   assert.match(app, /api\('\/api\/(?:my\/)?notes'/u);
   assert.doesNotMatch(app, /SUPABASE_SECRET_KEY|sb_secret_/u);

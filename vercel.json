@@ -13,5 +13,5 @@
     { "source": "/api/notes/:id", "destination": "/api/note" },
     { "source": "/api/announcements/:id", "destination": "/api/announcement" }
   ],
-  "functions": { "api/home.js": { "includeFiles": "public/index.html" } }
+  "functions": { "api/home.js": { "includeFiles": "views/index.html" } }
 }
