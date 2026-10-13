@@ -235,7 +235,8 @@ export async function runAttackChecks(config,{send=globalThis.fetch,onResponse,o
     if(includeOperations){
       const summary=await fetch(new URL('/api/checks?case=s12-requests',app),{redirect:'error',signal:AbortSignal.timeout(20000),alephEvidence:{requestKey:'summary'}});
       const report=await summary.json();
-      if(summary.status!==200||!Array.isArray(report)||report.length!==14||report.some(r=>!Number.isInteger(r.status)||!r.requestId||!r.checkedAt))throw Error('operations_summary_not_ready');
+      if(summary.status!==200||!Array.isArray(report)||report.length!==22||report.filter(r=>r.status!==null).length!==14
+        ||report.some(r=>r.status===null?(r.result!=='not_run'||r.requestId!==null||r.checkedAt!==null):(!Number.isInteger(r.status)||!r.requestId||!r.checkedAt)))throw Error('operations_summary_not_ready');
       receipts.get('operations_summary').jsonArrayLength=report.length;
       checks.splice(checks.findIndex(c=>c.attackId==='anonymous_delete'),1);
       checks.push({attackId:'operations_summary',expected:'실제 작전실 서버 API의 기록 준비 상태 확인',observed:''});

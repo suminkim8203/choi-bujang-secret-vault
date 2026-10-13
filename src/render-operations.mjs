@@ -1,10 +1,10 @@
 const escape=value=>String(value).replace(/[&<>"']/gu,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
 export function renderOperations(template,report){
   if(report?.schema!=='aleph.operations.report.v1'||!Array.isArray(report.rows)||report.rows.length>50
-    ||report.counts.executed!==report.rows.filter(r=>r.status!==null).length
+    ||report.counts.total!==report.rows.length||report.counts.executed!==report.rows.filter(r=>r.status!==null).length
     ||report.counts.notRun!==report.rows.filter(r=>r.result==='not_run').length)throw Error('operations_counts_mismatch');
   const text={
-    'ops-total':report.counts.executed,'ops-blocked':report.counts.blocked,'ops-failed':report.counts.failed,'ops-not-run':report.counts.notRun,
+    'ops-record-total':report.counts.total,'ops-total':report.counts.executed,'ops-blocked':report.counts.blocked,'ops-failed':report.counts.failed,'ops-not-run':report.counts.notRun,
     'ops-meta':`확인 시각 ${report.checkedAt} · 검사한 커밋 ${report.commit} · ${report.complete?'대표 점검 완료':'점검 중단'}`,
     'ops-rules':report.rules.join(', '),'ops-detect':`고정 가상 사건 API ${report.detection.cases}건 · 실제 사건 전달 미연결`,
     'ops-revoke':'실제 운영 접속 회수 미실행·미연결',

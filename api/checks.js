@@ -18,7 +18,7 @@ export function createChecksHandler({config,collect=collectOperationsReport,env=
   if((Object.keys(query).length===0||receiptArray)&&config.step>=12){
     // Coalesce concurrent public self-checks; do not store private records or claim judge results.
     running??=collect({config,commit:env().VERCEL_GIT_COMMIT_SHA}).finally(()=>{running=null;});
-    return running.then(report=>receiptArray?(report.ready?response.status(200).json(report.rows.filter(r=>r.status!==null))
+    return running.then(report=>receiptArray?(report.ready?response.status(200).json(report.rows)
       :response.status(503).json({error:'checks_unavailable'})):response.status(200).json(report))
       .catch(()=>response.status(503).json({error:'checks_unavailable'}));
   }
