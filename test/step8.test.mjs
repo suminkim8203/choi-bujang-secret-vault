@@ -21,6 +21,9 @@ test('resource allowlist pairs exact verified service, method, path and route', 
   assert.equal((await decide({ ...normal, path: '/notes/33333333-3333-4333-8333-333333333333',
     signals: { source: 'none', region: 'unknown', network: 'unknown', hour: 14 } })).decision, 'allow');
   assert.equal((await decide({ ...normal, subjectId: 'other_fixture' })).decision, 'deny');
+  const deployedPath = '/api/notes/33333333-3333-4333-8333-333333333333';
+  assert.equal((await decide({ ...normal, path: deployedPath, route: 'GET /api/notes/:id' })).decision, 'allow');
+  assert.equal((await decide({ ...normal, path: '/api/notes/export', route: 'GET /api/notes/:id' })).decision, 'deny');
 });
 
 const a = '11111111-1111-4111-8111-111111111111';

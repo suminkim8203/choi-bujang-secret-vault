@@ -4,16 +4,19 @@
 function permittedResource(request) {
   if (request.service !== 'notes') return false;
   const { method, path, route } = request;
-  if (path === '/notes') return ['GET', 'POST'].includes(method) && route === `${method} /notes`;
+  if (path === '/notes' || path === '/api/notes') {
+    return ['GET', 'POST'].includes(method) && route === `${method} ${path}`;
+  }
   // 실제 메모 ID는 UUID입니다. 공식 로컬 연습의 demo는 가상 출처에서만 허용합니다.
   const uuidPath = typeof path === 'string'
-    && /^\/notes\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(path);
+    && /^\/(?:api\/)?notes\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(path);
   // 연습용 demo는 공식 fixture-7의 정상 주체 learner_fixture로 소유 범위를 한정합니다.
   // 같은 경로로 다른 가명 신원이 요청하면 가상 자원의 소유 범위를 벗어납니다.
   const practicePath = path === '/notes/demo' && request.signals?.source === 'judge_fixture'
     && request.subjectId === 'learner_fixture';
   if (!uuidPath && !practicePath) return false;
-  return ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} /notes/:id`;
+  const base = path.startsWith('/api/') ? '/api/notes' : '/notes';
+  return ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} ${base}/:id`;
 }
 export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'resource_scope']);
 

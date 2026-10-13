@@ -9,7 +9,7 @@ function report(label, result) { $('results').textContent += `${label}: ${result
 function assert(value) { if (!value) throw new Error('검증 실패: 결과를 확인해 주세요.'); }
 function controls() {
   const differentOwner = preparedOwner && preparedOwner !== session?.user?.id;
-  for (const id of ['prepare', 'cross', 'finish']) $(id).disabled = busy || !session || differentOwner;
+  for (const id of ['prepare', 'read-other', 'cross', 'finish']) $(id).disabled = busy || !session || differentOwner;
   $('state').textContent = session ? '로그인됨 — 실제 운영 요청으로 확인합니다.' : '로그인되지 않았습니다. 자료실에서 로그인해 주세요.';
 }
 async function request(path, method = 'GET', data) {
@@ -50,6 +50,13 @@ $('prepare').addEventListener('click', () => run(async () => {
   const foreignInsert = await request('/api/notes', 'POST', { title: text.title, body: text.body, owner_id: fakeOwner });
   report('API 타인 소유 추가 시도', `HTTP${foreignInsert.status}`); assert(foreignInsert.status === 400);
 }));
+$('read-other').addEventListener('click', () => run(async () => {
+  const id = $('other-id').value.trim();
+  assert(UUID.test(id) && id !== $('own-id').value);
+  const denied = await request(item(id));
+  report('상대 메모 조회', `HTTP${denied.status}`);
+  assert(denied.status === 404 && denied.body && Object.keys(denied.body).join(',') === 'error');
+}));
 $('cross').addEventListener('click', () => run(async () => {
   const id = $('other-id').value.trim();
   assert(UUID.test(id) && !seeded.test(id) && id !== $('own-id').value);
@@ -80,9 +87,10 @@ $('finish').addEventListener('click', () => run(async () => {
 try {
   const [metadata, descriptor] = await Promise.all([fetch('/aleph.json', { cache: 'no-store' }), fetch('/database.json', { cache: 'no-store' })]);
   assert(metadata.ok && descriptor.ok);
-  const deployed = await metadata.json(); database = await descriptor.json(); assert(deployed.step === 5);
-  $('identity').textContent = `5단계 운영 저장점 ${deployed.commit}`;
+  const deployed = await metadata.json(); database = await descriptor.json();
+  assert(Number.isInteger(deployed.step) && deployed.step >= 5 && deployed.step <= 12);
+  $('identity').textContent = `${deployed.step}단계 운영 저장점 ${deployed.commit}`;
   client = window.supabase.createClient(database.url, database.publishableKey);
   client.auth.onAuthStateChange((_event, next) => { session = next; controls(); });
   const { data, error } = await client.auth.getSession(); assert(!error); session = data.session; controls();
-} catch { $('state').textContent = '로그인 설정 또는 5단계 운영 배포를 확인할 수 없습니다.'; }
+} catch { $('state').textContent = '로그인 설정 또는 운영 배포를 확인할 수 없습니다.'; }
