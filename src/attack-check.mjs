@@ -5,7 +5,7 @@ import { decide } from './decider.mjs';
 // The student changes this check as each stage adds an attack to the same app.
 // Never return tokens, private keys, real names, or note bodies.
 export async function runAttackChecks(config) {
-  if (![1, 2, 3, 4, 5, 6, 7].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
+  if (![1, 2, 3, 4, 5, 6, 7, 8].includes(config.step)) throw new Error('이 단계의 공격 점검을 src/attack-check.mjs에 구현해 주세요.');
   let app;
   try {
     app = new URL(config.publicAppUrl);
@@ -103,6 +103,19 @@ export async function runAttackChecks(config) {
       checks.push({ attackId: 'step_up_fixture',
         expected: '가상 복합 이상 사건은 step_up, 엔진 확인 재인증 뒤 allow',
         observed: '로컬 가상 요청에서 확인 전 step_up·확인 후 allow; 실제 재로그인·자료 차단은 미실행' });
+    }
+    if (config.step >= 8) {
+      const announcement = await fetch(new URL(`/api/announcements/${id}`, app), {
+        method: 'PUT', redirect: 'error', signal: AbortSignal.timeout(10000) });
+      if (announcement.status !== 401) throw new Error('익명 공지 수정 거부 확인 실패');
+      checks.push({ attackId: 'anonymous_announcement_update', expected: '익명 공지 수정 HTTP401',
+        observed: '실제 PUT 요청 HTTP401; 공지 구역 접근 거부' });
+      const { normal } = fixtureRequests();
+      for (const path of ['/admin', '/notes/export', '/notes/demo/extra']) {
+        if ((await decide({ ...normal, path })).decision !== 'deny') throw new Error('다른 구역 가상 요청 거부 실패');
+      }
+      checks.push({ attackId: 'resource_scope_fixture', expected: '가상 미허용 경로와 기능 경로 거부',
+        observed: '로컬 가상 요청3건 deny 확인; API 소유자 점검과 구분' });
     }
     return checks;
   }

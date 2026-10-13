@@ -18,11 +18,13 @@ export function deploymentIdentity(env, config) {
   if (env.VERCEL_GIT_PROVIDER !== 'github' || !OWNER.test(owner || '')
       || !REPO.test(repo || '') || repo === '.' || repo === '..'
       || repo.toLowerCase().endsWith('.git') || !SHA.test(commit || '')
-      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5, 6, 7].includes(config?.step)
+      || !HOST.test(host || '') || !HOST.test(publicHost || '') || ![1, 2, 3, 4, 5, 6, 7, 8].includes(config?.step)
       || (config.step === 2 && (!Array.isArray(allowedRoutes)
         || allowedRoutes.length !== 1 || allowedRoutes[0] !== '/api/notes'))
       || (config.step >= 3 && (!Array.isArray(allowedRoutes)
-        || JSON.stringify(allowedRoutes) !== JSON.stringify(['/api/notes', '/api/notes/:id'])
+        || JSON.stringify(allowedRoutes) !== JSON.stringify(config.step >= 8
+          ? ['/api/notes', '/api/notes/:id', '/api/announcements/:id']
+          : ['/api/notes', '/api/notes/:id'])
         || !identityProvider || identityProvider.issuer !== `${config.database?.url}/auth/v1`
         || identityProvider.audience !== 'authenticated'
         || identityProvider.jwksUrl !== `${identityProvider.issuer}/.well-known/jwks.json`))

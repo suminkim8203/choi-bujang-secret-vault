@@ -1,7 +1,15 @@
 // ALEPH SDP 엔진이 확인한 요청만 받는 학생 판정기 시작점입니다.
 // 등록 상태는 브라우저 입력이 아니라 엔진이 검증한 계약의 값입니다.
 // 요청 본문의 userId, role, 기기 키, 토큰을 별도로 믿거나 저장하지 마세요.
-export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required']);
+function permittedResource(request) {
+  if (request.service !== 'notes') return false;
+  const { method, path, route } = request;
+  if (path === '/notes') return ['GET', 'POST'].includes(method) && route === `${method} /notes`;
+  const match = typeof path === 'string' && /^\/notes\/([A-Za-z0-9_-]{1,128})$/u.exec(path);
+  if (!match || ['export', 'import', 'admin', 'announcements'].includes(match[1].toLowerCase())) return false;
+  return ['GET', 'PUT', 'DELETE'].includes(method) && route === `${method} /notes/:id`;
+}
+export const RULE_IDS = Object.freeze(['device_registered', 'step_up_required', 'resource_scope']);
 
 function requiresStepUp(request) {
   const signals = request.signals;
@@ -26,6 +34,10 @@ function freshStepUp(request) {
 
 export async function decide(request) {
   const registered = request.deviceRegistered === true;
+  if (registered && !permittedResource(request)) {
+    return { schema: 'aleph.decision.v1', requestId: request.requestId,
+      decision: 'deny', reasonCode: 'resource_not_allowed', ruleIds: [RULE_IDS[2]] };
+  }
   if (registered && requiresStepUp(request) && !freshStepUp(request)) {
     return { schema: 'aleph.decision.v1', requestId: request.requestId,
       decision: 'step_up', reasonCode: 'step_up_required', ruleIds: [RULE_IDS[1]] };

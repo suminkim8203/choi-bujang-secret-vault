@@ -29,10 +29,11 @@ test('stage 6 deployment identity preserves server API, issuer and public URL', 
   const config = JSON.parse(await readFile(new URL('../aleph.config.json', import.meta.url), 'utf8'));
   const identity = deploymentIdentity({ VERCEL_GIT_PROVIDER: 'github',
     VERCEL_GIT_REPO_OWNER: 'student', VERCEL_GIT_REPO_SLUG: 'practice',
-    VERCEL_GIT_COMMIT_SHA: 'a'.repeat(40), VERCEL_URL: 'practice-123.vercel.app' }, { ...config, step: 6 });
+    VERCEL_GIT_COMMIT_SHA: 'a'.repeat(40), VERCEL_URL: 'practice-123.vercel.app' },
+    { ...config, step: 6, allowedRoutes: ['/api/notes', '/api/notes/:id'] });
   assert.equal(identity.step, 6);
   assert.equal(identity.publicAppUrl, config.publicAppUrl);
-  assert.deepEqual(identity.allowedRoutes, config.allowedRoutes);
+  assert.deepEqual(identity.allowedRoutes, ['/api/notes', '/api/notes/:id']);
   assert.deepEqual(identity.identityProvider, config.identityProvider);
   assert.equal(identity.originalApiUrl, config.originalApiUrl);
   assert.equal(identity.judgeIssuer, config.judgeIssuer);

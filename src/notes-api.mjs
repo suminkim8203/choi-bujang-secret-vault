@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { createLoginVerifier } from './verify-login.mjs';
+import { RESOURCES } from './resource-scope.mjs';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const errors = { 400: '입력 내용을 확인해 주세요.', 401: '로그인이 필요합니다.',
@@ -43,6 +44,7 @@ export function createNotesHandler({ config, item = false, env = () => process.e
   return async function handler(request, response) {
     response.setHeader('Cache-Control', 'no-store');
     response.setHeader('X-Content-Type-Options', 'nosniff');
+    response.setHeader('X-Resource-Id', RESOURCES.notes.id);
     const fail = status => response.status(status).json({ error: errors[status] });
     const authorization = request.headers?.authorization;
     if (typeof authorization !== 'string' || !authorization.startsWith('Bearer ')) return fail(401);
@@ -52,6 +54,12 @@ export function createNotesHandler({ config, item = false, env = () => process.e
       verifier ??= verify ?? createLoginVerifier({ config, supabaseSecretKey: currentEnv.SUPABASE_SECRET_KEY });
       const identity = await verifier(authorization);
       if (!identity || !UUID.test(identity.userId ?? '')) return fail(401);
+      // 이 핸들러의 자원은 항상 개인 메모입니다. 클라이언트가 다른 구역을 선택할 수 없습니다.
+      if (config.step >= 8) {
+        const query = request.query ?? {};
+        if (Object.keys(query).some(key => key !== 'id')
+            || (!item && query.id !== undefined)) return fail(400);
+      }
       const ownerProtected = config.step >= 4;
       const owner = identity.userId.toLowerCase();
       const method = request.method;
