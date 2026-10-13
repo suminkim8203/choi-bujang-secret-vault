@@ -48,6 +48,9 @@ test('resource allowlist pairs exact verified service, method, path and route', 
   }
   assert.equal((await decide({ ...normal, method: 'POST', path: '/api/notes', route: 'POST /api/notes' })).decision, 'allow');
   assert.equal((await decide({ ...normal, method: 'POST', path: '/api/my/notes', route: 'POST /api/my/notes' })).decision, 'deny');
+  for (const queryLength of [1, 16, undefined, null, -1, '0']) {
+    assert.equal((await decide({ ...normal, path: deployedPath, route: 'GET /api/notes/:id', queryLength })).decision, 'deny');
+  }
 });
 
 const a = '11111111-1111-4111-8111-111111111111';

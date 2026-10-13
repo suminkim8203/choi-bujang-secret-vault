@@ -2,6 +2,9 @@
 // 등록 상태는 브라우저 입력이 아니라 엔진이 검증한 계약의 값입니다.
 // 요청 본문의 userId, role, 기기 키, 토큰을 별도로 믿거나 저장하지 마세요.
 function permittedResource(request) {
+  // 이 자료실은 ID를 경로에 두고 쿼리로 기능이나 소유자를 선택하지 않습니다.
+  // Engine-provided length is verified metadata; raw query text is not available.
+  if (request.queryLength !== 0) return false;
   if (request.service !== 'notes') return false;
   const { method, path, route } = request;
   // 본인 목록 구역과 전체 목록처럼 보이는 일반 경로를 구별합니다.
