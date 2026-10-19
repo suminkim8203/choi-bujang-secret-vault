@@ -21,7 +21,7 @@
 | student-failure-visible | error.message를 텍스트로 표시하고 error의 data는 표시하지 않음 | 예제 서버를 종료한 뒤 재조회, 연결 실패·이전 practice-user 제거 확인 |
 | identity-after-reload | 호출마다 새 DOM을 반환하고 제공 UI가 교체 | 예제 서버가 켜진 상태에서 재조회 시각 갱신, 새 값/오류는 단위 검사 |
 
-기기 상태는 compliant=보안 기준 충족, noncompliant=보안 기준 미충족, unknown=확인 불가입니다. 세션은 active=활성, expired=만료, revoked=철회됨, unknown=확인 불가로 표시합니다. loading과 error에서도 demo/disconnected/unknown 안내를 유지합니다. DOM은 createElement/textContent로 만들며 HTML 문자열을 실행하지 않습니다.
+기기 상태는 compliant=보안 기준 충족, noncompliant=보안 기준 미충족, unknown=확인 불가입니다. 세션은 active=활성, expired=만료, revoked=철회됨, unknown=확인 불가로 표시하며 한국어 설명 옆에 전달받은 원래 코드도 병기합니다. loading과 error에서도 demo/disconnected/unknown 안내를 유지합니다. DOM은 createElement/textContent로 만들며 HTML 문자열을 실행하지 않습니다.
 
 ## 실행한 검사
 
@@ -45,4 +45,8 @@
 - 학생이 직접 같은 화면을 조작한 결과는 아직 받지 않았으며 에이전트의 브라우저 검증과 구분합니다.
 - 기기 상태 표시는 악성코드 검사·치료 기능이 아닙니다.
 - 14단계 이후 학생 함수는 미구현입니다.
-- 공식 판정·진도는 포털 제출 후의 서버 결과로만 기록합니다. 아직 판정 전입니다.
+- 공식 판정·진도는 포털 제출 후의 서버 결과로만 기록합니다.
+
+## 첫 판정과 보완
+
+첫 제출 `0a0c470d77042d5e132592ade7a898a7a7373622`는 AI 검토에서 5개 중 4개 충족, student-identity-updates 미충족이었습니다. 상태 번역은 있지만 공통 규칙의 원래 상태 코드 병기가 빠졌다는 구체적인 피드백을 받았습니다. 같은 renderIdentity 안에서 현재 기기·세션과 두 목록 모두 한국어와 원래 코드를 함께 표시하도록 보완하고, 상태 검사에도 원래 코드 병기를 추가했습니다. 보완 재판정은 아직 확인 전입니다.

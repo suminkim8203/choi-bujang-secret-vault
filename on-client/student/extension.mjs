@@ -13,8 +13,14 @@ export function createStudentView() {
         return node;
       };
       const value = input => typeof input === 'string' && input.trim() ? input : '확인 불가';
-      const deviceStatus = input => ({ compliant: '보안 기준 충족', noncompliant: '보안 기준 미충족', unknown: '확인 불가' })[input] || '확인 불가';
-      const sessionStatus = input => ({ active: '활성', expired: '만료', revoked: '철회됨', unknown: '확인 불가' })[input] || '확인 불가';
+      const deviceStatus = input => {
+        const labels = { compliant: '보안 기준 충족', noncompliant: '보안 기준 미충족', unknown: '확인 불가' };
+        return Object.hasOwn(labels, input) ? `${labels[input]} (${input})` : '확인 불가 (unknown)';
+      };
+      const sessionStatus = input => {
+        const labels = { active: '활성', expired: '만료', revoked: '철회됨', unknown: '확인 불가' };
+        return Object.hasOwn(labels, input) ? `${labels[input]} (${input})` : '확인 불가 (unknown)';
+      };
       const renderResource = (title, resource, renderData) => {
         const group = document.createElement('section');
         add(group, 'h3', title);

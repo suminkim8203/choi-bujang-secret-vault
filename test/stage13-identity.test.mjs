@@ -30,7 +30,7 @@ test('기기와 세션의 모든 비정상 상태를 정확히 구분한다', ()
       const input = sample(); input.me.data.device.status = device; input.me.data.session.status = session;
       input.devices.data[0].status = device; input.sessions.data[0].status = session;
       const text = render(input).textContent;
-      assert.ok(text.includes(label)); assert.ok(text.includes(meaning));
+      assert.ok(text.includes(`${label} (${device})`)); assert.ok(text.includes(`${meaning} (${session})`));
       assert.ok(!text.includes('보안 기준 충족')); assert.ok(!text.includes('활성'));
     }
   }
