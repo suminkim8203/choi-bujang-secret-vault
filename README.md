@@ -1,5 +1,13 @@
 # BYTE BACK 방어전 · 켈비
 
+## 14단계 저장점 · 2026-10-20
+
+13단계 구현과 기존 제공 파일을 보존하고 `on-client/student/extension.mjs`의 `renderDecision`만 구현했습니다. 요청 전·요청 중·판정 수신·요청 실패를 구분하고, allow/deny/challenge/unknown의 한국어 의미와 원래 코드·선택한 앱·이유·시각을 표시합니다. 허용은 실제 앱 접속 성공이 아니며 추가 확인은 인증 완료가 아닙니다. 실패를 거부 판정이나 허용으로 바꾸지 않습니다.
+
+13·14단계 단위 검사14개와 문법 검사를 통과했습니다. 실제 예제 화면의 허용·거부·추가 확인, 마우스·키보드 요청, 재조회 후 이전 판정 초기화, 예제 서버 종료 뒤 요청 실패와 이전 성공 제거를 확인했습니다. unknown과 알 수 없는 판정값은 모의 입력으로 검사했고 실제 엔진 연결은 미구성입니다. [검증 기록](docs/STAGE14_VERIFICATION.md). 공식 판정은 아직 제출 전입니다.
+
+예제 실행: `ON_PORT=5190 npm run demo --prefix on-client` → http://127.0.0.1:5190/ → 업무 앱 → 접속 요청. macOS 셸 기준이며 Windows PowerShell 실행은 제공 `on-client/docs/STUDENT_LAUNCH_GUIDE.md`를 따릅니다. 실제 `.env`·인증 설정·옛 제출 묶음·기존 Vercel 자료실은 바꾸지 않았습니다.
+
 ## 13단계 저장점 · 2026-10-20
 
 기존 1~12단계와 XDR 코드·기록·DB 설정을 보존하고, 공식 시작 틀 0.2.13을 새 `on-client/` 폴더에 추가했습니다. 학생 구현은 `on-client/student/extension.mjs`의 `renderIdentity` 하나만 변경했습니다. 포털에 저장한 Agent 이름은 켈비이며 제공 앱의 기본 제목은 자동으로 바뀌지 않습니다.
