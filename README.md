@@ -10,7 +10,7 @@
 | 13단계 | 공식5항목 통과 · 95495bfef227a4cacfa40d01d047911b9e1e3ce5 |
 | 14단계 | 공식5항목 통과 · 26272faec2e9a8dc5fee3fecbe5dad67b694cd2b |
 | 15단계 | 공식7항목 통과 · 2d2f8c4ccaabded28200891fab32baad22e9c9fb |
-| 16단계 | 구현·검증 완료, 첫 접수는 코드 크기로 확인 불가, 재제출 준비 |
+| 16단계 | 공식7항목 통과 · 41736be3e31c398a89f72f7a8bffef8c8507d1fa (kelbi-product) |
 
 ## 실행·검증
 
