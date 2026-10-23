@@ -448,6 +448,73 @@ export function createStudentView() {
       finish();
       return root;
     },
-    renderAction() { return '학생 구현 대기: 현재 사건·조치·실제 대상·사람 확인·ACK와 원천 효과·unknown을 구분하세요.'; },
+    renderAction({ status = 'idle', event, actionId, target, receipt, observation, message, confirmationExpiresAt, error } = {}) {
+      const root = document.createElement('section');
+      root.setAttribute('aria-label', '학생 보안 조치 상태');
+      root.setAttribute('aria-live', 'polite');
+      aiAdd(root, 'h3', '조치 제안과 서버 처리 결과');
+      const labels = {
+        idle: '아직 미실행(idle)',
+        loading: '조치 준비 또는 결과 조회 중(loading) · 실행 결과는 아직 확인되지 않았습니다.',
+        prepared: '준비됨·미실행(prepared) · 사건·근거·조치·실제 대상·확인 기한을 읽고 사람이 확인해야 합니다.',
+        executing: '서버에 전달 중(executing) · 실행 결과는 아직 확인되지 않았습니다.',
+        pending: '서버 접수·처리 중(pending) · 접수 응답(ACK)은 실제 효과 확인이 아닙니다. 실행 결과는 아직 확인되지 않았습니다.',
+        succeeded: '효과 확인(succeeded)',
+        denied: '연동 시스템이 거절했습니다(denied).',
+        failed: '연동 시스템의 조치 처리가 실패했습니다(failed).',
+        unknown: '결과 불명(unknown) · 성공이나 효과 없음으로 판단하지 마세요. 이미 전달된 요청을 다시 집행하지 말고 결과만 직접 재조회하세요.',
+        error: '요청이 처리되지 않았습니다(error). 안전한 오류와 현재 상태를 확인하세요.',
+        expired: '확인 기한 지남(expired) · 이번 준비로 집행할 수 없습니다. 현재 사건과 대상을 다시 확인해 준비하세요.',
+      };
+      const mismatch = receipt && ((receipt.eventId != null && receipt.eventId !== event?.id)
+        || (receipt.actionId != null && receipt.actionId !== actionId));
+      const effectConfirmed = observation?.effectApplied === true && aiText(observation.observedAt, '')
+        && Number.isFinite(Date.parse(observation.observedAt)) && aiId(receipt?.receiptId);
+      const currentStatus = !Object.hasOwn(labels, status) || mismatch || (status === 'succeeded' && !effectConfirmed) ? 'unknown' : status;
+      aiAdd(root, 'p', labels[currentStatus]);
+      if (mismatch) aiAdd(root, 'p', '현재 사건·조치와 서버 응답이 맞지 않습니다. 다른 요청의 결과를 현재 결과로 붙이지 않습니다.');
+      if (currentStatus !== 'idle') {
+        if (aiId(event?.id)) {
+          root.setAttribute('data-student-action-event', event.id);
+          aiAdd(root, 'p', `사건 ID: ${event.id}`);
+        }
+        if (Array.isArray(event?.evidence)) for (const row of event.evidence) if (aiId(row?.id)) aiAdd(root, 'p', `근거 ID: ${row.id}`);
+        if (aiId(actionId)) aiAdd(root, 'p', `조치(actionId): ${actionId}`);
+        if (aiId(target?.id)) aiAdd(root, 'p', `실제 대상(target.id): ${target.id}`);
+        if (Number.isSafeInteger(target?.generation) && target.generation > 0) aiAdd(root, 'p', `대상 세대(target.generation): ${target.generation}`);
+        if (!mismatch && receipt) {
+          if (aiId(receipt.requestId)) {
+            root.setAttribute('data-student-action-request', receipt.requestId);
+            aiAdd(root, 'p', `요청(requestId): ${receipt.requestId}`);
+          }
+          if (aiId(receipt.receiptId)) aiAdd(root, 'p', `접수 기록(receiptId): ${receipt.receiptId}`);
+          if (Number.isSafeInteger(receipt.version) && receipt.version > 0) aiAdd(root, 'p', `기록 버전(version): ${receipt.version}`);
+          if (receipt.replayed === true) aiAdd(root, 'p', '같은 요청의 기존 결과입니다(replayed). 새 집행을 요청하거나 자동 재집행하지 않습니다.');
+          if (receipt.superseded === true) aiAdd(root, 'p', '이전 조회 결과입니다(superseded). 최신 효과를 대신하지 않습니다.');
+        }
+      }
+      if (currentStatus === 'prepared') {
+        aiAdd(root, 'p', `사람 확인 기한(confirmationExpiresAt): ${aiText(confirmationExpiresAt)}`);
+        aiAdd(root, 'p', '제공 화면에서 대상과 조치를 읽고 직접 확인해야 서버에 전달됩니다. 학생 화면에는 확인 티켓을 보관하지 않습니다.');
+      }
+      if (currentStatus === 'succeeded') {
+        aiAdd(root, 'p', `관측 시각(observedAt): ${aiText(observation.observedAt)}`);
+        aiAdd(root, 'p', 'effectApplied: true · 연동 시스템이 보고한 효과를 확인했습니다.');
+      }
+      if (['denied', 'failed', 'error', 'expired', 'unknown'].includes(currentStatus)) {
+        if (message) aiAdd(root, 'p', aiText(message));
+        if (error) {
+          const safeCode = typeof error.code === 'string' && /^[A-Z][A-Z0-9_]{1,79}$/.test(error.code) ? error.code : 'ACTION_RESULT_UNVERIFIED';
+          aiAdd(root, 'p', `${safeCode}: ${aiText(error.message)}`);
+        }
+      }
+      if (currentStatus === 'idle') {
+        if (message) aiAdd(root, 'p', aiText(message));
+        aiAdd(root, 'p', '현재 기록에 지원하는 조치가 없으면 조치 준비 버튼이 표시되지 않는 것이 정상입니다.');
+      }
+      aiAdd(root, 'p', 'AI 제안은 실행이 아닙니다. 조치 준비·사람 확인·결과 재조회는 제공 화면의 버튼을 사용하세요. 자동 집행·자동 재요청은 없습니다.');
+      aiAdd(root, 'p', '조치 화면 취소는 이미 서버에 전달된 조치 효과를 되돌리지 않습니다.');
+      return root;
+    },
   };
 }
