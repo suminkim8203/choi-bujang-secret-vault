@@ -357,7 +357,68 @@ export function createStudentView() {
       });
       return root;
     },
-    renderVulnerabilities() { return '학생 구현 대기: 정확한 설치 버전·OSV 출처·조회 시각·부분 결과·조회 실패를 구분하세요.'; },
+    renderVulnerabilities({ status = 'idle', mode, data, error } = {}) {
+      const root = document.createElement('section');
+      root.setAttribute('aria-label', '학생 설치 패키지 취약점 조회');
+      root.setAttribute('aria-live', 'polite');
+      aiAdd(root, 'h3', '설치 패키지와 알려진 취약점 정보');
+      if (mode === 'demo') aiAdd(root, 'p', '예제(demo) · 실제 OSV 조회 성공을 뜻하지 않습니다.');
+      const finish = () => {
+        aiAdd(root, 'p', '조회 결과는 해당 버전·조회 범위·조회 시각의 알려진 정보입니다. 알려진 항목이 없다는 결과가 패키지나 앱 전체의 안전 또는 침해 없음을 보장하지 않습니다.');
+        aiAdd(root, 'p', '다시 조회는 제공 화면의 설치 패키지 조회 버튼을 직접 누르세요. 자동으로 재요청하거나 패키지를 설치·변경하지 않습니다.');
+        return root;
+      };
+      if (status === 'idle') { aiAdd(root, 'p', '패키지 조회 전(idle)'); return finish(); }
+      if (status === 'loading') { aiAdd(root, 'p', '패키지 조회 중(loading) · 이전 표는 현재 결과가 아닙니다.'); return finish(); }
+      if (status === 'error') {
+        const code = typeof error?.code === 'string' && /^[A-Z][A-Z0-9_]{1,79}$/.test(error.code) ? error.code : 'LOOKUP_UNVERIFIED';
+        aiAdd(root, 'p', `조회 실패(error): ${code} · ${aiText(error?.message)}`);
+        if (code.includes('CANCEL')) aiAdd(root, 'p', '조회를 취소했습니다. 늦게 도착한 응답이나 이전 표를 현재 결과로 표시하지 않습니다.');
+        if (code.includes('TIMEOUT')) aiAdd(root, 'p', '조회 시간이 초과됐습니다. 연결 상태를 확인한 뒤 직접 다시 조회하세요.');
+        aiAdd(root, 'p', '조회 실패는 알려진 취약점 항목 없음이 아닙니다.');
+        return finish();
+      }
+      const scanLabels = { complete: '모두 조회(complete)', partial: '일부 조회 실패(partial)', not_checked: '아직 조회 안 함(not_checked)',
+        not_configured: '조회 대상 프로젝트 설정 필요(not_configured)', unverifiable: 'lock 파일 확인 불가(unverifiable)' };
+      if (status !== 'ok' || !data || !Object.hasOwn(scanLabels, data.status)) {
+        aiAdd(root, 'p', '조회 결과 확인 불가 · 응답 형식이나 상태를 확인할 수 없습니다.');
+        return finish();
+      }
+      aiAdd(root, 'p', scanLabels[data.status]);
+      if (data.lockfileVersion != null) aiAdd(root, 'p', `lockfileVersion: ${[2, 3].includes(data.lockfileVersion) ? data.lockfileVersion : '확인 불가'}`);
+      if (data.lockfileHash != null) aiAdd(root, 'p', `lockfileHash: ${aiText(data.lockfileHash)}`);
+      if (data.checkedAt != null) aiAdd(root, 'p', `조회 시각(checkedAt): ${aiText(data.checkedAt)}`);
+      if (data.status === 'not_configured') aiAdd(root, 'p', '운영자에게 조회 대상 프로젝트 설정을 확인하세요. 학생이 경로나 공개 조회 허용 목록을 임의로 변경하지 않습니다. 아직 조회한 결과가 아닙니다.');
+      if (data.status === 'not_checked') aiAdd(root, 'p', '승인된 공개 조회 대상 없음 등으로 아직 조회하지 않았습니다. 알려진 항목 없음과 구분합니다.');
+      if (data.status === 'unverifiable') aiAdd(root, 'p', '설치 버전과 lock 파일을 확인할 수 없습니다. 알려진 항목 없음으로 판단하지 마세요.');
+      if (!Array.isArray(data.packages)) { aiAdd(root, 'p', '패키지 결과 형식 확인 불가'); return finish(); }
+      if (!data.packages.length) aiAdd(root, 'p', '표시할 패키지 결과가 없습니다. 이 화면만으로 앱 전체의 취약점 유무를 판단하지 마세요.');
+      const packageLabels = { known_vulnerabilities: '알려진 항목 있음(known_vulnerabilities)', none_found: '조회 범위에서 알려진 항목 없음(none_found)', unverifiable: '조회 확인 불가(unverifiable)' };
+      const exactVersion = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
+      const packageName = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/;
+      for (const pkg of data.packages) {
+        const row = document.createElement('section');
+        const name = aiText(pkg?.name, '', 214), version = aiText(pkg?.version, '', 100);
+        const coordinatesValid = packageName.test(name) && exactVersion.test(version);
+        if (coordinatesValid) {
+          row.setAttribute('data-student-package-name', name);
+          row.setAttribute('data-student-package-version', version);
+          aiAdd(row, 'h4', `${name} · 설치 버전: ${version}`);
+        } else aiAdd(row, 'h4', '패키지 좌표 확인 불가 · 버전 범위나 태그를 실제 설치 버전으로 표시하지 않습니다.');
+        const findings = Array.isArray(pkg?.vulnerabilities) ? pkg.vulnerabilities : [];
+        const consistent = coordinatesValid && Object.hasOwn(packageLabels, pkg?.status)
+          && Array.isArray(pkg.vulnerabilities) && !(pkg.status === 'none_found' && findings.length) && !(pkg.status === 'known_vulnerabilities' && !findings.length);
+        const rowStatus = consistent ? pkg.status : 'unverifiable';
+        aiAdd(row, 'p', packageLabels[rowStatus]);
+        aiAdd(row, 'p', `출처(source): ${aiText(pkg?.source)}`);
+        aiAdd(row, 'p', `패키지 조회 시각(checkedAt): ${aiText(pkg?.checkedAt)}`);
+        if (rowStatus === 'unverifiable') aiAdd(row, 'p', findings.length ? '일부 확인·전체 조회 확인 불가 · 이미 받은 취약점 ID는 유지합니다.' : '조회를 확인할 수 없습니다. 알려진 항목 없음이 아닙니다.');
+        if (rowStatus === 'none_found') aiAdd(row, 'p', '이 버전을 조회한 시각·범위에서 알려진 항목이 없다는 뜻입니다. 안전 보장이 아닙니다.');
+        for (const finding of findings) aiAdd(row, 'p', `취약점 ID: ${aiText(finding?.id, '확인 불가', 160)} · 수정 시각(modified): ${aiText(finding?.modified)}`);
+        root.append(row);
+      }
+      return finish();
+    },
     renderAiConnection({ status = 'idle', mode, data, error, checkedAt } = {}) {
       const root = document.createElement('section');
       root.setAttribute('aria-label', '학생 AI 연결 점검');
