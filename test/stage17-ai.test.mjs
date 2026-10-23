@@ -73,8 +73,9 @@ test('원문 비밀·미허용 필드는 읽거나 표시하지 않고 HTML은 �
   assert.ok(html.textContent.includes('<img')); assert.ok(!html.children.some(n => n.tagName === 'img'));
 });
 test('사건 설명 성공만 사건 ID 속성·요약을 표시하고 실패·취소·대기는 구분한다', () => {
-  const event = { id: 'example-event-17' };
-  const success = view.renderExplanation({ event, explanation: { status: 'ok', data: { summary: '예제 사건 해석' } }, checkedAt: time });
+  // 18단계의 완전한 설명 계약으로 확장해도 17단계 성공·실패 구분은 유지해야 한다.
+  const event = { id: 'example-event-17', evidence: [{ id: 'e17', text: '예제 근거' }], rules: [{ id: 'r17', text: '예제 규칙' }], state: { access: 'unknown', session: 'active', device: 'unknown' }, supportedActions: [] };
+  const success = view.renderExplanation({ event, explanation: { status: 'ok', data: { summary: '예제 사건 해석', evidenceIds: ['e17'], proposals: [], requiresHumanConfirmation: true, executed: false } }, checkedAt: time });
   assert.equal(success.attributes['data-student-explanation-event'], event.id);
   assert.ok(success.textContent.includes(event.id)); assert.ok(success.textContent.includes('예제 사건 해석'));
   for (const status of ['idle', 'loading', 'error']) {
