@@ -13,13 +13,14 @@
 | 16단계 | 공식7항목 통과 · 41736be3e31c398a89f72f7a8bffef8c8507d1fa (kelbi-product) |
 | 17단계 | 공식9항목 통과 · 354fbf6fc00128a8758acc02e0e6be1470e87e87 |
 | 18단계 | 공식8항목 통과 · 6024c4fb031b8529852424e2691ca3ee5e197931 |
-| 19단계 | 조치 상태·사람 확인·관측 구분 구현, 로컬53검사 통과, 공식 판정 준비 |
+| 19단계 | 공식8항목 통과 · f10e19f9cb88fa4e24fbfeba8059e0f98e395d6e |
+| 20단계 | 정확한 설치 버전·OSV 결과·부분 실패 표시 구현, 로컬62검사 통과, 공식 판정 준비 |
 
 ## 실행·검증
 
 macOS 저장소 루트에서 `ON_PORT=5190 npm run demo --prefix on-client`를 실행하고 http://127.0.0.1:5190/ 를 엽니다. 기본 연결 없음 확인은 `npm start --prefix on-client`와 http://127.0.0.1:5189/ 입니다. Windows 실행은 [공식 안내](on-client/docs/STUDENT_LAUNCH_GUIDE.md)를 따릅니다. 예제는 실제 계정·회사 엔진·AI 연결이 아닙니다.
 
-검사: `node --test test/stage13-identity.test.mjs test/stage14-decision.test.mjs test/stage15-events.test.mjs test/stage16-status.test.mjs` 및 `npm run check --prefix on-client`. 17단계 검사는 `test/stage17-ai.test.mjs`를 더하며 18단계는 `test/stage18-explanation.test.mjs`도 더하며 19단계는 `test/stage19-action.test.mjs`도 더하며 현재53개 통과입니다. 코드 판정과 로컬 검사, 실제 브라우저 확인을 구분합니다.
+검사: `node --test test/stage13-identity.test.mjs test/stage14-decision.test.mjs test/stage15-events.test.mjs test/stage16-status.test.mjs` 및 `npm run check --prefix on-client`. 17단계 검사는 `test/stage17-ai.test.mjs`를 더하며 18단계는 `test/stage18-explanation.test.mjs`도 더하며 19단계는 `test/stage19-action.test.mjs`도 더하며 20단계는 `test/stage20-vulnerabilities.test.mjs`도 더하며 현재62개 통과입니다. 코드 판정과 로컬 검사, 실제 브라우저 확인을 구분합니다.
 
 ## 구현과 증빙
 
@@ -32,9 +33,10 @@ macOS 저장소 루트에서 `ON_PORT=5190 npm run demo --prefix on-client`를 �
 - [17단계·공식 업데이트 기록](docs/STAGE17_VERIFICATION.md)
 - [18단계 기록](docs/STAGE18_VERIFICATION.md)
 - [19단계 기록](docs/STAGE19_VERIFICATION.md)
+- [20단계 기록](docs/STAGE20_VERIFICATION.md)
 
 2026-10-23 실제 포털은20단계까지 공개됐고17단계부터 순차 제출 가능합니다. 공식0.2.14의6파일만 확인값 대조·백업 후 교체했습니다. 실제 계정 연결 준비는 Windows 전용이며 현재 Mac의 NATIVE_HOST_DISABLED를 연결 성공으로 표시하지 않습니다. 아직 미개방 단계를 완료로 기록하지 않습니다. 실제 운영 엔진·Jev 연결과 옛 공개 Git/배포 이력의 한계도 유지합니다. 비밀번호·서버 키·실제 계정 정보는 요청·기록하지 않습니다.
 
 ## 제출용 브랜치
 
-kelbi-product는 전체 on-client 앱과13~19단계 검사·문서·증빙을 담은 제출 사본입니다. 앱은 main 저장점 `5b2e118910dbd2cf050d49b10ce74a66422dc173`와 바이트가 일치합니다. 기존1~12단계/XDR·과거 기록은 원래 main과 Git 이력에 보존합니다. 실제 계정·AI 연결과 원천 집행은 현재 Mac에서 미확인입니다.
+kelbi-product는 전체 on-client 앱과13~20단계 검사·문서·증빙을 담은 제출 사본입니다. 앱은 main 저장점 `57f8cde6bde8d271bae37eb58671ea0e7eb348c4`와 바이트가 일치합니다. 기존1~12단계/XDR·과거 기록은 원래 main과 Git 이력에 보존합니다. 실제 계정·AI 연결·원천 집행·외부 OSV 조회는 현재 환경에서 미확인입니다.
