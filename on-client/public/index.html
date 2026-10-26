@@ -17,7 +17,7 @@
     <div class="brand">
       <img id="brand-icon" class="alekov-art brand-icon" hidden src="/assets/alekov/alekov-app-icon.webp" alt="" aria-hidden="true" width="32" height="32" draggable="false">
       <span class="brand-mark" id="brand-mark-fallback" aria-hidden="true">켈</span>
-      <span class="brand-name"><span id="brand-title">켈비</span> <small>내 PC를 위한 작은 관제실</small></span>
+      <span class="brand-name"><span id="brand-title">켈비</span> <small>로컬 시스템 모니터</small></span>
     </div>
     <div class="topbar-status">
       <span class="server-caption">보안 서버</span>
@@ -29,7 +29,7 @@
 
   <div class="layout">
     <nav class="sidebar" aria-label="주 메뉴">
-      <p class="nav-eyebrow">워크스페이스</p>
+      <p class="nav-eyebrow">모니터링</p>
       <div role="tablist" aria-orientation="vertical" id="nav">
         <button type="button" role="tab" id="tab-protection" data-testid="nav-protection" data-view="protection" aria-controls="view-protection" aria-selected="true" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>보호 현황</span></button>
         <button type="button" role="tab" id="tab-apps" data-testid="nav-apps" data-view="apps" aria-controls="view-apps" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5"/></svg><span>업무 앱</span></button>
@@ -47,9 +47,9 @@
 
       <section id="view-protection" class="view" role="tabpanel" aria-labelledby="tab-protection">
         <header class="page-heading">
-          <p class="eyebrow">나의 로컬 워크스페이스</p>
-          <h1>내 PC 대시보드</h1>
-          <p>이 Mac의 상태를 살펴보고, 변화를 차분히 확인하세요.</p>
+          <p class="eyebrow">시스템 / 리소스 모니터</p>
+          <h1>시스템 모니터</h1>
+          <p>CPU·메모리·디스크의 실측값과 조회 이력을 확인합니다.</p>
         </header>
         <section class="dashboard-shell card student" aria-labelledby="student-status-title">
           <h2 id="student-status-title" class="sr-only">PC 상태와 보안 연결 정보 · 학생 구현</h2>

@@ -76,7 +76,7 @@ export function createPcDashboard({api, now = Date.now} = {}) {
     make(parent, 'p', 'CPU 실선 · 메모리 점선 · 단위 %', 'chart-legend');
     if (Math.max(...['cpu', 'memory'].map(key => history.filter(row => row.snapshot?.values[key]?.state === 'ok').length)) < 4) {
       const empty = make(parent, 'div', undefined, 'kelbi-chart-empty');
-      make(empty, 'strong', '변화를 천천히 쌓아보세요');
+      make(empty, 'strong', '추이 데이터 대기');
       make(empty, 'p', '실측이 4회 이상 쌓이면 추이 그래프가 나타납니다. 그전에는 아래 조회 기록에서 값을 확인하세요.');
       return;
     }
@@ -95,7 +95,7 @@ export function createPcDashboard({api, now = Date.now} = {}) {
       svgNode('line', {x1: 42, x2: 602, y1: y, y2: y, stroke: '#d9dde3'});
       svgNode('text', {x: 4, y: y + 5, fill: 'currentColor', 'font-size': 14}, `${value}%`);
     }
-    for (const [key, color, dash] of [['cpu', '#176b64', 'none'], ['memory', '#6b3fb3', '7 5']]) {
+    for (const [key, color, dash] of [['cpu', '#2785bc', 'none'], ['memory', '#66768b', '7 5']]) {
       let segment = [];
       const flush = () => {
         if (segment.length > 1) svgNode('polyline', {points: segment.join(' '), fill: 'none', stroke: color, 'stroke-width': 3, 'stroke-dasharray': dash});
@@ -142,7 +142,7 @@ export function createPcDashboard({api, now = Date.now} = {}) {
     drawChart(past);
     make(past, 'p', '수동 조회 시각을 기준으로 비교합니다. 실패·확인 불가 구간은 잇지 않습니다.', 'muted chart-footnote');
     const insights = make(panels, 'section', undefined, 'kelbi-panel kelbi-insights');
-    make(insights, 'h4', '확인할 내용', 'panel-title');
+    make(insights, 'h4', '측정 상태와 제한', 'panel-title');
     if (current) {
       const list = make(insights, 'ul', undefined, 'observation-list');
       for (const item of pcObservations(current)) make(list, 'li', item);

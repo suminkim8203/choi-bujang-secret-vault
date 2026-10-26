@@ -271,88 +271,90 @@ main:focus { outline: none; }
 
 /* 켈비 Mac 웹 화면. 조회·인증·상태 의미는 그대로 두는 표시 전용 레이어입니다. */
 .kelbi-workspace {
-  --border: #e1e7eb;
-  --text: #20333c;
-  --muted: #5a6a74;
-  --radius: 16px;
+  --border: #dfe3e8;
+  --text: #252b34;
+  --muted: #626b78;
+  --radius: 4px;
   color: var(--text);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.6;
+  background: #f3f4f6;
   -webkit-font-smoothing: antialiased;
 }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.kelbi-workspace .topbar { min-height: 80px; padding: 16px 32px; gap: 16px 24px; }
+.kelbi-workspace .topbar { min-height: 64px; padding: 12px 24px; gap: 16px 24px; }
 .kelbi-workspace .brand { gap: 12px; }
-.kelbi-workspace .brand-mark { width: 42px; height: 42px; border-radius: 13px; color: #fff; font-size: 19px; font-weight: 750; background: var(--accent); }
-.kelbi-workspace .brand-name { font-size: 19px; letter-spacing: -0.04em; }
+.kelbi-workspace .brand-mark { width: 34px; height: 34px; border-radius: 4px; color: #174d72; font-size: 17px; font-weight: 750; background: #d9efff; border: 1px solid #b8dff8; }
+.kelbi-workspace .brand-name { font-size: 18px; letter-spacing: -0.04em; }
 .kelbi-workspace .brand-name small { display: block; margin: 1px 0 0; font-size: 11px; letter-spacing: 0; color: var(--muted); }
 .kelbi-workspace .topbar-status { gap: 12px; }
 .server-caption { color: var(--muted); font-size: 12px; }
-.kelbi-workspace .mode-badge { border: 1px solid currentColor; font-size: 11px; padding: 4px 10px; }
+.kelbi-workspace .mode-badge { border: 1px solid currentColor; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
 .kelbi-workspace .checked-at { font-size: 11px; }
-.kelbi-workspace .layout { grid-template-columns: 216px minmax(0, 1fr); min-height: calc(100vh - 80px); }
-.kelbi-workspace .sidebar { display: flex; flex-direction: column; align-self: start; position: sticky; top: 0; min-height: calc(100vh - 80px); padding: 28px 18px 20px; background: #fff; }
+.kelbi-workspace .layout { grid-template-columns: 184px minmax(0, 1fr); min-height: calc(100vh - 64px); }
+.kelbi-workspace .sidebar { display: flex; flex-direction: column; align-self: start; position: sticky; top: 0; min-height: calc(100vh - 64px); padding: 22px 12px 18px; background: #f9fafb; }
 .nav-eyebrow { margin: 0 12px 16px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; }
-.kelbi-workspace #nav { gap: 8px; }
-.kelbi-workspace #nav [role="tab"] { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 12px 14px; border-radius: 10px; font-size: 14px; color: #52646d; }
+.kelbi-workspace #nav { gap: 4px; }
+.kelbi-workspace #nav [role="tab"] { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 10px 12px; border-radius: 3px; font-size: 13px; color: #626b78; }
 .kelbi-workspace #nav [role="tab"] svg { width: 19px; height: 19px; flex: none; }
-.kelbi-workspace #nav [role="tab"][aria-selected="true"] { color: var(--accent); background: var(--accent-soft); font-weight: 650; }
+.kelbi-workspace #nav [role="tab"][aria-selected="true"] { color: #205c85; background: #e5f3fd; box-shadow: inset 3px 0 #75bfea; font-weight: 650; }
 .sidebar-footnote { margin-top: auto; padding: 36px 12px 0; color: var(--muted); font-size: 11px; }
 .sidebar-footnote strong { font-size: 12px; color: var(--text); font-weight: 550; }
 .sidebar-footnote p { margin: 6px 0 0; }
 .local-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 7px; }
 .kelbi-workspace .sidebar-note { margin: 20px 12px 0; font-size: 10px; }
-.kelbi-workspace main { padding: 36px 40px 28px; max-width: none; }
+.kelbi-workspace main { padding: 24px 28px; max-width: none; }
 .kelbi-workspace .view { max-width: 1320px; margin-inline: auto; }
-.page-heading { margin: 0 0 28px; }
+.page-heading { margin: 0 0 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .eyebrow { margin: 0 0 8px; font-size: 11px; font-weight: 650; letter-spacing: 0.08em; color: var(--accent); }
-.kelbi-workspace h1 { margin: 0 0 8px; font-size: clamp(26px, 2.4vw, 34px); font-weight: 700; letter-spacing: -0.055em; line-height: 1.25; }
-.page-heading > p:last-child { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
-.kelbi-workspace .card { padding: 24px; border-radius: var(--radius); }
+.kelbi-workspace h1 { margin: 0 0 8px; font-size: clamp(24px, 2.1vw, 28px); font-weight: 700; letter-spacing: -0.055em; line-height: 1.25; }
+.page-heading > p:last-child { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+.kelbi-workspace .card { padding: 20px; border-radius: var(--radius); box-shadow: none; }
 .kelbi-workspace .card.student { border-left: 1px solid var(--border); }
-.kelbi-workspace .dashboard-shell.card { padding: 0; background: transparent; border: 0; margin: 0 0 28px; }
+.kelbi-workspace .dashboard-shell.card { padding: 0; background: transparent; border: 0; margin: 0 0 18px; }
 .kelbi-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
-.kelbi-intro h3 { margin: 0; font-size: 16px; letter-spacing: -0.025em; font-weight: 600; }
-.kelbi-intro p { margin: 5px 0 0; font-size: 12px; }
-.kelbi-workspace .btn { min-height: 40px; padding: 9px 15px; border-radius: 9px; font-size: 12px; line-height: 1.5; font-weight: 550; transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
-.kelbi-workspace .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-.kelbi-workspace .btn-primary:hover:not(:disabled) { background: #12574f; color: #fff; border-color: #12574f; }
+.kelbi-intro h3 { margin: 0; font-size: 14px; letter-spacing: -0.025em; font-weight: 600; }
+.kelbi-intro p { margin: 4px 0 0; font-size: 11px; }
+.kelbi-workspace .btn { min-height: 36px; padding: 7px 12px; border-radius: 4px; font-size: 12px; line-height: 1.5; font-weight: 550; transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
+.kelbi-workspace .btn-primary { background: #d9efff; color: #174d72; border-color: #a9d5f1; }
+.kelbi-workspace .btn-primary:hover:not(:disabled) { background: #c4e5fc; color: #123d59; border-color: #80bce3; }
 .kelbi-workspace .btn-quiet { background: transparent; color: var(--muted); }
 .kelbi-workspace .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
-.kelbi-live { color: var(--muted); font-size: 12px; min-height: 20px; margin: 18px 0 0; }
+.kelbi-live { color: var(--muted); font-size: 11px; min-height: 20px; margin: 12px 0 0; font-variant-numeric: tabular-nums; }
 .kelbi-dashboard[aria-busy="true"] .kelbi-live { color: var(--accent); }
-.kelbi-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 18px 0 22px; }
-.kelbi-metric { min-width: 0; min-height: 158px; padding: 21px 22px 18px; background: #fff; border: 1px solid var(--border); border-radius: 15px; }
-.kelbi-metric h4 { font-size: 12px; font-weight: 550; color: var(--muted); margin: 0 0 16px; }
-.kelbi-metric strong { display: block; font-size: clamp(24px, 2.4vw, 34px); font-weight: 650; line-height: 1.25; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.kelbi-metric p { margin: 10px 0 0; font-size: 11px; line-height: 1.6; }
-.kelbi-panels { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(260px, 1fr); gap: 20px; }
-.kelbi-panel { min-width: 0; padding: 24px; border: 1px solid var(--border); border-radius: 15px; background: #fff; }
-.kelbi-panel .panel-title { margin: 0 0 8px; font-size: 15px; color: var(--text); letter-spacing: -0.02em; }
-.chart-legend { margin: 0 0 20px; font-size: 11px; color: var(--muted); }
+.kelbi-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 8px 0 12px; border: 1px solid var(--border); border-top: 2px solid #8fc9ef; border-radius: 4px; background: #fff; overflow: hidden; }
+.kelbi-metric { min-width: 0; min-height: 124px; padding: 16px 20px; border-right: 1px solid var(--border); }
+.kelbi-metric:last-child { border-right: 0; }
+.kelbi-metric h4 { font-size: 12px; font-weight: 550; color: var(--muted); margin: 0 0 10px; }
+.kelbi-metric strong { display: block; font-size: clamp(23px, 2.1vw, 30px); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 650; line-height: 1.25; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.kelbi-metric p { margin: 8px 0 0; font-size: 11px; line-height: 1.6; }
+.kelbi-panels { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr); gap: 12px; }
+.kelbi-panel { min-width: 0; padding: 18px 20px; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+.kelbi-panel .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--text); letter-spacing: -0.02em; }
+.chart-legend { margin: 0 0 12px; font-size: 11px; color: var(--muted); }
 .kelbi-trend svg { display: block; margin: 8px 0; max-width: 100%; }
-.kelbi-chart-empty { min-height: 196px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 24px; border: 1px dashed #d6e1e4; background: #fafcfc; border-radius: 10px; text-align: center; }
-.kelbi-chart-empty strong { font-size: 14px; font-weight: 550; }
+.kelbi-chart-empty { min-height: 190px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 20px; border: 1px solid #e5e9ee; background-color: #fafbfd; background-image: linear-gradient(#e9edf2 1px, transparent 1px), linear-gradient(90deg, #e9edf2 1px, transparent 1px); background-size: 100% 38px, 20% 100%; border-radius: 0; text-align: center; }
+.kelbi-chart-empty strong { font-size: 13px; font-weight: 550; background: #fafbfd; padding: 2px 8px; }
 .kelbi-chart-empty p { max-width: 300px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
 .kelbi-panel .chart-footnote { margin: 14px 0 0; font-size: 10px; }
 .observation-list { padding: 0; margin: 0; list-style: none; }
-.observation-list li { padding: 14px 0; border-bottom: 1px solid #edf0f2; font-size: 12px; line-height: 1.8; }
+.observation-list li { padding: 10px 0; border-bottom: 1px solid #edf0f2; font-size: 12px; line-height: 1.8; }
 .observation-list li:first-child { padding-top: 4px; }
 .kelbi-insights > .muted { margin: 16px 0; font-size: 10px; line-height: 1.8; }
 .insights-empty { margin: 26px 0; font-size: 13px; line-height: 1.9; color: var(--muted); }
 .evidence-details { font-size: 12px; margin-top: 16px; }
 .evidence-details summary { color: var(--accent); cursor: pointer; padding: 8px 0; }
 .evidence-details p { line-height: 1.9; }
-.kelbi-history { margin-top: 20px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
-.kelbi-history > summary { padding: 17px 22px; font-size: 12px; cursor: pointer; }
+.kelbi-history { margin-top: 12px; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
+.kelbi-history > summary { padding: 12px 18px; font-size: 12px; cursor: pointer; }
 .kelbi-history > p { padding: 0 22px; color: var(--muted); font-size: 12px; }
 .kelbi-history .vulnerabilities-result { padding: 0 22px 20px; overflow-x: auto; }
 .kelbi-history table { min-width: 440px; font-variant-numeric: tabular-nums; }
 .kelbi-history caption { text-align: left; padding: 8px 0 16px; font-size: 11px; color: var(--muted); }
-.kelbi-history .vulnerabilities-result th, .kelbi-history .vulnerabilities-result td { padding: 12px; font-size: 12px; }
+.kelbi-history .vulnerabilities-result th, .kelbi-history .vulnerabilities-result td { padding: 9px 12px; font-size: 12px; }
 .kelbi-privacy { margin: 16px 2px 0; font-size: 10px; }
-.support-panel, .connection-drawer, .legacy-status-details { background: #fff; border: 1px solid var(--border); border-radius: 12px; margin: 12px 0; }
-.support-panel > summary, .connection-drawer > summary, .legacy-status-details > summary { min-height: 54px; display: flex; align-items: center; gap: 12px; padding: 16px 20px; font-size: 13px; font-weight: 550; cursor: pointer; list-style: none; }
+.support-panel, .connection-drawer, .legacy-status-details { background: #fff; border: 1px solid var(--border); border-radius: 4px; margin: 8px 0; }
+.support-panel > summary, .connection-drawer > summary, .legacy-status-details > summary { min-height: 44px; display: flex; align-items: center; gap: 12px; padding: 11px 18px; font-size: 13px; font-weight: 550; cursor: pointer; list-style: none; }
 .support-panel > summary::-webkit-details-marker, .connection-drawer > summary::-webkit-details-marker, .legacy-status-details > summary::-webkit-details-marker { display: none; }
 .support-panel > summary::after, .connection-drawer > summary::after, .legacy-status-details > summary::after { content: ''; flex: none; width: 6px; height: 6px; margin-left: auto; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); }
 .support-panel[open] > summary::after, .connection-drawer[open] > summary::after, .legacy-status-details[open] > summary::after { transform: rotate(225deg); }
@@ -371,9 +373,11 @@ main:focus { outline: none; }
 .implementation-note .notice { margin-top: 12px; font-size: 12px; }
 .workspace-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; max-width: 1320px; margin: 24px auto 0; padding-top: 18px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); }
 @media (max-width: 1100px) {
-  .kelbi-workspace .layout { grid-template-columns: 190px minmax(0, 1fr); }
+  .kelbi-workspace .layout { grid-template-columns: 172px minmax(0, 1fr); }
   .kelbi-workspace main { padding: 28px; }
   .kelbi-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kelbi-metric:nth-child(2) { border-right: 0; }
+  .kelbi-metric:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
   .kelbi-panels { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 860px) {
@@ -390,7 +394,7 @@ main:focus { outline: none; }
 @media (max-width: 480px) {
   .kelbi-workspace .checked-at { flex-basis: 100%; }
   .kelbi-metric { padding: 18px 16px; min-height: 142px; }
-  .kelbi-metrics { gap: 12px; }
+  .kelbi-metrics { gap: 0; }
   .kelbi-panel { padding: 20px; }
   .kelbi-toolbar .row { width: 100%; }
   .kelbi-toolbar .btn-primary { flex: 1; }

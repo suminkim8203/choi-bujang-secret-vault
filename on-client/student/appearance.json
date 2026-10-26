@@ -2,8 +2,8 @@
   "schema": "alekov.student-appearance.v1",
   "appName": "켈비",
   "palette": {
-    "accent": "#176b64",
-    "background": "#f5f7f9",
+    "accent": "#2879a8",
+    "background": "#f3f4f6",
     "surface": "#ffffff"
   },
   "dashboardPreset": "default"
