@@ -1,6 +1,213 @@
-// 이 파일은 학생이 같은 프로젝트에서 이어서 구현합니다.
-// 제공 UI를 받은 것만으로 단계 완료를 인정하지 않습니다.
-export function createStudentView() {
+// 학생 PC 대시보드: 제공 조회를 재사용하고, 비교 기록은 이 탭의 메모리에만 둡니다.
+const PC_KEYS = ['cpu', 'memory', 'disk', 'network', 'firewall', 'events'];
+const PC_LABELS = ['CPU', '메모리', '디스크', '네트워크 구성', 'Windows 방화벽', 'Windows 기록'];
+const PC_REASONS = Object.freeze({
+  unsupported: '이 운영체제에서 제공하지 않는 항목입니다.',
+  permission_denied: '현재 읽기 권한으로 확인할 수 없습니다. 권한을 임의로 높이지 않습니다.',
+  timeout: '조회 시간을 초과했습니다. 직접 다시 조회하세요.',
+  cancelled: '조회가 취소됐습니다.',
+  query_failed: '이 항목을 읽지 못했습니다.',
+  invalid_response: '값이나 단위를 확인할 수 없습니다.',
+  invalid_sample: 'CPU 측정 구간을 확인할 수 없습니다.',
+});
+const validCount = n => Number.isSafeInteger(n) && n >= 0;
+const validBytes = n => validCount(n) && n > 0;
+const percent = n => `${n.toFixed(1)}%`;
+const gib = n => `${(n / 2 ** 30).toFixed(1)} GiB`;
+const pcTime = iso => new Date(iso).toLocaleTimeString('ko-KR', {hour12: false});
+
+export function normalizePcSnapshot(data, now = Date.now()) {
+  const at = typeof data?.measuredAt === 'string' && /(?:Z|[+-]\d{2}:\d{2})$/.test(data.measuredAt) ? Date.parse(data.measuredAt) : NaN;
+  if (data?.schema !== 'aleph.on.pc-status.v1' || data.source !== 'local-pc'
+      || !Number.isFinite(at) || now - at > 60000 || at - now > 5000) return null;
+  const values = {};
+  for (const key of PC_KEYS) {
+    const m = data.metrics?.[key];
+    const unavailable = reason => ({state: 'unavailable', reason, note: PC_REASONS[reason]});
+    let v = unavailable(m?.state === 'unavailable' && Object.hasOwn(PC_REASONS, m.reason) ? m.reason : 'invalid_response');
+    if (m?.state === 'ok') {
+      if (key === 'cpu' && typeof m.usagePercent === 'number' && Number.isFinite(m.usagePercent) && m.usagePercent >= 0 && m.usagePercent <= 100
+          && validBytes(m.sampleMs) && m.sampleMs <= 10000) {
+        v = {state: 'ok', ratio: m.usagePercent, text: percent(m.usagePercent), note: `${m.sampleMs}ms 구간의 사용률입니다. 지속 부하나 감염 판정이 아닙니다.`};
+      } else if (key === 'memory' && validBytes(m.totalBytes) && validCount(m.usedBytes) && m.usedBytes <= m.totalBytes) {
+        v = {state: 'ok', ratio: 100 * m.usedBytes / m.totalBytes, text: `${gib(m.usedBytes)} / ${gib(m.totalBytes)}`,
+          note: 'OS의 전체·여유 메모리 기준입니다. Mac의 캐시·압축·메모리 압력과 같은 수치는 아닙니다.'};
+      } else if (key === 'disk' && validBytes(m.totalBytes) && validCount(m.freeBytes) && m.freeBytes <= m.totalBytes) {
+        v = {state: 'ok', ratio: 100 * m.freeBytes / m.totalBytes, freeGiB: m.freeBytes / 2 ** 30, text: `${gib(m.freeBytes)} 여유`, note: '이 앱이 있는 디스크 기준입니다. 전체 디스크나 모든 볼륨의 합계가 아닙니다.'};
+      } else if (key === 'network' && validCount(m.interfaceCount) && validCount(m.ipv4Count)) {
+        v = {state: 'ok', text: `인터페이스 ${m.interfaceCount}개 · IPv4 구성 ${m.ipv4Count}개`, note: '로컬 구성 개수이며 인터넷 접속·VPN·ZTNA 연결 성공을 뜻하지 않습니다.'};
+      } else if (key === 'firewall' && Array.isArray(m.profiles) && m.profiles.length === 3
+          && ['Domain', 'Private', 'Public'].every(name => m.profiles.some(p => p?.name === name && typeof p.enabled === 'boolean'))) {
+        v = {state: 'ok', text: m.profiles.map(p => `${p.name} ${p.enabled ? '켜짐' : '꺼짐'}`).join(' · '), note: 'Windows 설정을 읽은 결과입니다. 앱이 설정을 바꾸지 않습니다.'};
+      } else if (key === 'events' && validCount(m.warningCount) && validCount(m.errorCount) && m.warningCount + m.errorCount <= 5000
+          && m.sampleLimit === 5000 && typeof m.truncated === 'boolean' && typeof m.since === 'string' && Number.isFinite(Date.parse(m.since))) {
+        v = {state: 'ok', text: `경고 ${m.warningCount}건 · 오류 ${m.errorCount}건${m.truncated ? ' · 일부 집계' : ''}`,
+          note: '최근 24시간 System·Application 기록, 최대 5,000건입니다. 침해 사고 건수가 아닙니다.'};
+      }
+    }
+    values[key] = Object.freeze(v);
+  }
+  return Object.freeze({measuredAt: new Date(at).toISOString(), values: Object.freeze(values)});
+}
+
+export function pcObservations(snapshot) {
+  const v = snapshot.values, observations = [];
+  if (v.cpu.state === 'ok' && v.cpu.ratio >= 85) observations.push(`CPU ${percent(v.cpu.ratio)}: 참고 기준 85% 이상입니다. 다른 시각에 다시 조회해 지속되는지 확인하세요.`);
+  if (v.memory.state === 'ok' && v.memory.ratio >= 90) observations.push(`메모리 사용 비율 ${percent(v.memory.ratio)}: 참고 기준 90% 이상입니다. Mac 활성 상태 보기에서 메모리 압력과 캐시를 함께 확인하세요.`);
+  if (v.disk.state === 'ok' && v.disk.ratio < 10) observations.push(`디스크 여유 ${percent(v.disk.ratio)}: 참고 기준 10% 미만입니다. 저장할 공간을 확인하세요. 파일을 자동 삭제하지 않습니다.`);
+  if (!observations.length) observations.push(['cpu', 'memory', 'disk'].some(key => v[key].state === 'ok')
+    ? '이번에 읽은 수치 중 참고 기준에 해당하는 항목은 없습니다. 읽지 못한 항목이나 PC 전체의 안전 판정은 아닙니다.'
+    : 'CPU·메모리·디스크 수치를 확인하지 못해 참고 기준을 적용하지 않았습니다.');
+  return observations;
+}
+
+export function createPcDashboard({api, now = Date.now} = {}) {
+  let status = 'idle', snapshot = null, history = [], message = '', mount = null, historyOpen = false;
+  const make = (parent, tag, text, cls) => {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (cls) node.className = cls;
+    if (parent) parent.append(node);
+    return node;
+  };
+  const historyValues = row => row.snapshot ? [row.snapshot.values.cpu, row.snapshot.values.memory, row.snapshot.values.disk] : [];
+  function drawChart(parent) {
+    make(parent, 'h4', '수동 조회 추이');
+    make(parent, 'p', 'CPU 실선 · 메모리 점선 · 단위 %. 실패·확인 불가 구간은 잇지 않습니다. 조회 간격은 일정하지 않습니다.', 'muted');
+    if (Math.max(...['cpu', 'memory'].map(key => history.filter(row => row.snapshot?.values[key]?.state === 'ok').length)) < 4) {
+      make(parent, 'p', '실측이 4회 이상 쌓이면 추이 그래프가 나타납니다. 그전에는 아래 조회 기록에서 값을 확인하세요.');
+      return;
+    }
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    for (const [key, value] of Object.entries({viewBox: '0 0 640 190', width: '100%', height: '190', role: 'img', 'aria-label': '수동 조회한 CPU·메모리 사용률 추이. 같은 값은 아래 기록표에서도 확인할 수 있습니다.'})) svg.setAttribute(key, value);
+    const svgNode = (tag, attrs, text) => {
+      const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+      if (text !== undefined) node.textContent = text;
+      svg.append(node);
+    };
+    const first = Date.parse(history[0].at), span = Math.max(1, Date.parse(history.at(-1).at) - first);
+    const x = row => 42 + 560 * (Date.parse(row.at) - first) / span;
+    for (const value of [0, 50, 100]) {
+      const y = 154 - value * 1.3;
+      svgNode('line', {x1: 42, x2: 602, y1: y, y2: y, stroke: '#d9dde3'});
+      svgNode('text', {x: 4, y: y + 5, fill: 'currentColor', 'font-size': 14}, `${value}%`);
+    }
+    for (const [key, color, dash] of [['cpu', '#176b64', 'none'], ['memory', '#6b3fb3', '7 5']]) {
+      let segment = [];
+      const flush = () => {
+        if (segment.length > 1) svgNode('polyline', {points: segment.join(' '), fill: 'none', stroke: color, 'stroke-width': 3, 'stroke-dasharray': dash});
+        segment = [];
+      };
+      for (const row of history) {
+        const value = row.snapshot?.values[key];
+        if (value?.state !== 'ok') {flush(); continue;}
+        const y = 154 - value.ratio * 1.3;
+        segment.push(`${x(row).toFixed(1)},${y.toFixed(1)}`);
+        svgNode('circle', {cx: x(row), cy: y, r: 3, fill: color});
+      }
+      flush();
+    }
+    svgNode('text', {x: 42, y: 183, fill: 'currentColor', 'font-size': 14}, pcTime(history[0].at));
+    svgNode('text', {x: 602, y: 183, fill: 'currentColor', 'font-size': 14, 'text-anchor': 'end'}, pcTime(history.at(-1).at));
+    parent.append(svg);
+  }
+  function draw() {
+    if (!mount) return;
+    const {root, refresh, clear, live, body} = mount;
+    const busy = status === 'loading';
+    root.setAttribute('aria-busy', String(busy));
+    // native disabled로 초점을 BODY로 잃지 않도록 의미·실행 가드를 함께 사용합니다.
+    refresh.setAttribute('aria-disabled', String(busy));
+    clear.setAttribute('aria-disabled', String(busy || !history.length));
+    refresh.textContent = busy ? 'PC를 읽는 중…' : 'PC 상태 다시 조회';
+    live.textContent = status === 'ok' ? `마지막 수동 조회: ${new Date(snapshot.measuredAt).toLocaleString('ko-KR')} · 이 시점의 실측입니다.`
+      : busy ? '이 PC에서 읽는 중입니다. 이전 값을 이번 결과로 표시하지 않습니다.'
+      : status === 'error' ? message : '아직 조회하지 않았습니다. 버튼을 누르면 한 번 읽습니다.';
+    body.replaceChildren();
+    const grid = make(body, 'div', undefined, 'grid-2');
+    const pairs = [make(grid, 'div', undefined, 'grid-2'), make(grid, 'div', undefined, 'grid-2')];
+    const current = status === 'ok' ? snapshot : null;
+    const available = current ? PC_KEYS.filter(key => current.values[key].state === 'ok').length : null;
+    for (const [index, key] of ['cpu', 'memory', 'disk', 'scope'].entries()) {
+      const card = make(pairs[Math.floor(index / 2)], 'section', undefined, 'card');
+      make(card, 'h4', key === 'scope' ? '확인 범위' : PC_LABELS[PC_KEYS.indexOf(key)]);
+      const value = key === 'scope' ? available === null ? null : `${available} / 6항목 실측` : current?.values[key];
+      make(card, 'strong', key === 'scope' && value ? value : value?.state === 'ok' ? value.text : busy ? '조회 중' : status === 'idle' ? '조회 전' : '확인 불가');
+      make(card, 'p', key === 'scope' ? '읽지 못한 항목은 아래에 이유를 남깁니다.' : value?.state === 'ok' ? key === 'memory' ? `사용 비율 ${percent(value.ratio)}` : key === 'disk' ? `여유 비율 ${percent(value.ratio)}` : '짧은 구간의 사용률' : value?.note ?? '이전 조회값으로 채우지 않습니다.', 'muted');
+    }
+    make(body, 'h4', '근거와 다음 행동');
+    if (current) {
+      const list = make(body, 'ul');
+      for (const item of pcObservations(current)) make(list, 'li', item);
+      for (const [index, key] of PC_KEYS.entries()) {
+        const value = current.values[key];
+        if (value.state !== 'ok') make(list, 'li', `${PC_LABELS[index]} · 확인 불가: ${value.note}`);
+      }
+      make(body, 'p', '참고 기준은 사용량을 살펴보기 위한 편의 기준입니다. 공격·감염 탐지나 보안 점수가 아닙니다.', 'muted');
+      const evidence = make(body, 'details'), title = make(evidence, 'summary', '항목별 측정 근거와 제한');
+      title.className = 'btn';
+      for (const [index, key] of PC_KEYS.entries()) make(evidence, 'p', `${PC_LABELS[index]}: ${current.values[key].state === 'ok' ? current.values[key].text : '확인 불가'} · ${current.values[key].note}`);
+    } else make(body, 'p', status === 'error' ? '앱 실행 상태를 확인하고 직접 다시 조회하세요. 과거 기록은 아래에 남아 있지만 이번 결과가 아닙니다.' : '조회 후 실제 값과 확인하지 못한 항목을 함께 정리합니다.');
+    const past = make(body, 'section', undefined, 'card');
+    drawChart(past);
+    const details = make(past, 'details'); details.open = historyOpen;
+    make(details, 'summary', `최근 조회 기록 · ${history.length} / 20회`, 'btn');
+    details.addEventListener('toggle', () => {historyOpen = details.open;});
+    if (!history.length) make(details, 'p', '기록이 없습니다.');
+    else {
+      const wrap = make(details, 'div', undefined, 'vulnerabilities-result'), table = make(wrap, 'table');
+      make(table, 'caption', '현재 탭의 수동 조회 기록 · 최신순 · 실패는 수치 없이 표시');
+      const header = make(make(table, 'thead'), 'tr');
+      for (const title of ['조회 시각', '결과', 'CPU %', '메모리 %', '디스크 여유 GiB']) {const th = make(header, 'th', title); th.setAttribute('scope', 'col');}
+      const tbody = make(table, 'tbody');
+      for (const row of [...history].reverse()) {
+        const tr = make(tbody, 'tr'), values = historyValues(row);
+        for (const value of [pcTime(row.at), row.snapshot ? '실측' : '실패',
+          values[0]?.state === 'ok' ? values[0].ratio.toFixed(1) : '—', values[1]?.state === 'ok' ? values[1].ratio.toFixed(1) : '—',
+          values[2]?.state === 'ok' ? values[2].freeGiB.toFixed(1) : '—']) make(tr, 'td', value);
+      }
+    }
+  }
+  async function read() {
+    if (status === 'loading') return;
+    status = 'loading'; snapshot = null; draw();
+    try {
+      const result = await api.get('/api/pc/status');
+      if (result?.ok !== true) throw Error(['NOT_ALLOWED', 'REQUEST_TIMEOUT'].includes(result?.error?.code) ? result.error.code : 'PC_QUERY_FAILED');
+      const next = normalizePcSnapshot(result.data, now());
+      const previous = [...history].reverse().find(row => row.snapshot);
+      if (!next || previous && Date.parse(next.measuredAt) <= Date.parse(previous.at)) throw Error('PC_RESPONSE_UNVERIFIED');
+      snapshot = next; status = 'ok';
+      history = [...history, {at: next.measuredAt, snapshot: next}].slice(-20);
+    } catch (error) {
+      status = 'error'; snapshot = null;
+      message = error?.message === 'NOT_ALLOWED' ? '이 제공본에서는 PC 조회를 지원하지 않습니다. 제공본 업데이트를 확인하세요.'
+        : error?.message === 'REQUEST_TIMEOUT' ? 'PC 조회 시간을 초과했습니다. 직접 다시 조회하세요.'
+        : error?.message === 'PC_RESPONSE_UNVERIFIED' ? '이번 응답의 출처·측정 시각·순서를 확인할 수 없습니다. 이전 값으로 채우지 않습니다.'
+        : '이번 PC 조회를 완료하지 못했습니다. 앱 실행 상태를 확인하세요.';
+      history = [...history, {at: new Date(now()).toISOString(), snapshot: null}].slice(-20);
+    }
+    draw();
+  }
+  return function render() {
+    const root = make(null, 'section'); root.setAttribute('aria-label', '켈비 PC 대시보드');
+    make(root, 'h3', '내 Mac · PC 상태 대시보드');
+    make(root, 'p', '제공된 PC 실측을 사용해 조회 기록과 근거를 정리합니다. 보안 서버 연결·예제 기록과 별도입니다.');
+    make(root, 'p', '현재 탭에서 최근 20회만 보관합니다. 새로고침하면 지워지며 영구 저장·외부 전송·자동 조회하지 않습니다.', 'muted');
+    const controls = make(root, 'div', undefined, 'row');
+    const refresh = make(controls, 'button', 'PC 상태 다시 조회', 'btn'); refresh.type = 'button'; refresh.addEventListener('click', read);
+    const clear = make(controls, 'button', '이 탭의 조회 기록 지우기', 'btn'); clear.type = 'button';
+    clear.addEventListener('click', () => {if (status === 'loading' || !history.length) return; history = []; status = 'idle'; snapshot = null; message = ''; draw();});
+    const live = make(root, 'p'); live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite');
+    const body = make(root, 'div'); mount = {root, refresh, clear, live, body}; draw();
+    return root;
+  };
+}
+
+// 기존 13~22단계 표시 함수를 보존하고 학생 상태 칸 안에서 확장합니다.
+export function createStudentView({api} = {}) {
+  const renderPcDashboard = typeof api?.get === 'function' ? createPcDashboard({api}) : null;
   const aiText = (value, fallback = '확인 불가', max = 1500) => typeof value === 'string' && value.trim() && value.length <= max
     && !/(?:Bearer\s|sb_secret_|sk-[A-Za-z0-9]|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.|-----BEGIN [A-Z ]*PRIVATE KEY-----)/i.test(value) ? value : fallback;
   const aiId = value => typeof value === 'string' && /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$/.test(value) && aiText(value, '') === value;
@@ -267,6 +474,7 @@ export function createStudentView() {
     renderStatus({ devices, sessions, notifications, diagnostics, mode } = {}) {
       const root = document.createElement('section');
       root.setAttribute('aria-label', '기기·세션·알림과 진단 정보');
+      if (renderPcDashboard) root.append(renderPcDashboard());
       const add = (parent, tag, text) => {
         const node = document.createElement(tag);
         if (text !== undefined) node.textContent = text;
