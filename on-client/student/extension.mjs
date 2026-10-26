@@ -72,10 +72,12 @@ export function createPcDashboard({api, now = Date.now} = {}) {
   };
   const historyValues = row => row.snapshot ? [row.snapshot.values.cpu, row.snapshot.values.memory, row.snapshot.values.disk] : [];
   function drawChart(parent) {
-    make(parent, 'h4', '수동 조회 추이');
-    make(parent, 'p', 'CPU 실선 · 메모리 점선 · 단위 %. 실패·확인 불가 구간은 잇지 않습니다. 조회 간격은 일정하지 않습니다.', 'muted');
+    make(parent, 'h4', '사용량의 변화', 'panel-title');
+    make(parent, 'p', 'CPU 실선 · 메모리 점선 · 단위 %', 'chart-legend');
     if (Math.max(...['cpu', 'memory'].map(key => history.filter(row => row.snapshot?.values[key]?.state === 'ok').length)) < 4) {
-      make(parent, 'p', '실측이 4회 이상 쌓이면 추이 그래프가 나타납니다. 그전에는 아래 조회 기록에서 값을 확인하세요.');
+      const empty = make(parent, 'div', undefined, 'kelbi-chart-empty');
+      make(empty, 'strong', '변화를 천천히 쌓아보세요');
+      make(empty, 'p', '실측이 4회 이상 쌓이면 추이 그래프가 나타납니다. 그전에는 아래 조회 기록에서 값을 확인하세요.');
       return;
     }
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -125,34 +127,36 @@ export function createPcDashboard({api, now = Date.now} = {}) {
       : busy ? '이 PC에서 읽는 중입니다. 이전 값을 이번 결과로 표시하지 않습니다.'
       : status === 'error' ? message : '아직 조회하지 않았습니다. 버튼을 누르면 한 번 읽습니다.';
     body.replaceChildren();
-    const grid = make(body, 'div', undefined, 'grid-2');
-    const pairs = [make(grid, 'div', undefined, 'grid-2'), make(grid, 'div', undefined, 'grid-2')];
+    const grid = make(body, 'div', undefined, 'kelbi-metrics');
     const current = status === 'ok' ? snapshot : null;
     const available = current ? PC_KEYS.filter(key => current.values[key].state === 'ok').length : null;
     for (const [index, key] of ['cpu', 'memory', 'disk', 'scope'].entries()) {
-      const card = make(pairs[Math.floor(index / 2)], 'section', undefined, 'card');
+      const card = make(grid, 'section', undefined, `kelbi-metric kelbi-metric-${key}`);
       make(card, 'h4', key === 'scope' ? '확인 범위' : PC_LABELS[PC_KEYS.indexOf(key)]);
       const value = key === 'scope' ? available === null ? null : `${available} / 6항목 실측` : current?.values[key];
-      make(card, 'strong', key === 'scope' && value ? value : value?.state === 'ok' ? value.text : busy ? '조회 중' : status === 'idle' ? '조회 전' : '확인 불가');
-      make(card, 'p', key === 'scope' ? '읽지 못한 항목은 아래에 이유를 남깁니다.' : value?.state === 'ok' ? key === 'memory' ? `사용 비율 ${percent(value.ratio)}` : key === 'disk' ? `여유 비율 ${percent(value.ratio)}` : '짧은 구간의 사용률' : value?.note ?? '이전 조회값으로 채우지 않습니다.', 'muted');
+      make(card, 'strong', key === 'scope' && value ? `${available} / 6` : value?.state === 'ok' ? key === 'memory' ? percent(value.ratio) : value.text : busy ? '조회 중' : status === 'idle' ? '조회 전' : '확인 불가');
+      make(card, 'p', key === 'scope' ? available === null ? '항목 실측 · 확인 전' : `항목 실측 · ${6 - available}항목 확인 불가` : value?.state === 'ok' ? key === 'memory' ? value.text : key === 'disk' ? `여유 비율 ${percent(value.ratio)}` : '짧은 구간의 사용률' : value?.note ?? '이전 조회값으로 채우지 않습니다.', 'muted');
     }
-    make(body, 'h4', '근거와 다음 행동');
+    const panels = make(body, 'div', undefined, 'kelbi-panels');
+    const past = make(panels, 'section', undefined, 'kelbi-panel kelbi-trend');
+    drawChart(past);
+    make(past, 'p', '수동 조회 시각을 기준으로 비교합니다. 실패·확인 불가 구간은 잇지 않습니다.', 'muted chart-footnote');
+    const insights = make(panels, 'section', undefined, 'kelbi-panel kelbi-insights');
+    make(insights, 'h4', '확인할 내용', 'panel-title');
     if (current) {
-      const list = make(body, 'ul');
+      const list = make(insights, 'ul', undefined, 'observation-list');
       for (const item of pcObservations(current)) make(list, 'li', item);
       for (const [index, key] of PC_KEYS.entries()) {
         const value = current.values[key];
         if (value.state !== 'ok') make(list, 'li', `${PC_LABELS[index]} · 확인 불가: ${value.note}`);
       }
-      make(body, 'p', '참고 기준은 사용량을 살펴보기 위한 편의 기준입니다. 공격·감염 탐지나 보안 점수가 아닙니다.', 'muted');
-      const evidence = make(body, 'details'), title = make(evidence, 'summary', '항목별 측정 근거와 제한');
-      title.className = 'btn';
+      make(insights, 'p', '참고 기준은 사용량을 살펴보기 위한 편의 기준입니다. 공격·감염 탐지나 보안 점수가 아닙니다.', 'muted');
+      const evidence = make(insights, 'details', undefined, 'evidence-details');
+      make(evidence, 'summary', '측정 근거와 제한');
       for (const [index, key] of PC_KEYS.entries()) make(evidence, 'p', `${PC_LABELS[index]}: ${current.values[key].state === 'ok' ? current.values[key].text : '확인 불가'} · ${current.values[key].note}`);
-    } else make(body, 'p', status === 'error' ? '앱 실행 상태를 확인하고 직접 다시 조회하세요. 과거 기록은 아래에 남아 있지만 이번 결과가 아닙니다.' : '조회 후 실제 값과 확인하지 못한 항목을 함께 정리합니다.');
-    const past = make(body, 'section', undefined, 'card');
-    drawChart(past);
-    const details = make(past, 'details'); details.open = historyOpen;
-    make(details, 'summary', `최근 조회 기록 · ${history.length} / 20회`, 'btn');
+    } else make(insights, 'p', status === 'error' ? '앱 실행 상태를 확인하고 직접 다시 조회하세요. 과거 기록은 아래에 남아 있지만 이번 결과가 아닙니다.' : '조회 후 실제 값과 확인하지 못한 항목을 함께 정리합니다.', 'insights-empty');
+    const details = make(body, 'details', undefined, 'kelbi-history'); details.open = historyOpen;
+    make(details, 'summary', `최근 조회 기록 · ${history.length} / 20회`);
     details.addEventListener('toggle', () => {historyOpen = details.open;});
     if (!history.length) make(details, 'p', '기록이 없습니다.');
     else {
@@ -191,16 +195,18 @@ export function createPcDashboard({api, now = Date.now} = {}) {
     draw();
   }
   return function render() {
-    const root = make(null, 'section'); root.setAttribute('aria-label', '켈비 PC 대시보드');
-    make(root, 'h3', '내 Mac · PC 상태 대시보드');
-    make(root, 'p', '제공된 PC 실측을 사용해 조회 기록과 근거를 정리합니다. 보안 서버 연결·예제 기록과 별도입니다.');
-    make(root, 'p', '현재 탭에서 최근 20회만 보관합니다. 새로고침하면 지워지며 영구 저장·외부 전송·자동 조회하지 않습니다.', 'muted');
-    const controls = make(root, 'div', undefined, 'row');
-    const refresh = make(controls, 'button', 'PC 상태 다시 조회', 'btn'); refresh.type = 'button'; refresh.addEventListener('click', read);
-    const clear = make(controls, 'button', '이 탭의 조회 기록 지우기', 'btn'); clear.type = 'button';
+    const root = make(null, 'section', undefined, 'kelbi-dashboard'); root.setAttribute('aria-label', '켈비 PC 대시보드');
+    const toolbar = make(root, 'div', undefined, 'kelbi-toolbar');
+    const intro = make(toolbar, 'div', undefined, 'kelbi-intro');
+    make(intro, 'h3', '리소스 현황');
+    make(intro, 'p', '이 Mac에서 직접 읽은 값입니다. 보안 서버 연결과는 별도입니다.', 'muted');
+    const controls = make(toolbar, 'div', undefined, 'row');
+    const refresh = make(controls, 'button', 'PC 상태 다시 조회', 'btn btn-primary'); refresh.type = 'button'; refresh.addEventListener('click', read);
+    const clear = make(controls, 'button', '이 탭의 조회 기록 지우기', 'btn btn-quiet'); clear.type = 'button';
     clear.addEventListener('click', () => {if (status === 'loading' || !history.length) return; history = []; status = 'idle'; snapshot = null; message = ''; draw();});
-    const live = make(root, 'p'); live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite');
+    const live = make(root, 'p', undefined, 'kelbi-live'); live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite');
     const body = make(root, 'div'); mount = {root, refresh, clear, live, body}; draw();
+    make(root, 'p', '현재 탭에서 최근 20회만 보관합니다. 새로고침하면 지워지며 영구 저장·외부 전송·자동 조회하지 않습니다.', 'muted kelbi-privacy');
     return root;
   };
 }
@@ -472,9 +478,15 @@ export function createStudentView({api} = {}) {
       return root;
     },
     renderStatus({ devices, sessions, notifications, diagnostics, mode } = {}) {
-      const root = document.createElement('section');
-      root.setAttribute('aria-label', '기기·세션·알림과 진단 정보');
-      if (renderPcDashboard) root.append(renderPcDashboard());
+      const outer = document.createElement('section');
+      outer.setAttribute('aria-label', '기기·세션·알림과 진단 정보');
+      let root = outer;
+      if (renderPcDashboard) {
+        outer.append(renderPcDashboard());
+        const details = document.createElement('details'); details.className = 'legacy-status-details';
+        const summary = document.createElement('summary'); summary.textContent = '보안 기기·세션·알림 상세 · PC 실측과 별도';
+        root = document.createElement('section'); details.append(summary, root); outer.append(details);
+      }
       const add = (parent, tag, text) => {
         const node = document.createElement(tag);
         if (text !== undefined) node.textContent = text;
@@ -563,7 +575,7 @@ export function createStudentView({api} = {}) {
           copied.textContent = '복사하지 못했습니다. 표시된 안전한 진단 항목만 직접 선택해 도움을 요청하세요.';
         }
       });
-      return root;
+      return outer;
     },
     renderVulnerabilities({ status = 'idle', mode, data, error } = {}) {
       const root = document.createElement('section');

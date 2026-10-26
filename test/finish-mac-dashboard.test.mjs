@@ -72,7 +72,8 @@ test('잘못된 수치와 이유 문자열은 개별 확인 불가이며 다른 
 test('수동 조회 전에는 요청이 없고 제공 PC API 하나만 사용한다', async () => {
   const h = harness(); assert.deepEqual(h.calls, []); assert.ok(h.root.textContent.includes('조회 전'));
   h.next(); await h.query();
-  assert.deepEqual(h.calls, ['/api/pc/status']); assert.ok(card(h.root, '확인 범위').textContent.includes('4 / 6항목 실측'));
+  assert.deepEqual(h.calls, ['/api/pc/status']); assert.ok(card(h.root, '확인 범위').textContent.includes('4 / 6'));
+  assert.ok(card(h.root, '확인 범위').textContent.includes('항목 실측'));
   assert.ok(h.root.textContent.includes('Windows 방화벽 · 확인 불가'));
   assert.ok(h.root.textContent.includes('새로고침하면 지워지며'));
 });
@@ -145,6 +146,6 @@ test('기존 학생 상태 함수에서 PC 대시보드를 함께 표시해도 �
   let calls = 0;
   const view = createStudentView({api: {get() {calls++;}}});
   const root = view.renderStatus({mode: 'disconnected', notifications: []});
-  assert.ok(root.textContent.includes('PC 상태 대시보드')); assert.ok(root.textContent.includes('연결 없음(disconnected)'));
+  assert.ok(walk(root).some(node => node.attributes['aria-label'] === '켈비 PC 대시보드')); assert.ok(root.textContent.includes('연결 없음(disconnected)'));
   assert.equal(calls, 0);
 });

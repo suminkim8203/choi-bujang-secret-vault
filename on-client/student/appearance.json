@@ -3,8 +3,8 @@
   "appName": "켈비",
   "palette": {
     "accent": "#176b64",
-    "background": "#f4f7f6",
+    "background": "#f5f7f9",
     "surface": "#ffffff"
   },
-  "dashboardPreset": "student-first"
+  "dashboardPreset": "default"
 }
