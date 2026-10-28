@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/student/appearance.css">
   <script type="module" src="/app.js"></script>
 </head>
-<body class="kelbi-workspace">
+<body class="kelbi-workspace kelbi-topnav-preview">
   <a class="skip-link" href="#main">본문으로 건너뛰기</a>
 
   <header class="topbar">
@@ -20,8 +20,8 @@
       <span class="brand-name"><span id="brand-title">켈비</span> <small>로컬 시스템 모니터</small></span>
     </div>
     <div class="topbar-status">
-      <span class="server-caption">보안 서버</span>
-      <span id="mode-badge" class="mode-badge" data-mode="loading" role="status" aria-live="polite">상태 확인 중</span>
+      <div class="connection-status"><span class="server-caption">보안 서버</span>
+      <span id="mode-badge" class="mode-badge" data-mode="loading" role="status" aria-live="polite">상태 확인 중</span></div>
       <span id="checked-at" class="checked-at"></span>
       <button type="button" id="refresh" class="btn">다시 불러오기</button>
     </div>
@@ -30,13 +30,13 @@
   <div class="layout">
     <nav class="sidebar" aria-label="주 메뉴">
       <p class="nav-eyebrow">모니터링</p>
-      <div role="tablist" aria-orientation="vertical" id="nav">
+      <div role="tablist" aria-orientation="horizontal" id="nav">
         <button type="button" role="tab" id="tab-protection" data-testid="nav-protection" data-view="protection" aria-controls="view-protection" aria-selected="true" tabindex="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>보호 현황</span></button>
         <button type="button" role="tab" id="tab-apps" data-testid="nav-apps" data-view="apps" aria-controls="view-apps" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 4v5"/></svg><span>업무 앱</span></button>
         <button type="button" role="tab" id="tab-records" data-testid="nav-records" data-view="records" aria-controls="view-records" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M7 3h10l3 3v15H4V3h3ZM8 10h8M8 14h8M8 18h5"/></svg><span>보안 기록</span></button>
       </div>
       <div class="sidebar-footnote"><span class="local-indicator" aria-hidden="true"></span><strong>내 PC에서 확인</strong><p>PC 값은 외부로 자동 전송하지 않습니다.</p></div>
-      <p class="sidebar-note">위·아래 방향키로 메뉴를 이동합니다.</p>
+      <p class="sidebar-note">좌·우 방향키로 메뉴를 이동합니다.</p>
     </nav>
 
     <main id="main" tabindex="-1">

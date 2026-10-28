@@ -1,0 +1,243 @@
+{
+  "sourceRoot": "../../on-client",
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "bytes": 339,
+      "sha256": "9117633ba8c0fdbefee9bbcc4b25b83529630f98c738eff1a50b403ecd4074ab"
+    },
+    {
+      "path": "public/ai-connect.mjs",
+      "bytes": 51893,
+      "sha256": "562d1eb225f49dee6c41b1cdba22766e4c662ce85e299894d68e71281cabb32c"
+    },
+    {
+      "path": "public/app.js",
+      "bytes": 88414,
+      "sha256": "c5b2a973e6960c708a805329eabc92bb0c2249868080e07988560ceb76d15d99"
+    },
+    {
+      "path": "public/assets/alekov/alekov-ai-explain.webp",
+      "bytes": 14830,
+      "sha256": "b79ad565ffd2de876bdda37fb5905f3a57e2fead979bced926d51697bec86850"
+    },
+    {
+      "path": "public/assets/alekov/alekov-app-icon.webp",
+      "bytes": 21604,
+      "sha256": "2c00e676ea754092c78dfd97a1ae3767e511b642b930266689730e55b67b68aa"
+    },
+    {
+      "path": "public/assets/alekov/alekov-connect-approval.webp",
+      "bytes": 17884,
+      "sha256": "942f4a5a9d158c371a4055592f673baf94a71b6dad42e7f0a07443c9ccb94f36"
+    },
+    {
+      "path": "public/assets/alekov/alekov-connection-unknown.webp",
+      "bytes": 14682,
+      "sha256": "ef9ee29d40246b50a97f8d51f1f13f60013697a601fa7310c735192d52592ccc"
+    },
+    {
+      "path": "public/assets/alekov/alekov-empty-records.webp",
+      "bytes": 18206,
+      "sha256": "b124bf1cc0a40e35d3fbfbdb103496f8217db72a8ce4e637bd3b901f264f033b"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 21769,
+      "sha256": "5f0fc7bcd8bd6f99591a8243dcf75a3b2c18e205d995c833d0416662af6c7fd6"
+    },
+    {
+      "path": "public/pc-status-view.mjs",
+      "bytes": 8589,
+      "sha256": "6b437dd99f5208502e185595dc6082694c16a8d3c97a57937fad73c24fdc41b6"
+    },
+    {
+      "path": "public/student-appearance.mjs",
+      "bytes": 8298,
+      "sha256": "1dfc20e8458871c78ff6e17cfdd3d64ff064a98092f7459d27c9fce7f5a0bd28"
+    },
+    {
+      "path": "public/style.css",
+      "bytes": 34282,
+      "sha256": "7b4ca67de525a1557e447f2f41619eab2be2c85dfec49cb7303ca65bbb74c801"
+    },
+    {
+      "path": "public/vulnerabilities-view.mjs",
+      "bytes": 14196,
+      "sha256": "c48b75582931e38b7175b9d66286b71951ba9794f4762d7fb3ddfe66cb4656fd"
+    },
+    {
+      "path": "src/actions/README.md",
+      "bytes": 8511,
+      "sha256": "e426821d281db0810a02744183102013948c5a89a99a83b54b46345357539368"
+    },
+    {
+      "path": "src/actions/action-startup-config.mjs",
+      "bytes": 5766,
+      "sha256": "c3a47f6da50a17a493b94d5573461a5cbd99322bd0c4fb19dcc57eba723dfa21"
+    },
+    {
+      "path": "src/actions/sdp-action-engine.mjs",
+      "bytes": 2881,
+      "sha256": "d6965c31ecfab7dfcc6c7c9ef34056ebf2fef85af874050a2162c3b6d1b5f0e9"
+    },
+    {
+      "path": "src/actions/service.mjs",
+      "bytes": 17748,
+      "sha256": "7c25ef5696b211be0fef6fe80c79efe842681658f1be5eee0219c9871b7a066f"
+    },
+    {
+      "path": "src/actions/store.mjs",
+      "bytes": 6800,
+      "sha256": "b75f4e73f007ffabb9f38cc6d092c444b0736af9a8b4d4f2c3912539718927d1"
+    },
+    {
+      "path": "src/ai/README.md",
+      "bytes": 16203,
+      "sha256": "de805a96f03a05988d27ea8bcf5d561e56d6ee6e67cdde114bb8b24c208c2454"
+    },
+    {
+      "path": "src/ai/app-authorization.mjs",
+      "bytes": 9612,
+      "sha256": "f141f0654c5cb2366c6aa9bb85c7fc87f42ea20dfa29756f8bfae6f2e7046c6a"
+    },
+    {
+      "path": "src/ai/connection.mjs",
+      "bytes": 14493,
+      "sha256": "b858c94c8b7ad3e502904b3ec48b94dde682b53f73b6b31a95eb53df0dcc440d"
+    },
+    {
+      "path": "src/ai/credential-vault.mjs",
+      "bytes": 10097,
+      "sha256": "94a3c22cd2283338f0e1cf1cc58d56709807606da8dd34b26c43a37d51799cf2"
+    },
+    {
+      "path": "src/ai/learner-support-contract.mjs",
+      "bytes": 10231,
+      "sha256": "a5fd67792c31f1cdc575587b893afdaac1139e42f98a0dd99c4b9525461d3240"
+    },
+    {
+      "path": "src/ai/service.mjs",
+      "bytes": 38087,
+      "sha256": "cca28895bbc57319b974dff52ca711f1f47ca0c7a976c1980d08b6dff31b7360"
+    },
+    {
+      "path": "src/ai/vault-service.mjs",
+      "bytes": 11647,
+      "sha256": "07814933b42f5b795ffd5a547e9434f4086eaebf0135004880747fd981a4a13b"
+    },
+    {
+      "path": "src/connection/manager.mjs",
+      "bytes": 32911,
+      "sha256": "0ad240e63816bfd9c1e5ac74b78fc4315697b1908582f54635aa2c38c6d01f9f"
+    },
+    {
+      "path": "src/connection/native-context.mjs",
+      "bytes": 24005,
+      "sha256": "1202db7c7875ee91013863a4f789401169ff16010182f6a18cee4f8bb7a8ab02"
+    },
+    {
+      "path": "src/connection/native-login.mjs",
+      "bytes": 20787,
+      "sha256": "e125d7e4db7db0e3db690ea85c9585bb511f49c4483d018d01c760d9caa4c06b"
+    },
+    {
+      "path": "src/engine/sdp-host-config.mjs",
+      "bytes": 19590,
+      "sha256": "c418f55ebd273b8ac9dc4f37ffd20bc19dbaa5f68fc1c49c07a03bf44d08822f"
+    },
+    {
+      "path": "src/engine/sdp-host.mjs",
+      "bytes": 36657,
+      "sha256": "70037627d873bac50e2f290e66a861b2a8ec2ec6adf7f5c1dbb3561ff9a2f403"
+    },
+    {
+      "path": "src/engine/student-engine-ipc.mjs",
+      "bytes": 7040,
+      "sha256": "1ce4859f91f27bf594fcee5f47655c22bb1f82b552f5bd37f13147851be1a0f2"
+    },
+    {
+      "path": "src/engine/student-engine-worker.mjs",
+      "bytes": 1813,
+      "sha256": "faf9431735822d7fd1e87435288f3c6c7e3b4504572d25b337f8ae34ffbc6986"
+    },
+    {
+      "path": "src/engine/trusted-app-assembly.mjs",
+      "bytes": 6204,
+      "sha256": "39720f5d80e6e25282bfce63affe80b9a765f355ad0d70fcb2ba7a120d87651b"
+    },
+    {
+      "path": "src/engine.mjs",
+      "bytes": 2748,
+      "sha256": "67a4f794eccbe7c5ba922b030cacb92c1473e2f9ef6ab1a69f8619a3292c58df"
+    },
+    {
+      "path": "src/learner-support/service.mjs",
+      "bytes": 7309,
+      "sha256": "0271330068606e98cd49d8c7751183df5726d75b004d992efd14e1107132cb55"
+    },
+    {
+      "path": "src/pc-status.mjs",
+      "bytes": 7391,
+      "sha256": "3edb0f2dda86f32673c9e4781979b41871974587c5e96800bf1f8b0dac2d6d45"
+    },
+    {
+      "path": "src/server.mjs",
+      "bytes": 85923,
+      "sha256": "578a60ed3a47baea1576920eb644f4ee60015fe848ab07fca47156ab53680abe"
+    },
+    {
+      "path": "src/student-appearance-files.mjs",
+      "bytes": 6207,
+      "sha256": "f03e59a78ebd0643154e155feb07fd81f47dfdbb2da92f1a464a47516fa0348a"
+    },
+    {
+      "path": "src/student-appearance.mjs",
+      "bytes": 20897,
+      "sha256": "d1cbcdb617e1f9ad665b02a2de72088337e35ce21f72eaea6abf2d3e99996db1"
+    },
+    {
+      "path": "src/vulnerabilities/README.md",
+      "bytes": 7357,
+      "sha256": "e797072e12671fc3d3840423398abfcf3d3e84e5f1f1d5be995dbf76563af225"
+    },
+    {
+      "path": "src/vulnerabilities/osv.mjs",
+      "bytes": 9857,
+      "sha256": "c49abd811168e4879fa82eeb23638e4fe86751ef5e52a9eba4eccff46261a914"
+    },
+    {
+      "path": "src/vulnerabilities/project-scan.mjs",
+      "bytes": 11345,
+      "sha256": "ce4e56b2bc823be3835bbb5a3416d5506d1de96688e34d684894f42bba1f1154"
+    },
+    {
+      "path": "student/appearance.json",
+      "bytes": 201,
+      "sha256": "a3406ca3e7e963bd7e20fbfc83be22684c4b888af6e990ba0482f1d75ff38f63"
+    },
+    {
+      "path": "student/engine-adapter.mjs",
+      "bytes": 1527,
+      "sha256": "a097322e58b11aa48d87369e67e48a7a8bf72416d958c1e101e17d3b77fbf838"
+    },
+    {
+      "path": "student/extension.mjs",
+      "bytes": 59501,
+      "sha256": "50792ce24bbb8e96c8850d5f49ee59eefa2255dd812927dcc0dcfc184dc503b7"
+    }
+  ],
+  "uiDeferred": false,
+  "submissionHold": true,
+  "installerExcluded": true,
+  "alephPackagingExcluded": true,
+  "sourceState": "reviewed runtime snapshot; use the containing Git commit as final source identity",
+  "uiFinalized": true,
+  "uiApproval": "2026-10-28 current preview applied; connection absent remains gray",
+  "previousPackage": "2026-10-27 preserved",
+  "changesFromPrevious": [
+    "public/index.html",
+    "public/style.css"
+  ],
+  "sourceBaseCommit": "502d6122c01196b0ef093148eb7907c480883be5"
+}

@@ -1,0 +1,23 @@
+{
+  "name": "kelbi-basic",
+  "productName": "켈비",
+  "version": "0.1.1-dev.20261028",
+  "description": "Kelbi local Mac app bundle; no installer or publishing",
+  "author": "Kelbi project",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "main": "src/main.mjs",
+  "scripts": {
+    "stage": "node scripts/stage.mjs",
+    "start": "npm run stage && electron-forge start",
+    "package": "npm run stage && electron-forge package --platform=darwin --arch=arm64",
+    "make:zip": "npm run stage && electron-forge make --platform=darwin --arch=arm64",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "8.0.1",
+    "@electron-forge/maker-zip": "8.0.1",
+    "electron": "45.0.0"
+  }
+}

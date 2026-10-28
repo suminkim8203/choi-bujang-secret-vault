@@ -269,136 +269,213 @@ main:focus { outline: none; }
   .art-explain { float: none; margin: 0 0 8px; }
 }
 
-/* 켈비 Mac 웹 화면. 조회·인증·상태 의미는 그대로 두는 표시 전용 레이어입니다. */
-.kelbi-workspace {
-  --border: #dfe3e8;
-  --text: #252b34;
-  --muted: #626b78;
-  --radius: 4px;
-  color: var(--text);
-  font-size: 14px;
-  line-height: 1.6;
-  background: #f3f4f6;
-  -webkit-font-smoothing: antialiased;
+/* Kelbi separate preview: white workspace, compact top navigation, open resource groups. */
+.kelbi-workspace.kelbi-topnav-preview {
+  --bg:#f6f8fa; --surface:#fff; --border:#e0e6ec; --text:#252e3a; --muted:#596776;
+  --accent:#216f9e; --accent-soft:#eaf5fc; --allow:#246c99; --allow-soft:#eaf4fb;
+  --student:#306988; --student-soft:#eef6fb; --radius:3px;
+  --focus:0 0 0 3px #bbddf3; --meter-fill:#459acb; --meter-track:#eaf0f5;
+  background:var(--bg); color:var(--text); font-size:15px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
 }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.kelbi-workspace .topbar { min-height: 64px; padding: 12px 24px; gap: 16px 24px; }
-.kelbi-workspace .brand { gap: 12px; }
-.kelbi-workspace .brand-mark { width: 34px; height: 34px; border-radius: 4px; color: #174d72; font-size: 17px; font-weight: 750; background: #d9efff; border: 1px solid #b8dff8; }
-.kelbi-workspace .brand-name { font-size: 18px; letter-spacing: -0.04em; }
-.kelbi-workspace .brand-name small { display: block; margin: 1px 0 0; font-size: 11px; letter-spacing: 0; color: var(--muted); }
-.kelbi-workspace .topbar-status { gap: 12px; }
-.server-caption { color: var(--muted); font-size: 12px; }
-.kelbi-workspace .mode-badge { border: 1px solid currentColor; font-size: 11px; padding: 3px 8px; border-radius: 4px; }
-.kelbi-workspace .checked-at { font-size: 11px; }
-.kelbi-workspace .layout { grid-template-columns: 184px minmax(0, 1fr); min-height: calc(100vh - 64px); }
-.kelbi-workspace .sidebar { display: flex; flex-direction: column; align-self: start; position: sticky; top: 0; min-height: calc(100vh - 64px); padding: 22px 12px 18px; background: #f9fafb; }
-.nav-eyebrow { margin: 0 12px 16px; color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; }
-.kelbi-workspace #nav { gap: 4px; }
-.kelbi-workspace #nav [role="tab"] { display: flex; align-items: center; gap: 10px; min-height: 42px; padding: 10px 12px; border-radius: 3px; font-size: 13px; color: #626b78; }
-.kelbi-workspace #nav [role="tab"] svg { width: 19px; height: 19px; flex: none; }
-.kelbi-workspace #nav [role="tab"][aria-selected="true"] { color: #205c85; background: #e5f3fd; box-shadow: inset 3px 0 #75bfea; font-weight: 650; }
-.sidebar-footnote { margin-top: auto; padding: 36px 12px 0; color: var(--muted); font-size: 11px; }
-.sidebar-footnote strong { font-size: 12px; color: var(--text); font-weight: 550; }
-.sidebar-footnote p { margin: 6px 0 0; }
-.local-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 7px; }
-.kelbi-workspace .sidebar-note { margin: 20px 12px 0; font-size: 10px; }
-.kelbi-workspace main { padding: 24px 28px; max-width: none; }
-.kelbi-workspace .view { max-width: 1320px; margin-inline: auto; }
-.page-heading { margin: 0 0 20px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
-.eyebrow { margin: 0 0 8px; font-size: 11px; font-weight: 650; letter-spacing: 0.08em; color: var(--accent); }
-.kelbi-workspace h1 { margin: 0 0 8px; font-size: clamp(24px, 2.1vw, 28px); font-weight: 700; letter-spacing: -0.055em; line-height: 1.25; }
-.page-heading > p:last-child { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
-.kelbi-workspace .card { padding: 20px; border-radius: var(--radius); box-shadow: none; }
-.kelbi-workspace .card.student { border-left: 1px solid var(--border); }
-.kelbi-workspace .dashboard-shell.card { padding: 0; background: transparent; border: 0; margin: 0 0 18px; }
-.kelbi-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
-.kelbi-intro h3 { margin: 0; font-size: 14px; letter-spacing: -0.025em; font-weight: 600; }
-.kelbi-intro p { margin: 4px 0 0; font-size: 11px; }
-.kelbi-workspace .btn { min-height: 36px; padding: 7px 12px; border-radius: 4px; font-size: 12px; line-height: 1.5; font-weight: 550; transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease; }
-.kelbi-workspace .btn-primary { background: #d9efff; color: #174d72; border-color: #a9d5f1; }
-.kelbi-workspace .btn-primary:hover:not(:disabled) { background: #c4e5fc; color: #123d59; border-color: #80bce3; }
-.kelbi-workspace .btn-quiet { background: transparent; color: var(--muted); }
-.kelbi-workspace .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
-.kelbi-live { color: var(--muted); font-size: 11px; min-height: 20px; margin: 12px 0 0; font-variant-numeric: tabular-nums; }
-.kelbi-dashboard[aria-busy="true"] .kelbi-live { color: var(--accent); }
-.kelbi-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 8px 0 12px; border: 1px solid var(--border); border-top: 2px solid #8fc9ef; border-radius: 4px; background: #fff; overflow: hidden; }
-.kelbi-metric { min-width: 0; min-height: 124px; padding: 16px 20px; border-right: 1px solid var(--border); }
-.kelbi-metric:last-child { border-right: 0; }
-.kelbi-metric h4 { font-size: 12px; font-weight: 550; color: var(--muted); margin: 0 0 10px; }
-.kelbi-metric strong { display: block; font-size: clamp(23px, 2.1vw, 30px); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 650; line-height: 1.25; letter-spacing: -0.045em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.kelbi-metric p { margin: 8px 0 0; font-size: 11px; line-height: 1.6; }
-.kelbi-panels { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr); gap: 12px; }
-.kelbi-panel { min-width: 0; padding: 18px 20px; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
-.kelbi-panel .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--text); letter-spacing: -0.02em; }
-.chart-legend { margin: 0 0 12px; font-size: 11px; color: var(--muted); }
-.kelbi-trend svg { display: block; margin: 8px 0; max-width: 100%; }
-.kelbi-chart-empty { min-height: 190px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; padding: 20px; border: 1px solid #e5e9ee; background-color: #fafbfd; background-image: linear-gradient(#e9edf2 1px, transparent 1px), linear-gradient(90deg, #e9edf2 1px, transparent 1px); background-size: 100% 38px, 20% 100%; border-radius: 0; text-align: center; }
-.kelbi-chart-empty strong { font-size: 13px; font-weight: 550; background: #fafbfd; padding: 2px 8px; }
-.kelbi-chart-empty p { max-width: 300px; margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
-.kelbi-panel .chart-footnote { margin: 14px 0 0; font-size: 10px; }
-.observation-list { padding: 0; margin: 0; list-style: none; }
-.observation-list li { padding: 10px 0; border-bottom: 1px solid #edf0f2; font-size: 12px; line-height: 1.8; }
-.observation-list li:first-child { padding-top: 4px; }
-.kelbi-insights > .muted { margin: 16px 0; font-size: 10px; line-height: 1.8; }
-.insights-empty { margin: 26px 0; font-size: 13px; line-height: 1.9; color: var(--muted); }
-.evidence-details { font-size: 12px; margin-top: 16px; }
-.evidence-details summary { color: var(--accent); cursor: pointer; padding: 8px 0; }
-.evidence-details p { line-height: 1.9; }
-.kelbi-history { margin-top: 12px; border: 1px solid var(--border); border-radius: 4px; background: #fff; }
-.kelbi-history > summary { padding: 12px 18px; font-size: 12px; cursor: pointer; }
-.kelbi-history > p { padding: 0 22px; color: var(--muted); font-size: 12px; }
-.kelbi-history .vulnerabilities-result { padding: 0 22px 20px; overflow-x: auto; }
-.kelbi-history table { min-width: 440px; font-variant-numeric: tabular-nums; }
-.kelbi-history caption { text-align: left; padding: 8px 0 16px; font-size: 11px; color: var(--muted); }
-.kelbi-history .vulnerabilities-result th, .kelbi-history .vulnerabilities-result td { padding: 9px 12px; font-size: 12px; }
-.kelbi-privacy { margin: 16px 2px 0; font-size: 10px; }
-.support-panel, .connection-drawer, .legacy-status-details { background: #fff; border: 1px solid var(--border); border-radius: 4px; margin: 8px 0; }
-.support-panel > summary, .connection-drawer > summary, .legacy-status-details > summary { min-height: 44px; display: flex; align-items: center; gap: 12px; padding: 11px 18px; font-size: 13px; font-weight: 550; cursor: pointer; list-style: none; }
-.support-panel > summary::-webkit-details-marker, .connection-drawer > summary::-webkit-details-marker, .legacy-status-details > summary::-webkit-details-marker { display: none; }
-.support-panel > summary::after, .connection-drawer > summary::after, .legacy-status-details > summary::after { content: ''; flex: none; width: 6px; height: 6px; margin-left: auto; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); }
-.support-panel[open] > summary::after, .connection-drawer[open] > summary::after, .legacy-status-details[open] > summary::after { transform: rotate(225deg); }
-.support-panel[open] > summary, .connection-drawer[open] > summary, .legacy-status-details[open] > summary { border-bottom: 1px solid var(--border); }
-.support-hint { margin-left: auto; color: var(--muted); font-size: 11px; font-weight: 400; }
-.support-content { padding: 20px; }
-.support-content .card:last-child { margin-bottom: 0; }
-.legacy-status-details > section { padding: 22px; }
-.legacy-status-details h3 { margin-bottom: 16px; }
-.legacy-status-details h4 { margin-top: 22px; }
-.connection-drawer { max-width: 1320px; margin: 12px auto; }
-.connection-drawer .error-banner { margin: 20px; font-size: 12px; padding: 16px 20px; }
-.connection-drawer > p { margin: 20px; font-size: 12px; }
-.implementation-note { max-width: 1320px; margin: 22px auto 0; font-size: 11px; color: var(--muted); }
-.implementation-note > summary { cursor: pointer; padding: 8px 0; }
-.implementation-note .notice { margin-top: 12px; font-size: 12px; }
-.workspace-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; max-width: 1320px; margin: 24px auto 0; padding-top: 18px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); }
-@media (max-width: 1100px) {
-  .kelbi-workspace .layout { grid-template-columns: 172px minmax(0, 1fr); }
-  .kelbi-workspace main { padding: 28px; }
-  .kelbi-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .kelbi-metric:nth-child(2) { border-right: 0; }
-  .kelbi-metric:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
-  .kelbi-panels { grid-template-columns: minmax(0, 1fr); }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+.kelbi-topnav-preview .topbar { min-height:84px; padding:18px max(32px,calc((100vw - 1240px)/2)); gap:16px 28px; border:0; background:#fff; }
+.kelbi-topnav-preview .brand { gap:12px; }
+.kelbi-topnav-preview .brand-mark { width:36px; height:36px; border-radius:3px; background:#edf7fd; border:1px solid #d3eaf8; color:#24678e; font-size:18px; }
+.kelbi-topnav-preview .brand-name { font-size:21px; letter-spacing:-.035em; }
+.kelbi-topnav-preview .brand-name small { display:block; margin-top:1px; color:var(--muted); font-size:12px; font-weight:400; }
+.kelbi-topnav-preview .topbar-status { gap:10px 14px; flex-wrap:wrap; }
+.server-caption { color:var(--muted); font-size:12px; }
+.kelbi-topnav-preview .mode-badge { border-radius:3px; padding:3px 8px; font-size:12px; }
+.kelbi-topnav-preview .checked-at { font-size:12px; }
+.kelbi-topnav-preview .layout { display:block; min-height:calc(100vh - 84px); }
+.kelbi-topnav-preview .sidebar { position:sticky; z-index:10; top:0; display:flex; align-items:center; gap:24px; min-height:58px; padding:0 max(32px,calc((100vw - 1240px)/2)); background:#fff; border:0; border-bottom:1px solid var(--border); }
+.kelbi-topnav-preview .nav-eyebrow { margin:0; flex:none; color:var(--muted); font-size:12px; font-weight:500; }
+.kelbi-topnav-preview #nav { display:flex; flex-direction:row; align-items:stretch; gap:10px; }
+.kelbi-topnav-preview #nav [role="tab"] { display:flex; justify-content:center; align-items:center; gap:8px; min-width:112px; min-height:58px; padding:12px 16px; border:0; border-radius:0; color:var(--muted); font-size:14px; font-weight:500; box-shadow:none; white-space:nowrap; background:transparent; }
+.kelbi-topnav-preview #nav [role="tab"] svg { width:17px; height:17px; flex:none; }
+.kelbi-topnav-preview #nav [role="tab"]:hover { color:var(--accent); background:#f6fafc; }
+.kelbi-topnav-preview #nav [role="tab"][aria-selected="true"] { color:#235f86; box-shadow:inset 0 -3px #66afe0; background:#f2f8fc; font-weight:650; }
+.kelbi-topnav-preview .sidebar-footnote, .kelbi-topnav-preview .sidebar-note { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.kelbi-topnav-preview main { padding:42px 32px 36px; background:#fff; max-width:none; min-width:0; }
+.kelbi-topnav-preview .view { max-width:1240px; margin-inline:auto; scroll-margin-top:74px; }
+.kelbi-topnav-preview .page-heading { margin:0 0 34px; }
+.kelbi-topnav-preview .eyebrow { margin:0 0 9px; color:#4b7d9a; font-size:12px; font-weight:550; letter-spacing:.035em; }
+.kelbi-topnav-preview h1 { margin:0 0 10px; font-size:30px; font-weight:650; line-height:1.35; letter-spacing:-.04em; }
+.kelbi-topnav-preview .page-heading > p:last-child { margin:0; color:var(--muted); font-size:15px; }
+.kelbi-topnav-preview .card { border:0; border-radius:0; background:transparent; box-shadow:none; }
+.kelbi-topnav-preview .dashboard-shell.card { padding:0; margin:0 0 54px; }
+.kelbi-topnav-preview .kelbi-toolbar { display:flex; flex-direction:column; gap:28px; }
+.kelbi-topnav-preview .kelbi-toolbar > .row { order:-1; width:100%; padding:0 0 18px; gap:10px 22px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.kelbi-topnav-preview .kelbi-intro h3 { margin:0 0 4px; font-size:16px; font-weight:650; }
+.kelbi-topnav-preview .kelbi-intro p { margin:0; color:var(--muted); font-size:14px; }
+.kelbi-topnav-preview .btn { min-height:44px; padding:9px 13px; border-radius:3px; font-size:14px; font-weight:500; line-height:1.6; transition:background-color 150ms ease,color 150ms ease; }
+.kelbi-topnav-preview .kelbi-toolbar .btn { padding:8px 2px; border-color:transparent; background:transparent; color:#276d98; }
+.kelbi-topnav-preview .kelbi-toolbar .btn-primary { font-weight:650; }
+.kelbi-topnav-preview .kelbi-toolbar .btn-quiet { color:var(--muted); }
+.kelbi-topnav-preview .kelbi-toolbar .btn:hover { background:#f0f7fc; }
+.kelbi-topnav-preview .btn[aria-disabled="true"] { opacity:.55; cursor:default; }
+.kelbi-topnav-preview :is(button,a,summary):focus-visible { outline:2px solid #287ba9; outline-offset:4px; box-shadow:none; }
+.kelbi-topnav-preview .kelbi-live { margin:18px 0 0; min-height:24px; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; }
+.kelbi-topnav-preview .kelbi-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:48px; margin:34px 0 54px; }
+.kelbi-topnav-preview .kelbi-metric { min-width:0; padding:0; border:0; background:transparent; box-shadow:none; }
+.kelbi-topnav-preview .kelbi-metric h4 { margin:0 0 15px; color:var(--muted); font-size:14px; font-weight:550; }
+.kelbi-topnav-preview .kelbi-metric strong { display:block; font-size:clamp(25px,2.65vw,36px); line-height:1.3; letter-spacing:-.035em; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.kelbi-topnav-preview .kelbi-metric p { margin:13px 0 0; font-size:13px; line-height:1.75; }
+.kelbi-topnav-preview .kelbi-meter { display:block; width:100%; height:6px; margin:22px 0 0; border:0; border-radius:0; background:var(--meter-track); appearance:none; -webkit-appearance:none; }
+.kelbi-topnav-preview .kelbi-meter::-webkit-meter-bar { height:6px; border:0; border-radius:0; background:var(--meter-track); box-shadow:none; }
+.kelbi-topnav-preview .kelbi-meter::-webkit-meter-optimum-value,.kelbi-topnav-preview .kelbi-meter::-webkit-meter-suboptimum-value,.kelbi-topnav-preview .kelbi-meter::-webkit-meter-even-less-good-value { background:var(--meter-fill); border-radius:0; box-shadow:none; }
+.kelbi-topnav-preview .kelbi-meter::-moz-meter-bar { background:var(--meter-fill); border-radius:0; }
+.kelbi-topnav-preview .kelbi-meter-empty { display:block; width:100%; height:6px; margin-top:22px; background:#edf1f5; }
+.kelbi-topnav-preview .kelbi-panels { display:grid; grid-template-columns:minmax(0,1.8fr) minmax(260px,1fr); gap:60px; padding-top:32px; border-top:1px solid var(--border); }
+.kelbi-topnav-preview .kelbi-panel { min-width:0; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+.kelbi-topnav-preview .panel-title { margin:0 0 8px; font-size:17px; font-weight:650; }
+.kelbi-topnav-preview .chart-legend { margin:0 0 22px; color:var(--muted); font-size:13px; }
+.kelbi-topnav-preview .kelbi-chart-empty { min-height:190px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; padding:18px; border:0; border-radius:0; background:repeating-linear-gradient(to bottom,#fff 0,#fff 37px,#edf1f5 38px); text-align:center; }
+.kelbi-topnav-preview .kelbi-chart-empty strong { font-size:14px; font-weight:550; }
+.kelbi-topnav-preview .kelbi-chart-empty p { max-width:310px; margin:0; color:var(--muted); font-size:13px; line-height:1.8; }
+.kelbi-topnav-preview .chart-footnote { margin:16px 0 0; color:var(--muted); font-size:13px; line-height:1.8; }
+.kelbi-topnav-preview .observation-list { list-style:none; padding:0; margin:14px 0 0; }
+.kelbi-topnav-preview .observation-list li { margin:0 0 20px; padding:0; font-size:14px; line-height:1.85; }
+.kelbi-topnav-preview .kelbi-insights > .muted { color:var(--muted); font-size:13px; line-height:1.8; }
+.kelbi-topnav-preview .insights-empty { margin:18px 0; color:var(--muted); font-size:14px; line-height:1.85; }
+.kelbi-topnav-preview .evidence-details summary { min-height:44px; padding:10px 0; color:var(--accent); cursor:pointer; font-size:13px; }
+.kelbi-topnav-preview .evidence-details p { margin:10px 0; color:var(--muted); font-size:13px; line-height:1.8; }
+.kelbi-topnav-preview .kelbi-history { margin-top:40px; padding-top:23px; border:0; border-top:1px solid var(--border); border-radius:0; background:transparent; }
+.kelbi-topnav-preview .kelbi-history > summary { min-height:44px; padding:8px 0; font-size:15px; font-weight:600; cursor:pointer; }
+.kelbi-topnav-preview .kelbi-history .vulnerabilities-result { margin-top:14px; padding:0; overflow-x:auto; }
+.kelbi-topnav-preview .kelbi-history caption { padding:0 0 15px; color:var(--muted); text-align:left; font-size:13px; }
+.kelbi-topnav-preview .kelbi-history :is(th,td) { padding:14px 15px; font-size:14px; white-space:nowrap; }
+.kelbi-topnav-preview .kelbi-history th { color:#526174; font-weight:550; background:#f6f8fa; }
+.kelbi-topnav-preview .kelbi-privacy { margin:18px 0 0; color:var(--muted); font-size:13px; line-height:1.85; }
+.kelbi-topnav-preview :is(.support-panel,.connection-drawer,.legacy-status-details) { margin:0; border:0; border-top:1px solid var(--border); border-radius:0; background:transparent; }
+.kelbi-topnav-preview :is(.support-panel,.connection-drawer,.legacy-status-details) > summary { min-height:58px; display:flex; align-items:center; gap:14px; padding:16px 0; list-style:none; cursor:pointer; font-size:15px; font-weight:550; }
+.kelbi-topnav-preview :is(.support-panel,.connection-drawer,.legacy-status-details) > summary::-webkit-details-marker { display:none; }
+.kelbi-topnav-preview :is(.support-panel,.connection-drawer,.legacy-status-details) > summary::after { content:'⌄'; margin-left:10px; color:var(--muted); }
+.kelbi-topnav-preview :is(.support-panel,.connection-drawer,.legacy-status-details)[open] > summary::after { transform:rotate(180deg); }
+.kelbi-topnav-preview .support-hint { margin-left:auto; color:var(--muted); font-size:13px; font-weight:400; }
+.kelbi-topnav-preview .support-content { padding:12px 0 30px; }
+.kelbi-topnav-preview .support-content .card { padding:12px 0 18px; }
+.kelbi-topnav-preview .implementation-note { max-width:1240px; margin:26px auto 0; color:var(--muted); font-size:13px; }
+.kelbi-topnav-preview .implementation-note > summary { min-height:44px; padding:9px 0; cursor:pointer; }
+.kelbi-topnav-preview .workspace-footer { max-width:1240px; margin:38px auto 0; padding-top:20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; color:var(--muted); font-size:12px; }
+@media (max-width:1100px) {
+ .kelbi-topnav-preview .kelbi-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:34px 60px; }
+ .kelbi-topnav-preview .kelbi-metric strong { font-size:34px; }
+ .kelbi-topnav-preview .kelbi-panels { grid-template-columns:minmax(0,1.55fr) minmax(250px,1fr); gap:40px; }
+ .kelbi-topnav-preview .checked-at { display:none; }
 }
-@media (max-width: 860px) {
-  .kelbi-workspace .topbar { padding: 16px 20px; }
-  .kelbi-workspace .topbar-status { flex-wrap: wrap; }
-  .kelbi-workspace .layout { grid-template-columns: minmax(0, 1fr); }
-  .kelbi-workspace .sidebar { position: static; min-height: 0; padding: 16px 20px; }
-  .nav-eyebrow, .sidebar-footnote, .kelbi-workspace .sidebar-note { display: none; }
-  .kelbi-workspace #nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .kelbi-workspace #nav [role="tab"] { justify-content: center; padding: 10px 6px; gap: 8px; }
-  .kelbi-workspace main { padding: 28px 20px; }
-  .support-hint { display: none; }
+@media (max-width:760px) {
+ .kelbi-topnav-preview .topbar { padding:18px 22px; gap:15px; }
+ .kelbi-topnav-preview .topbar-status { margin-left:auto; }
+ .kelbi-topnav-preview .server-caption { display:none; }
+ .kelbi-topnav-preview .sidebar { padding-inline:22px; }
+ .kelbi-topnav-preview .nav-eyebrow { display:none; }
+ .kelbi-topnav-preview main { padding:32px 22px; }
+ .kelbi-topnav-preview .kelbi-panels { grid-template-columns:minmax(0,1fr); gap:36px; }
+ .kelbi-topnav-preview .kelbi-metrics { margin-bottom:36px; gap:30px 34px; }
+ .kelbi-topnav-preview h1 { font-size:27px; }
 }
-@media (max-width: 480px) {
-  .kelbi-workspace .checked-at { flex-basis: 100%; }
-  .kelbi-metric { padding: 18px 16px; min-height: 142px; }
-  .kelbi-metrics { gap: 0; }
-  .kelbi-panel { padding: 20px; }
-  .kelbi-toolbar .row { width: 100%; }
-  .kelbi-toolbar .btn-primary { flex: 1; }
+@media (max-width:480px) {
+ .kelbi-topnav-preview .topbar { align-items:flex-start; flex-wrap:wrap; padding:18px 18px 12px; }
+ .kelbi-topnav-preview .brand-name { font-size:20px; }
+ .kelbi-topnav-preview .topbar-status { width:100%; margin:0; justify-content:space-between; }
+ .kelbi-topnav-preview .sidebar { padding:0 18px; }
+ .kelbi-topnav-preview #nav { width:100%; gap:4px; }
+ .kelbi-topnav-preview #nav [role="tab"] { flex:1; min-width:0; min-height:50px; gap:6px; padding:10px 6px; font-size:13px; }
+ .kelbi-topnav-preview main { padding:28px 18px; }
+ .kelbi-topnav-preview h1 { font-size:26px; }
+ .kelbi-topnav-preview .page-heading > p:last-child { font-size:14px; }
+ .kelbi-topnav-preview .kelbi-metric strong { font-size:24px; }
+ .kelbi-topnav-preview .kelbi-metrics { gap:28px 26px; }
+ .kelbi-topnav-preview .kelbi-metric h4 { font-size:13px; }
+ .kelbi-topnav-preview .kelbi-metric p { font-size:12px; }
+ .kelbi-topnav-preview .kelbi-toolbar > .row { gap:4px 16px; }
+ .kelbi-topnav-preview .kelbi-toolbar .btn { font-size:13px; }
+ .kelbi-topnav-preview .support-hint { max-width:43%; font-size:12px; text-align:right; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .kelbi-workspace .btn { transition: none; }
+@media (prefers-reduced-motion:reduce) { .kelbi-topnav-preview .btn { transition:none; } }
+
+/* Revision 02: clear blue, typographic controls and stronger proximity groups. */
+.kelbi-workspace.kelbi-topnav-preview {
+ --accent:#225ee8; --accent-soft:#eef3ff; --allow:#225ee8; --allow-soft:#eef3ff;
+ --student:#225ee8; --student-soft:#f1f5ff; --meter-fill:#2864ed; --meter-track:#edf0f5;
+ --muted:#626b79; --focus:none; word-break:keep-all; overflow-wrap:normal;
+}
+.kelbi-topnav-preview :is(p,li,summary,.brand-name,.muted) { word-break:keep-all; overflow-wrap:normal; text-wrap:pretty; }
+.kelbi-topnav-preview .brand-mark,.kelbi-topnav-preview .brand-icon { display:none !important; }
+.kelbi-topnav-preview .topbar { min-height:92px; padding-block:22px; }
+.kelbi-topnav-preview .brand-name { font-size:23px; letter-spacing:-.045em; }
+.kelbi-topnav-preview .brand-name small { margin:3px 0 0; font-size:12px; letter-spacing:0; }
+.kelbi-topnav-preview .topbar-status { gap:14px 28px; }
+.kelbi-topnav-preview .connection-status { display:flex; align-items:center; gap:8px; }
+.kelbi-topnav-preview .server-caption { display:inline; font-size:12px; color:var(--muted); }
+.kelbi-topnav-preview .mode-badge { display:inline-flex; align-items:center; gap:7px; padding:0; border:0; border-radius:0; background:transparent; color:var(--muted); font-size:12px; font-weight:500; box-shadow:none; }
+.kelbi-topnav-preview .mode-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+.kelbi-topnav-preview .mode-badge[data-mode="disconnected"] { background:transparent; color:#6d7480; }
+.kelbi-topnav-preview .mode-badge[data-mode="connected"] { background:transparent; color:var(--accent); }
+.kelbi-topnav-preview .mode-badge[data-mode="demo"] { background:transparent; color:var(--challenge); }
+.kelbi-topnav-preview .mode-badge[data-ui-mode="local-pc"],.kelbi-topnav-preview .mode-badge[data-refresh="checking"] { background:transparent; color:var(--muted); }
+.kelbi-topnav-preview #refresh { border:0; border-radius:0; background:transparent; box-shadow:none; padding:8px 0; min-height:44px; color:var(--accent); font-size:13px; }
+.kelbi-topnav-preview #refresh::before { content:'↻'; display:inline-block; margin-right:7px; font-size:17px; vertical-align:-1px; }
+.kelbi-topnav-preview #refresh:hover { background:transparent; color:#1746ba; text-decoration:underline; text-underline-offset:5px; }
+.kelbi-topnav-preview .sidebar { gap:32px; }
+.kelbi-topnav-preview #nav { gap:20px; }
+.kelbi-topnav-preview #nav [role="tab"] { min-width:100px; padding:12px 4px; color:#667080; }
+.kelbi-topnav-preview #nav [role="tab"]:hover { background:transparent; color:var(--accent); }
+.kelbi-topnav-preview #nav [role="tab"][aria-selected="true"] { color:var(--accent); background:transparent; box-shadow:inset 0 -2px var(--accent); }
+.kelbi-topnav-preview main { padding-top:48px; }
+.kelbi-topnav-preview .page-heading { margin-bottom:52px; }
+.kelbi-topnav-preview .eyebrow { margin-bottom:8px; color:#6d7582; }
+.kelbi-topnav-preview h1 { margin-bottom:10px; }
+.kelbi-topnav-preview .kelbi-toolbar { display:flex; flex-direction:row; align-items:flex-end; justify-content:space-between; gap:20px 36px; }
+.kelbi-topnav-preview .kelbi-intro { min-width:0; }
+.kelbi-topnav-preview .kelbi-intro h3 { margin-bottom:6px; }
+.kelbi-topnav-preview .kelbi-toolbar > .row { order:0; flex:none; width:auto; padding:0; margin:0; gap:24px; border:0; }
+.kelbi-topnav-preview .kelbi-toolbar .btn { min-height:44px; padding:8px 0; border:0; border-radius:0; background:transparent; box-shadow:none; color:var(--accent); white-space:nowrap; }
+.kelbi-topnav-preview .kelbi-toolbar .btn-quiet { color:#626b79; font-weight:400; }
+.kelbi-topnav-preview .kelbi-toolbar .btn:hover:not(:disabled):not([aria-disabled="true"]),.kelbi-topnav-preview .kelbi-toolbar .btn:active:not([aria-disabled="true"]) { border:0; background:transparent; color:#1746ba; box-shadow:none; text-decoration:underline; text-underline-offset:6px; text-decoration-thickness:1px; }
+.kelbi-topnav-preview :is(#refresh,.kelbi-toolbar .btn):focus-visible { outline:0; box-shadow:none; text-decoration:underline; text-underline-offset:6px; text-decoration-thickness:2px; }
+.kelbi-topnav-preview #nav [role="tab"]:focus-visible { outline:0; text-decoration:underline; text-underline-offset:6px; text-decoration-thickness:2px; }
+.kelbi-topnav-preview .btn[aria-disabled="true"] { opacity:.45; text-decoration:none; cursor:default; }
+.kelbi-topnav-preview .kelbi-live { margin-top:14px; font-size:12px; }
+.kelbi-topnav-preview .kelbi-metrics { margin:28px 0 64px; gap:56px; }
+.kelbi-topnav-preview .kelbi-metric h4 { margin-bottom:10px; }
+.kelbi-topnav-preview .kelbi-meter,.kelbi-topnav-preview .kelbi-meter-empty { margin-top:18px; }
+.kelbi-topnav-preview .kelbi-metric p { margin-top:9px; }
+.kelbi-topnav-preview .kelbi-panels { gap:72px; padding-top:36px; }
+.kelbi-topnav-preview .panel-title { margin-bottom:8px; }
+.kelbi-topnav-preview .chart-legend { margin-bottom:20px; }
+.kelbi-topnav-preview .kelbi-trend svg polyline[stroke="#2785bc"] { stroke:var(--accent); }
+.kelbi-topnav-preview .kelbi-trend svg circle[fill="#2785bc"] { fill:var(--accent); }
+.kelbi-topnav-preview .observation-list { margin-top:18px; }
+.kelbi-topnav-preview .observation-list li { margin-bottom:22px; }
+.kelbi-topnav-preview .kelbi-history { margin-top:52px; padding-top:24px; }
+.kelbi-topnav-preview .dashboard-shell.card { margin-bottom:64px; }
+@media(max-width:1100px) {
+ .kelbi-topnav-preview .kelbi-toolbar { align-items:flex-start; flex-direction:column; gap:12px; }
+ .kelbi-topnav-preview .kelbi-metrics { gap:36px 56px; }
+ .kelbi-topnav-preview .kelbi-panels { gap:44px; }
+}
+@media(max-width:760px) {
+ .kelbi-topnav-preview .topbar { padding:22px; }
+ .kelbi-topnav-preview main { padding-top:36px; }
+ .kelbi-topnav-preview .page-heading { margin-bottom:40px; }
+ .kelbi-topnav-preview .kelbi-panels { gap:44px; }
+ .kelbi-topnav-preview .kelbi-metrics { margin-bottom:48px; gap:36px 36px; }
+ .kelbi-topnav-preview .kelbi-history { margin-top:44px; }
+}
+@media(max-width:480px) {
+ .kelbi-topnav-preview .topbar { padding:20px 18px 16px; gap:16px; }
+ .kelbi-topnav-preview .brand-name { font-size:22px; }
+ .kelbi-topnav-preview .topbar-status { width:100%; gap:12px; justify-content:space-between; }
+ .kelbi-topnav-preview #refresh { font-size:12px; }
+ .kelbi-topnav-preview #nav { gap:12px; }
+ .kelbi-topnav-preview #nav [role="tab"] { min-width:0; padding:12px 0; }
+ .kelbi-topnav-preview .kelbi-toolbar > .row { gap:20px; }
+ .kelbi-topnav-preview .kelbi-toolbar .btn { font-size:12px; }
+ .kelbi-topnav-preview .kelbi-metrics { gap:32px 24px; }
+ .kelbi-topnav-preview .kelbi-metric strong { font-size:23px; }
+ .kelbi-topnav-preview .kelbi-metric p { line-height:1.8; }
+ .kelbi-topnav-preview .support-hint { max-width:40%; }
 }

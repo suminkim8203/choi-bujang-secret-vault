@@ -135,6 +135,18 @@ export function createPcDashboard({api, now = Date.now} = {}) {
       make(card, 'h4', key === 'scope' ? '확인 범위' : PC_LABELS[PC_KEYS.indexOf(key)]);
       const value = key === 'scope' ? available === null ? null : `${available} / 6항목 실측` : current?.values[key];
       make(card, 'strong', key === 'scope' && value ? `${available} / 6` : value?.state === 'ok' ? key === 'memory' ? percent(value.ratio) : value.text : busy ? '조회 중' : status === 'idle' ? '조회 전' : '확인 불가');
+      if (key !== 'scope') {
+        if (value?.state === 'ok') {
+          const meter = make(card, 'meter', undefined, 'kelbi-meter');
+          meter.setAttribute('min', '0'); meter.setAttribute('max', '100');
+          meter.setAttribute('value', String(value.ratio));
+          meter.setAttribute('aria-label', PC_LABELS[PC_KEYS.indexOf(key)] + (key === 'disk' ? ' \uc5ec\uc720 \ube44\uc728' : ' \uc0ac\uc6a9\ub960'));
+          meter.textContent = percent(value.ratio);
+        } else {
+          const empty = make(card, 'div', undefined, 'kelbi-meter-empty');
+          empty.setAttribute('aria-hidden', 'true');
+        }
+      }
       make(card, 'p', key === 'scope' ? available === null ? '항목 실측 · 확인 전' : `항목 실측 · ${6 - available}항목 확인 불가` : value?.state === 'ok' ? key === 'memory' ? value.text : key === 'disk' ? `여유 비율 ${percent(value.ratio)}` : '짧은 구간의 사용률' : value?.note ?? '이전 조회값으로 채우지 않습니다.', 'muted');
     }
     const panels = make(body, 'div', undefined, 'kelbi-panels');

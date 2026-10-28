@@ -1,0 +1,9 @@
+node_modules/
+staging/
+out/
+delivery/
+delivery-final/
+verification-temp/
+evidence/*
+!evidence/source-baseline.json
+*.log
